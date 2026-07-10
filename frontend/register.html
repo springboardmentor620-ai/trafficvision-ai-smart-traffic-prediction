@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrafficVision AI - Register</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="brand">
+        <div class="brand-icon"><i class="fas fa-traffic-light"></i></div>
+        <h1>TrafficVision AI</h1>
+        <p>Smart Traffic Prediction &amp; Congestion Management</p>
+      </div>
+
+      <h2><i class="fas fa-user-plus" style="color:#2563eb; margin-right:8px;"></i> Create Account</h2>
+      <div id="alertBox" class="alert hidden"></div>
+
+      <form id="registerForm">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" placeholder="Jane Doe" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@gmail.com" required>
+        <small style="color:#6b7280; font-size:0.75rem;">Must be a valid @gmail.com address</small>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="At least 6 characters" required minlength="6">
+        <small style="color:#6b7280; font-size:0.75rem;">
+          <i class="fas fa-info-circle"></i> Min 6 characters, 1 special character, 1 number
+        </small>
+
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" id="confirm_password" placeholder="Confirm your password" required>
+
+        <label for="role">Register as</label>
+        <select id="role" required>
+          <option value="" disabled selected>Select role</option>
+          <option value="admin">Admin / Traffic Authority</option>
+          <option value="operator">Traffic Operator</option>
+        </select>
+
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-user-plus" style="margin-right:8px;"></i> Register
+        </button>
+      </form>
+
+      <p class="switch-auth">Already have an account? <a href="index.html">Login here</a></p>
+      
+      <div style="margin-top:8px; text-align:center; font-size:0.75rem; color:#94a3b8;">
+        <i class="fas fa-shield-alt"></i> demo · light theme
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check if user is already logged in
+    function redirectIfAuthenticated() {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        window.location.href = 'dashboard.html';
+      }
+    }
+
+    // Show alert message
+    function showAlert(message, type = 'error') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.className = 'alert';
+      alertBox.textContent = message;
+      
+      if (type === 'success') {
+        alertBox.style.background = '#d1fae5';
+        alertBox.style.color = '#065f46';
+        alertBox.style.border = '1px solid #a7f3d0';
+      } else {
+        alertBox.style.background = '#fef2f2';
+        alertBox.style.color = '#991b1b';
+        alertBox.style.border = '1px solid #fecaca';
+      }
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        alertBox.className = 'alert hidden';
+      }, 5000);
+    }
+
+    // Validate email - must be @gmail.com
+    function validateEmail(email) {
+      return email.endsWith('@gmail.com') && email.length > 10;
+    }
+
+    // Validate password - min 6 chars, at least 1 special char, 1 number
+    function validatePassword(password) {
+      const hasMinLength = password.length >= 6;
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      return hasMinLength && hasSpecialChar && hasNumber;
+    }
+
+    // Get password requirements message
+    function getPasswordRequirements(password) {
+      const requirements = [];
+      if (password.length < 6) requirements.push('at least 6 characters');
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) requirements.push('1 special character (!@#$%^&*)');
+      if (!/[0-9]/.test(password)) requirements.push('1 number');
+      return requirements;
+    }
+
+    // API request function
+    async function apiRequest(endpoint, method = 'GET', data = null) {
+      const url = `/api${endpoint}`;
+      const options = {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      };
+
+      if (data) {
+        options.body = JSON.stringify(data);
+      }
+
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        options.headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      try {
+        const response = await fetch(url, options);
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || result.message || 'Request failed');
+        }
+
+        return result;
+      } catch (error) {
+        if (error.message === 'Failed to fetch') {
+          throw new Error('Cannot connect to server. Please make sure the server is running.');
+        }
+        throw error;
+      }
+    }
+
+    // Save session data
+    function saveSession(token, user) {
+      if (token) {
+        localStorage.setItem('access_token', token);
+      }
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+    }
+
+    // Run redirect check
+    redirectIfAuthenticated();
+
+    // Password validation on input (live feedback)
+    document.getElementById('password').addEventListener('input', function() {
+      const password = this.value;
+      const isValid = validatePassword(password);
+      const requirements = getPasswordRequirements(password);
+      
+      // Update password field style
+      if (password.length > 0) {
+        if (isValid) {
+          this.style.borderColor = '#22c55e';
+          this.style.boxShadow = '0 0 0 4px rgba(34, 197, 94, 0.1)';
+        } else {
+          this.style.borderColor = '#ef4444';
+          this.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.1)';
+        }
+      } else {
+        this.style.borderColor = '#e2e8f0';
+        this.style.boxShadow = 'none';
+      }
+    });
+
+    // Handle registration form submission
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirm_password").value;
+      const role = document.getElementById("role").value;
+
+      // Validate inputs
+      if (!name || !email || !password || !confirmPassword || !role) {
+        showAlert("Please fill in all fields.");
+        return;
+      }
+
+      // Validate email - must be @gmail.com
+      if (!validateEmail(email)) {
+        showAlert("Please use a valid @gmail.com email address.");
+        return;
+      }
+
+      // Validate password
+      if (!validatePassword(password)) {
+        const requirements = getPasswordRequirements(password);
+        showAlert(`Password must have: ${requirements.join(', ')}`);
+        return;
+      }
+
+      // Check if passwords match
+      if (password !== confirmPassword) {
+        showAlert("Passwords do not match!");
+        return;
+      }
+
+      // Show loading state
+      const submitBtn = document.querySelector('.btn-primary');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+      submitBtn.disabled = true;
+
+      try {
+        const result = await apiRequest("/register", "POST", { 
+          fullname: name,
+          name: name,
+          email, 
+          password, 
+          role 
+        });
+        
+        // Save session if token returned
+        if (result.token || result.access_token) {
+          saveSession(result.token || result.access_token, result.user);
+        }
+        
+        showAlert("Registration successful! Redirecting to dashboard...", "success");
+        
+        // Redirect to dashboard after short delay
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1500);
+        
+      } catch (err) {
+        showAlert(err.message || "Registration failed. Please try again.");
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

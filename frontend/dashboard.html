@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrafficVision AI - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-traffic-light"></i>
+        <span>TrafficVision</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="dashboard">
+          <i class="fas fa-th-large"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-page="traffic">
+          <i class="fas fa-road"></i>
+          <span>Traffic Monitoring</span>
+        </a>
+        <a href="#" class="nav-item" data-page="analytics">
+          <i class="fas fa-chart-line"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="#" class="nav-item" data-page="routes">
+          <i class="fas fa-route"></i>
+          <span>Route Analysis</span>
+        </a>
+        <a href="#" class="nav-item" data-page="predictions">
+          <i class="fas fa-brain"></i>
+          <span>AI Predictions</span>
+        </a>
+        <a href="#" class="nav-item" data-page="alerts">
+          <i class="fas fa-bell"></i>
+          <span>Alerts</span>
+          <span class="badge">3</span>
+        </a>
+        <a href="#" class="nav-item" data-page="settings">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=40" alt="Profile">
+          <div>
+            <div class="user-name" id="sidebarUserName">User</div>
+            <div class="user-role" id="sidebarUserRole">Admin</div>
+          </div>
+        </div>
+        <button id="sidebarLogout" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main-content">
+      
+      <!-- Top Bar -->
+      <header class="main-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="header-right">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search roads, alerts, routes..." id="searchInput">
+          </div>
+          <button class="header-btn">
+            <i class="fas fa-bell"></i>
+            <span class="badge">3</span>
+          </button>
+          <button class="header-btn">
+            <i class="fas fa-envelope"></i>
+          </button>
+          <div class="profile-dropdown">
+            <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=36" alt="Profile" class="profile-avatar" id="profileTrigger">
+            <div class="dropdown-menu" id="dropdownMenu">
+              <div class="dropdown-item">
+                <i class="fas fa-user"></i>
+                <span id="dropdownName">Loading...</span>
+              </div>
+              <div class="dropdown-item">
+                <i class="fas fa-envelope"></i>
+                <span id="dropdownEmail">Loading...</span>
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+              </div>
+              <div class="dropdown-item" id="logoutBtn">
+                <i class="fas fa-sign-out-alt" style="color: #ef4444;"></i>
+                <span style="color: #ef4444;">Logout</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ========== DASHBOARD CONTENT ========== -->
+      <div class="dashboard-content">
+        
+        <!-- PAGE: Dashboard -->
+        <div id="page-dashboard" class="page-content active">
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple"><i class="fas fa-car"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Total Vehicles</span>
+                <span class="stat-value" id="totalVehicles">-</span>
+                <span class="stat-change positive">+12.5%</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon cyan"><i class="fas fa-road"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Active Roads</span>
+                <span class="stat-value" id="activeRoads">6</span>
+                <span class="stat-change positive">+2 this week</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-percent"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Avg. Density</span>
+                <span class="stat-value" id="avgDensity">-</span>
+                <span class="stat-change" id="densityStatus">Moderate</span>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Congestion Alerts</span>
+                <span class="stat-value" id="congestionCount">-</span>
+                <span class="stat-change negative">+3 new</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Grid -->
+          <div class="content-grid">
+            <div class="content-col">
+              <div class="card">
+                <div class="card-header">
+                  <h2><i class="fas fa-road"></i> Vehicle Density &amp; Congestion</h2>
+                  <span class="tag">Live</span>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr><th>Road</th><th>Vehicles</th><th>Density</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="liveTrafficBody">
+                      <tr><td colspan="4" class="muted"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h2><i class="fas fa-clock"></i> Peak Hour Forecast</h2>
+                  <span class="tag">Prediction</span>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr><th>Time Slot</th><th>Expected Density</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="peakHourBody">
+                      <tr><td colspan="3" class="muted"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-col">
+              <div class="card admin-only hidden" id="adminSection">
+                <div class="card-header">
+                  <h2><i class="fas fa-route"></i> Route Analysis</h2>
+                  <span class="tag">Admin</span>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr><th>Route</th><th>Time</th><th>Alternate</th><th>Saved</th></tr>
+                    </thead>
+                    <tbody id="routeAnalysisBody">
+                      <tr><td colspan="4" class="muted">Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card admin-only hidden" id="adminSection2">
+                <div class="card-header">
+                  <h2><i class="fas fa-bell"></i> Alerts &amp; Notifications</h2>
+                  <span class="tag">Admin</span>
+                </div>
+                <div id="alertContainer">
+                  <div id="alertList"><p class="muted">Loading alerts...</p></div>
+                </div>
+              </div>
+
+              <div class="card admin-only hidden" id="adminSection3">
+                <div class="card-header">
+                  <h2><i class="fas fa-brain"></i> AI Traffic Prediction</h2>
+                  <span class="tag">Admin</span>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr><th>Road</th><th>Current</th><th>Predicted (1hr)</th><th>Confidence</th></tr>
+                    </thead>
+                    <tbody id="predictionBody">
+                      <tr><td colspan="4" class="muted">Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card admin-only hidden" id="adminSection4">
+                <div class="card-header">
+                  <h2><i class="fas fa-chart-pie"></i> Traffic Analytics</h2>
+                  <span class="tag">Admin</span>
+                </div>
+                <div id="analyticsContainer">
+                  <div class="analytics-item">
+                    <span class="analytics-label">Peak Hour Volume</span>
+                    <span class="analytics-value" id="peakVolume">-</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">Average Speed</span>
+                    <span class="analytics-value" id="avgSpeed">-</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">Congestion Index</span>
+                    <span class="analytics-value" id="congestionIndex">-</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">Prediction Accuracy</span>
+                    <span class="analytics-value" id="predAccuracy">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-info">
+            <p class="muted" id="lastUpdated"><i class="fas fa-clock"></i> Last updated: Loading...</p>
+          </div>
+        </div>
+
+        <!-- PAGE: Traffic Monitoring -->
+        <div id="page-traffic" class="page-content hidden">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple"><i class="fas fa-car"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Total Vehicles</span>
+                <span class="stat-value" id="trafficTotal">-</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon cyan"><i class="fas fa-road"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Active Roads</span>
+                <span class="stat-value" id="trafficRoads">6</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-percent"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Avg. Density</span>
+                <span class="stat-value" id="trafficDensity">-</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Congestion Alerts</span>
+                <span class="stat-value" id="trafficAlerts">-</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-road"></i> Live Traffic Monitoring</h2>
+              <span class="tag">Live</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Road</th><th>Vehicles</th><th>Density</th><th>Status</th><th>Last Updated</th></tr>
+                </thead>
+                <tbody id="trafficMonitoringBody">
+                  <tr><td colspan="5" class="muted"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-clock"></i> Peak Hour Forecast</h2>
+              <span class="tag">Prediction</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Time Slot</th><th>Expected Density</th><th>Status</th><th>Recommendation</th></tr>
+                </thead>
+                <tbody id="trafficPeakBody">
+                  <tr><td colspan="4" class="muted"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE: Analytics -->
+        <div id="page-analytics" class="page-content hidden">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple"><i class="fas fa-chart-bar"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Total Data Points</span>
+                <span class="stat-value">1,847</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Avg. Response Time</span>
+                <span class="stat-value">42ms</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Data Accuracy</span>
+                <span class="stat-value">94%</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="fas fa-calendar"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Reports Generated</span>
+                <span class="stat-value">156</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-grid">
+            <div class="content-col">
+              <div class="card">
+                <div class="card-header">
+                  <h2><i class="fas fa-chart-line"></i> Traffic Trends</h2>
+                  <span class="tag">Analytics</span>
+                </div>
+                <div id="analyticsTrends">
+                  <div class="analytics-item">
+                    <span class="analytics-label">Peak Hour Volume</span>
+                    <span class="analytics-value">1,847 vehicles/hr</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">Average Speed</span>
+                    <span class="analytics-value">42 km/h</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">Congestion Index</span>
+                    <span class="analytics-value">67%</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">Prediction Accuracy</span>
+                    <span class="analytics-value">94%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="content-col">
+              <div class="card">
+                <div class="card-header">
+                  <h2><i class="fas fa-fire"></i> Hotspots</h2>
+                  <span class="tag">Analytics</span>
+                </div>
+                <div id="analyticsHotspots">
+                  <div class="analytics-item">
+                    <span class="analytics-label">NH-44</span>
+                    <span class="analytics-value" style="color: #ef4444;">High Congestion</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">Ring Road</span>
+                    <span class="analytics-value" style="color: #ef4444;">High Congestion</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">Highway 48</span>
+                    <span class="analytics-value" style="color: #f59e0b;">Moderate</span>
+                  </div>
+                  <div class="analytics-item">
+                    <span class="analytics-label">MG Road</span>
+                    <span class="analytics-value" style="color: #f59e0b;">Moderate</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE: Route Analysis -->
+        <div id="page-routes" class="page-content hidden">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple"><i class="fas fa-route"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Total Routes</span>
+                <span class="stat-value">12</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Avg. Travel Time</span>
+                <span class="stat-value">32 min</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Alternate Routes</span>
+                <span class="stat-value">8</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Time Saved</span>
+                <span class="stat-value">15 min avg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-route"></i> Route Analysis</h2>
+              <span class="tag">Admin</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Route</th><th>Current Time</th><th>Alternate Route</th><th>Time Saved</th><th>Status</th></tr>
+                </thead>
+                <tbody id="routesBody">
+                  <tr><td colspan="5" class="muted">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE: AI Predictions -->
+        <div id="page-predictions" class="page-content hidden">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple"><i class="fas fa-brain"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Model Accuracy</span>
+                <span class="stat-value">94%</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Prediction Window</span>
+                <span class="stat-value">1 Hour</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Confidence Level</span>
+                <span class="stat-value">High</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="fas fa-database"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Data Points</span>
+                <span class="stat-value">10K+</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-brain"></i> AI Traffic Predictions</h2>
+              <span class="tag">Admin</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Road</th><th>Current</th><th>Predicted (1hr)</th><th>Confidence</th><th>Trend</th></tr>
+                </thead>
+                <tbody id="predictionsBody">
+                  <tr><td colspan="5" class="muted">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE: Alerts -->
+        <div id="page-alerts" class="page-content hidden">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Total Alerts</span>
+                <span class="stat-value">12</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">New Today</span>
+                <span class="stat-value">3</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Resolved</span>
+                <span class="stat-value">8</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+              <div class="stat-info">
+                <span class="stat-label">Pending</span>
+                <span class="stat-value">4</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-bell"></i> All Alerts &amp; Notifications</h2>
+              <span class="tag">Admin</span>
+            </div>
+            <div id="alertsList">
+              <div class="alert-item" style="border-left: 4px solid #f59e0b;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
+                  <span style="font-size: 0.9rem;">Heavy congestion on NH-44 near Exit 12</span>
+                  <span style="margin-left: auto; font-size: 0.7rem; color: #94a3b8;">2 min ago</span>
+                </div>
+              </div>
+              <div class="alert-item" style="border-left: 4px solid #3b82f6;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <i class="fas fa-info-circle" style="color: #3b82f6;"></i>
+                  <span style="font-size: 0.9rem;">Accident reported on Ring Road, use alternate</span>
+                  <span style="margin-left: auto; font-size: 0.7rem; color: #94a3b8;">15 min ago</span>
+                </div>
+              </div>
+              <div class="alert-item" style="border-left: 4px solid #10b981;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                  <span style="font-size: 0.9rem;">Traffic flowing smoothly on Airport Road</span>
+                  <span style="margin-left: auto; font-size: 0.7rem; color: #94a3b8;">45 min ago</span>
+                </div>
+              </div>
+              <div class="alert-item" style="border-left: 4px solid #ef4444;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <i class="fas fa-times-circle" style="color: #ef4444;"></i>
+                  <span style="font-size: 0.9rem;">Emergency: Road closure on City Center</span>
+                  <span style="margin-left: auto; font-size: 0.7rem; color: #94a3b8;">1 hour ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE: Settings -->
+        <div id="page-settings" class="page-content hidden">
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-cog"></i> Settings</h2>
+              <span class="tag">Preferences</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px; padding: 8px 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                  <div style="font-weight: 600; color: #0f172a;">Email Notifications</div>
+                  <div style="font-size: 0.85rem; color: #64748b;">Receive email alerts for traffic updates</div>
+                </div>
+                <label style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                  <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                  <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #6366f1; border-radius: 34px; transition: 0.3s;"></span>
+                </label>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                  <div style="font-weight: 600; color: #0f172a;">Dark Mode</div>
+                  <div style="font-size: 0.85rem; color: #64748b;">Switch to dark theme</div>
+                </div>
+                <label style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                  <input type="checkbox" style="opacity: 0; width: 0; height: 0;">
+                  <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; border-radius: 34px; transition: 0.3s;"></span>
+                </label>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                  <div style="font-weight: 600; color: #0f172a;">Auto-Refresh</div>
+                  <div style="font-size: 0.85rem; color: #64748b;">Auto-refresh dashboard every 15 seconds</div>
+                </div>
+                <label style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                  <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                  <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #6366f1; border-radius: 34px; transition: 0.3s;"></span>
+                </label>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                  <div style="font-weight: 600; color: #0f172a;">Data Sharing</div>
+                  <div style="font-size: 0.85rem; color: #64748b;">Share anonymous traffic data for research</div>
+                </div>
+                <label style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                  <input type="checkbox" style="opacity: 0; width: 0; height: 0;">
+                  <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; border-radius: 34px; transition: 0.3s;"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2><i class="fas fa-user"></i> Profile Settings</h2>
+              <span class="tag">Account</span>
+            </div>
+            <div id="settingsProfile">
+              <div style="padding: 8px 0;">
+                <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
+                  <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=64" alt="Profile" style="width: 64px; height: 64px; border-radius: 50%;">
+                  <div>
+                    <div style="font-weight: 600; font-size: 1.1rem; color: #0f172a;" id="settingsName">User</div>
+                    <div style="color: #64748b; font-size: 0.9rem;" id="settingsEmail">user@email.com</div>
+                    <div style="color: #64748b; font-size: 0.85rem;" id="settingsRole">Role: Admin</div>
+                  </div>
+                </div>
+                <button class="btn-secondary" style="padding: 8px 24px;">Edit Profile</button>
+                <button class="btn-secondary" style="padding: 8px 24px; margin-left: 8px; border-color: #ef4444; color: #ef4444;">Change Password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ========== AUTH FUNCTIONS ==========
+    function getSession() {
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user) : null;
+    }
+
+    function clearSession() {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+    }
+
+    function requireAuth() {
+      const token = localStorage.getItem('access_token');
+      if (!token) window.location.href = 'index.html';
+    }
+
+    // ========== API REQUEST ==========
+    async function apiRequest(endpoint, method = 'GET', data = null) {
+      const token = localStorage.getItem('access_token');
+      const url = `/api${endpoint}`;
+      const options = { method, headers: { 'Content-Type': 'application/json' } };
+      if (token) options.headers['Authorization'] = `Bearer ${token}`;
+      if (data) options.body = JSON.stringify(data);
+
+      const response = await fetch(url, options);
+      if (response.status === 401) { clearSession(); window.location.href = 'index.html'; throw new Error('Session expired'); }
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Request failed');
+      return result;
+    }
+
+    // ========== MOCK DATA ==========
+    function getMockTrafficData() {
+      return [
+        { road: "NH-44", vehicles: 245, density: 82, status: "Heavy Congestion" },
+        { road: "MG Road", vehicles: 189, density: 63, status: "Moderate" },
+        { road: "Ring Road", vehicles: 320, density: 91, status: "Heavy Congestion" },
+        { road: "Airport Road", vehicles: 156, density: 52, status: "Moderate" },
+        { road: "City Center", vehicles: 98, density: 33, status: "Smooth" },
+        { road: "Highway 48", vehicles: 412, density: 78, status: "Heavy Congestion" }
+      ];
+    }
+
+    function getMockPeakHours() {
+      return [
+        { time: "07:00 - 09:00", density: "High (85%)", status: "Peak", recommendation: "Avoid travel" },
+        { time: "09:00 - 11:00", density: "Medium (55%)", status: "Normal", recommendation: "Good to travel" },
+        { time: "17:00 - 19:00", density: "High (90%)", status: "Peak", recommendation: "Use alternate routes" },
+        { time: "19:00 - 21:00", density: "Medium (45%)", status: "Normal", recommendation: "Traffic easing" }
+      ];
+    }
+
+    function getMockRoutes() {
+      return [
+        { route: "NH-44 to City", time: "45 min", alternate: "Ring Road", saved: "15 min", status: "Active" },
+        { route: "MG Road to Airport", time: "30 min", alternate: "Express Way", saved: "10 min", status: "Active" },
+        { route: "Ring Road to Center", time: "35 min", alternate: "NH-44", saved: "12 min", status: "Active" }
+      ];
+    }
+
+    function getMockPredictions() {
+      return [
+        { road: "NH-44", current: "82%", predicted: "75%", confidence: "92%", trend: "Decreasing" },
+        { road: "MG Road", current: "63%", predicted: "58%", confidence: "88%", trend: "Stable" },
+        { road: "Ring Road", current: "91%", predicted: "85%", confidence: "95%", trend: "Decreasing" }
+      ];
+    }
+
+    // ========== NAVIGATION ==========
+    const navItems = document.querySelectorAll('.nav-item');
+    const pages = {
+      dashboard: document.getElementById('page-dashboard'),
+      traffic: document.getElementById('page-traffic'),
+      analytics: document.getElementById('page-analytics'),
+      routes: document.getElementById('page-routes'),
+      predictions: document.getElementById('page-predictions'),
+      alerts: document.getElementById('page-alerts'),
+      settings: document.getElementById('page-settings')
+    };
+    const pageTitles = {
+      dashboard: 'Dashboard',
+      traffic: 'Traffic Monitoring',
+      analytics: 'Analytics',
+      routes: 'Route Analysis',
+      predictions: 'AI Predictions',
+      alerts: 'Alerts & Notifications',
+      settings: 'Settings'
+    };
+
+    function navigateTo(page) {
+      // Hide all pages
+      Object.keys(pages).forEach(key => {
+        pages[key].classList.add('hidden');
+      });
+      
+      // Show selected page
+      if (pages[page]) {
+        pages[page].classList.remove('hidden');
+      }
+      
+      // Update nav items
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.page === page) {
+          item.classList.add('active');
+        }
+      });
+      
+      // Update page title
+      document.getElementById('pageTitle').textContent = pageTitles[page] || 'Dashboard';
+    }
+
+    // Add click handlers to nav items
+    navItems.forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        const page = this.dataset.page;
+        navigateTo(page);
+        // Close mobile menu
+        document.querySelector('.sidebar').classList.remove('mobile-open');
+      });
+    });
+
+    // ========== PAGE INIT ==========
+    requireAuth();
+    const session = getSession();
+
+    // Update user info
+    const userName = session ? session.name : 'User';
+    document.getElementById("sidebarUserName").textContent = userName;
+    document.getElementById("sidebarUserRole").textContent = session ? session.role.toUpperCase() : 'USER';
+    document.getElementById("dropdownName").textContent = userName;
+    document.getElementById("dropdownEmail").textContent = session ? session.email : 'user@email.com';
+    document.getElementById("settingsName").textContent = userName;
+    document.getElementById("settingsEmail").textContent = session ? session.email : 'user@email.com';
+    document.getElementById("settingsRole").textContent = `Role: ${session ? session.role.charAt(0).toUpperCase() + session.role.slice(1) : 'User'}`;
+
+    // Profile dropdown toggle
+    document.getElementById('profileTrigger').addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('dropdownMenu').classList.toggle('show');
+    });
+
+    document.addEventListener('click', function() {
+      document.getElementById('dropdownMenu').classList.remove('show');
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      clearSession();
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('sidebarLogout').addEventListener('click', function() {
+      clearSession();
+      window.location.href = 'index.html';
+    });
+
+    // Show admin sections
+    if (session && session.role === "admin") {
+      document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+    }
+
+    // Mobile menu toggle
+    document.getElementById('menuToggle').addEventListener('click', function() {
+      document.querySelector('.sidebar').classList.toggle('mobile-open');
+    });
+
+    // ========== LOAD DASHBOARD DATA ==========
+    function loadTrafficData() {
+      const data = getMockTrafficData();
+      const total = data.reduce((sum, r) => sum + r.vehicles, 0);
+      const avgDensity = Math.round(data.reduce((sum, r) => sum + r.density, 0) / data.length);
+      const congested = data.filter(r => r.status === "Heavy Congestion").length;
+
+      // Dashboard stats
+      document.getElementById('totalVehicles').textContent = total.toLocaleString();
+      document.getElementById('avgDensity').textContent = avgDensity + '%';
+      document.getElementById('congestionCount').textContent = congested;
+      document.getElementById('trafficTotal').textContent = total.toLocaleString();
+      document.getElementById('trafficDensity').textContent = avgDensity + '%';
+      document.getElementById('trafficAlerts').textContent = congested;
+
+      const densityStatus = avgDensity > 70 ? 'Heavy' : avgDensity > 50 ? 'Moderate' : 'Smooth';
+      document.getElementById('densityStatus').textContent = densityStatus;
+      document.getElementById('densityStatus').className = `stat-change ${avgDensity > 70 ? 'negative' : 'positive'}`;
+
+      // Dashboard traffic table
+      const rows = data.map(r => `
+        <tr>
+          <td><strong>${r.road}</strong></td>
+          <td>${r.vehicles}</td>
+          <td>${r.density}%</td>
+          <td><span class="status status-${r.status === 'Heavy Congestion' ? 'danger' : r.status === 'Moderate' ? 'warning' : 'ok'}">${r.status}</span></td>
+        </tr>
+      `).join('');
+      document.getElementById("liveTrafficBody").innerHTML = rows;
+
+      // Traffic Monitoring page
+      const trafficRows = data.map(r => `
+        <tr>
+          <td><strong>${r.road}</strong></td>
+          <td>${r.vehicles}</td>
+          <td>${r.density}%</td>
+          <td><span class="status status-${r.status === 'Heavy Congestion' ? 'danger' : r.status === 'Moderate' ? 'warning' : 'ok'}">${r.status}</span></td>
+          <td>Just now</td>
+        </tr>
+      `).join('');
+      document.getElementById("trafficMonitoringBody").innerHTML = trafficRows;
+    }
+
+    function loadPeakHours() {
+      const data = getMockPeakHours();
+      const rows = data.map(r => `
+        <tr>
+          <td>${r.time}</td>
+          <td>${r.density}</td>
+          <td><span class="status ${r.status === 'Peak' ? 'status-danger' : 'status-ok'}">${r.status}</span></td>
+        </tr>
+      `).join('');
+      document.getElementById("peakHourBody").innerHTML = rows;
+
+      // Traffic page peak hours
+      const trafficPeakRows = data.map(r => `
+        <tr>
+          <td>${r.time}</td>
+          <td>${r.density}</td>
+          <td><span class="status ${r.status === 'Peak' ? 'status-danger' : 'status-ok'}">${r.status}</span></td>
+          <td>${r.recommendation}</td>
+        </tr>
+      `).join('');
+      document.getElementById("trafficPeakBody").innerHTML = trafficPeakRows;
+    }
+
+    function loadRouteAnalysis() {
+      if (session.role !== 'admin') return;
+      const data = getMockRoutes();
+      const rows = data.map(r => `
+        <tr>
+          <td>${r.route}</td>
+          <td>${r.time}</td>
+          <td>${r.alternate}</td>
+          <td><span class="status status-ok">${r.saved}</span></td>
+        </tr>
+      `).join('');
+      document.getElementById("routeAnalysisBody").innerHTML = rows;
+
+      // Routes page
+      const routesRows = data.map(r => `
+        <tr>
+          <td>${r.route}</td>
+          <td>${r.time}</td>
+          <td>${r.alternate}</td>
+          <td><span class="status status-ok">${r.saved}</span></td>
+          <td><span class="status status-ok">${r.status}</span></td>
+        </tr>
+      `).join('');
+      document.getElementById("routesBody").innerHTML = routesRows;
+    }
+
+    function loadPredictions() {
+      if (session.role !== 'admin') return;
+      const data = getMockPredictions();
+      const rows = data.map(r => `
+        <tr>
+          <td><strong>${r.road}</strong></td>
+          <td>${r.current}</td>
+          <td>${r.predicted}</td>
+          <td><span class="status status-ok">${r.confidence}</span></td>
+        </tr>
+      `).join('');
+      document.getElementById("predictionBody").innerHTML = rows;
+
+      // Predictions page
+      const predRows = data.map(r => `
+        <tr>
+          <td><strong>${r.road}</strong></td>
+          <td>${r.current}</td>
+          <td>${r.predicted}</td>
+          <td><span class="status status-ok">${r.confidence}</span></td>
+          <td><span class="status ${r.trend === 'Decreasing' ? 'status-ok' : 'status-warning'}">${r.trend}</span></td>
+        </tr>
+      `).join('');
+      document.getElementById("predictionsBody").innerHTML = predRows;
+    }
+
+    function updateTimestamp() {
+      document.getElementById("lastUpdated").innerHTML = `<i class="fas fa-clock"></i> Last updated: ${new Date().toLocaleString()}`;
+    }
+
+    // ========== SEARCH FUNCTIONALITY ==========
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      // Search through traffic table
+      const rows = document.querySelectorAll('#liveTrafficBody tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+
+    // ========== INITIALIZE ==========
+    loadTrafficData();
+    loadPeakHours();
+    loadRouteAnalysis();
+    loadPredictions();
+    updateTimestamp();
+
+    // Auto-refresh
+    setInterval(() => {
+      loadTrafficData();
+      loadPeakHours();
+      updateTimestamp();
+    }, 15000);
+
+    setInterval(() => {
+      if (session.role === 'admin') {
+        loadRouteAnalysis();
+        loadPredictions();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>

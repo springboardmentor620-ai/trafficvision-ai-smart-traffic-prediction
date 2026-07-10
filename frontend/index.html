@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrafficVision AI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="container">
+    <!-- Login Section -->
+    <div class="login">
+      <div class="content">
+        <div class="brand-icon" style="font-size: 2.8rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; width: 80px; height: 80px; line-height: 80px; border-radius: 24px; display: inline-block; margin-bottom: 12px; box-shadow: 0 12px 30px rgba(99, 102, 241, 0.3);">
+          <i class="fas fa-traffic-light"></i>
+        </div>
+        <h1 style="font-size: 2rem; background: linear-gradient(135deg, #0f172a, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">TrafficVision AI</h1>
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">Smart Traffic Prediction &amp; Congestion Management</p>
+        
+        <div id="loginAlert" class="alert hidden"></div>
+        
+        <form id="loginForm">
+          <input type="email" id="loginEmail" placeholder="Email (must be @gmail.com)" required>
+          <input type="password" id="loginPassword" placeholder="Password" required>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin: 8px 0;">
+            <span class="remember"><input type="checkbox" id="rememberMe"> Remember me</span>
+            <span class="forget"><a href="#" style="color: #6366f1; text-decoration: none;">Forgot password?</a></span>
+          </div>
+          <span class="clearfix"></span>
+          <button type="submit" class="btn-primary" style="border-radius: 40px;">
+            <i class="fas fa-arrow-right-to-bracket"></i> Log In
+          </button>
+        </form>
+        
+        <span class="copy">&copy; 2026 TrafficVision AI</span>
+      </div>
+    </div>
+
+    <!-- Front Page (Register CTA) -->
+    <div class="page front">
+      <div class="content">
+        <i class="fas fa-user-plus" style="font-size: 4rem; color: white; background: rgba(255,255,255,0.2); padding: 20px; border-radius: 50%;"></i>
+        <h1 style="color: white;">Hello, friend!</h1>
+        <p style="color: rgba(255,255,255,0.9);">Enter your personal details and start journey with us</p>
+        <button type="button" id="registerBtn" style="border-color: white; color: white; background: transparent; border-radius: 40px; padding: 12px 40px;">
+          Register <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Back Page (Login CTA) -->
+    <div class="page back">
+      <div class="content">
+        <i class="fas fa-sign-in-alt" style="font-size: 4rem; color: white; background: rgba(255,255,255,0.2); padding: 20px; border-radius: 50%;"></i>
+        <h1 style="color: white;">Welcome Back!</h1>
+        <p style="color: rgba(255,255,255,0.9);">To keep connected with us please login with your personal info</p>
+        <button type="button" id="loginBtn" style="border-color: white; color: white; background: transparent; border-radius: 40px; padding: 12px 40px;">
+          <i class="fas fa-arrow-left"></i> Log In
+        </button>
+      </div>
+    </div>
+
+    <!-- Register Section -->
+    <div class="register">
+      <div class="content">
+        <div class="brand-icon" style="font-size: 2.8rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; width: 80px; height: 80px; line-height: 80px; border-radius: 24px; display: inline-block; margin-bottom: 12px; box-shadow: 0 12px 30px rgba(99, 102, 241, 0.3);">
+          <i class="fas fa-traffic-light"></i>
+        </div>
+        <h1 style="font-size: 2rem; background: linear-gradient(135deg, #0f172a, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Sign Up</h1>
+        
+        <div id="registerAlert" class="alert hidden"></div>
+
+        <form id="registerForm">
+          <input type="text" id="regName" placeholder="Full Name" required>
+          <input type="email" id="regEmail" placeholder="Email (must be @gmail.com)" required>
+          <input type="password" id="regPassword" placeholder="Password (min 6 chars, 1 special, 1 number)" required>
+          <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required>
+          
+          <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
+            <select id="regRole" style="flex: 1; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 0.9rem;">
+              <option value="" disabled selected>Select Role</option>
+              <option value="admin">Admin / Traffic Authority</option>
+              <option value="operator">Traffic Operator</option>
+            </select>
+          </div>
+          
+          <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
+            <input type="checkbox" id="acceptTerms" required>
+            <label for="acceptTerms" style="font-size: 0.85rem; color: #64748b;">I accept terms and conditions</label>
+          </div>
+          
+          <span class="clearfix"></span>
+          <button type="submit" class="btn-primary" style="border-radius: 40px;">
+            <i class="fas fa-user-plus"></i> Register
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== FLIP ANIMATION CONTROLS ==========
+    const container = document.getElementById('container');
+    const registerBtn = document.getElementById('registerBtn');
+    const loginBtn = document.getElementById('loginBtn');
+
+    registerBtn.onclick = function() {
+      container.className = 'active';
+    };
+
+    loginBtn.onclick = function() {
+      container.className = 'close';
+    };
+
+    // ========== UTILITY FUNCTIONS ==========
+
+    function showAlert(elementId, message, type = 'error') {
+      const alertBox = document.getElementById(elementId);
+      alertBox.className = 'alert';
+      alertBox.textContent = message;
+      
+      if (type === 'success') {
+        alertBox.style.background = '#d1fae5';
+        alertBox.style.color = '#065f46';
+        alertBox.style.border = '1px solid #a7f3d0';
+      } else {
+        alertBox.style.background = '#fef2f2';
+        alertBox.style.color = '#991b1b';
+        alertBox.style.border = '1px solid #fecaca';
+      }
+      
+      setTimeout(() => {
+        alertBox.className = 'alert hidden';
+      }, 5000);
+    }
+
+    function validateEmail(email) {
+      return email.endsWith('@gmail.com') && email.length > 10;
+    }
+
+    function validatePassword(password) {
+      const hasMinLength = password.length >= 6;
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      return hasMinLength && hasSpecialChar && hasNumber;
+    }
+
+    function saveSession(token, user) {
+      if (token) localStorage.setItem('access_token', token);
+      if (user) localStorage.setItem('user', JSON.stringify(user));
+    }
+
+    function clearSession() {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+    }
+
+    function redirectIfAuthenticated() {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        window.location.href = 'dashboard.html';
+      }
+    }
+
+    // ========== API REQUEST ==========
+
+    async function apiRequest(endpoint, method = 'GET', data = null) {
+      const url = `/api${endpoint}`;
+      const options = {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      };
+
+      if (data) options.body = JSON.stringify(data);
+      
+      const token = localStorage.getItem('access_token');
+      if (token) options.headers['Authorization'] = `Bearer ${token}`;
+
+      try {
+        const response = await fetch(url, options);
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || result.message || 'Request failed');
+        }
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    // ========== REDIRECT IF LOGGED IN ==========
+    redirectIfAuthenticated();
+
+    // ========== LOGIN FORM HANDLING ==========
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showAlert('loginAlert', 'Please enter both email and password.');
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        showAlert('loginAlert', 'Please use a valid @gmail.com address.');
+        return;
+      }
+
+      const submitBtn = this.querySelector('button');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+      submitBtn.disabled = true;
+
+      try {
+        const result = await apiRequest('/login', 'POST', { email, password });
+        saveSession(result.access_token || result.token, result.user);
+        showAlert('loginAlert', 'Login successful! Redirecting...', 'success');
+        
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1500);
+      } catch (err) {
+        showAlert('loginAlert', err.message || 'Login failed. Please try again.');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // ========== REGISTER FORM HANDLING ==========
+
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regConfirmPassword').value;
+      const role = document.getElementById('regRole').value;
+      const acceptTerms = document.getElementById('acceptTerms').checked;
+
+      if (!name || !email || !password || !confirmPassword || !role) {
+        showAlert('registerAlert', 'Please fill in all fields.');
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        showAlert('registerAlert', 'Please use a valid @gmail.com address.');
+        return;
+      }
+
+      if (!validatePassword(password)) {
+        showAlert('registerAlert', 'Password must be at least 6 characters, contain 1 special character and 1 number.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showAlert('registerAlert', 'Passwords do not match!');
+        return;
+      }
+
+      if (!acceptTerms) {
+        showAlert('registerAlert', 'Please accept the terms and conditions.');
+        return;
+      }
+
+      const submitBtn = this.querySelector('button');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+      submitBtn.disabled = true;
+
+      try {
+        const result = await apiRequest('/register', 'POST', {
+          fullname: name,
+          name: name,
+          email,
+          password,
+          role
+        });
+
+        saveSession(result.access_token || result.token, result.user);
+        showAlert('registerAlert', 'Registration successful! Redirecting...', 'success');
+        
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1500);
+      } catch (err) {
+        showAlert('registerAlert', err.message || 'Registration failed. Please try again.');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Password validation feedback
+    document.getElementById('regPassword').addEventListener('input', function() {
+      const password = this.value;
+      const isValid = validatePassword(password);
+      
+      if (password.length > 0) {
+        this.style.borderColor = isValid ? '#10b981' : '#ef4444';
+        this.style.boxShadow = isValid ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : '0 0 0 3px rgba(239, 68, 68, 0.1)';
+      } else {
+        this.style.borderColor = '#e2e8f0';
+        this.style.boxShadow = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
