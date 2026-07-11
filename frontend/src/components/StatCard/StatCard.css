@@ -1,0 +1,47 @@
+.card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:15px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+
+    transition:.3s;
+
+}
+
+.card:hover{
+
+    transform:translateY(-6px);
+
+}
+
+.card-title{
+
+    color:#64748b;
+
+    font-size:15px;
+
+}
+
+.card-value{
+
+    color:#2563eb;
+
+    font-size:36px;
+
+    margin:15px 0;
+
+}
+
+.card-footer{
+
+    color:#22c55e;
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
