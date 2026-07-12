@@ -5,7 +5,9 @@ from sqlalchemy import text
 from app.database.connection import engine
 from app.database.base import Base
 from app.models.user import User
+from app.models.traffic import Traffic
 from app.routers.user import router as user_router
+from app.routers.traffic import router as traffic_router
 
 app = FastAPI()
 
@@ -20,6 +22,7 @@ app.add_middleware(
 
 
 app.include_router(user_router)
+app.include_router(traffic_router)
 
 Base.metadata.create_all(bind=engine)
 
