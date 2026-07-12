@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.database.connection import engine
@@ -7,6 +8,17 @@ from app.models.user import User
 from app.routers.user import router as user_router
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 app.include_router(user_router)
 
 Base.metadata.create_all(bind=engine)
@@ -25,3 +37,11 @@ def home():
             "message": "Database connection failed",
             "error": str(e)
         }
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "Backend Running",
+        "message": "TrafficVision AI API is working"
+    }
