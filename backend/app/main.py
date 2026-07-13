@@ -4,13 +4,19 @@ from app.routes.auth import router as auth_router
 
 from fastapi import Depends
 from app.dependencies import get_current_user
+from app.routes.traffic import router as traffic_router
+from app.routes.dashboard import router as dashboard_router
 
 import app.models.user
+
+import app.models.traffic
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="TrafficVision AI")
 app.include_router(auth_router)
+app.include_router(traffic_router)
+app.include_router(dashboard_router)
 
 @app.get("/")
 def home():
