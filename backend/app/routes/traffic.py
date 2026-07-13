@@ -6,7 +6,10 @@ from app.database import get_db
 from app.models.traffic import TrafficRecord
 from app.schemas.traffic import TrafficCreate, TrafficResponse
 
-from app.dependencies import get_current_user
+from app.dependencies import (
+    get_current_user,
+    require_role
+)
 from app.models.user import User
 from fastapi import HTTPException
 from fastapi import Query
@@ -21,7 +24,9 @@ router = APIRouter(
 def create_traffic(
     traffic: TrafficCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(
+    require_role("admin", "operator")
+    )
 ):
     new_record = TrafficRecord(
     location=traffic.location,
