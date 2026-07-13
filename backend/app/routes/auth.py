@@ -1,25 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
-from app.security import hash_password
-from fastapi.security import OAuth2PasswordRequestForm
-
-from app.schemas.user import UserLogin, Token
-from app.security import verify_password, create_access_token
+from app.schemas.user import UserCreate, UserResponse, Token
+from app.security import (
+    hash_password,
+    verify_password,
+    create_access_token
+)
 
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
 )
 
-@router.post("/register", response_model=UserResponse)
-def register(user: UserCreate, db: Session = Depends(get_db)):
 
+@router.post("/register", response_model=UserResponse)
+def register(
+    user: UserCreate,
+    db: Session = Depends(get_db)
+):
     existing_user = db.query(User).filter(
-        User.email == form_data.username
+        User.email == user.email
     ).first()
 
     if existing_user:
@@ -30,8 +34,9 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
     new_user = User(
         name=user.name,
-        email=form_data.username,
-        password=hash_password(form_data.password)
+        email=user.email,
+        password=hash_password(user.password),
+        role=user.role
     )
 
     db.add(new_user)
@@ -40,12 +45,12 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
     return new_user
 
+
 @router.post("/login", response_model=Token)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-
     db_user = db.query(User).filter(
         User.email == form_data.username
     ).first()
