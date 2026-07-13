@@ -1,0 +1,123 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+.dashboard{
+    min-height:100vh;
+    background:#eef2f7;
+}
+
+/* Top Bar */
+
+.topbar{
+    background:#1e3a8a;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 40px;
+}
+
+.logout-btn{
+    background:#ef4444;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.3s;
+}
+
+.logout-btn:hover{
+    background:#dc2626;
+}
+
+/* Welcome */
+
+.welcome{
+    padding:35px 40px;
+}
+
+.welcome h1{
+    color:#1f2937;
+    margin-bottom:8px;
+}
+
+.welcome p{
+    color:#6b7280;
+}
+
+.date-time{
+    margin-top:15px;
+    color:#475569;
+    font-size:15px;
+}
+
+/* Cards */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:25px;
+    padding:20px 40px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 5px 15px rgba(0,0,0,.10);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 12px 25px rgba(0,0,0,.18);
+}
+
+.vehicle{
+    border-left:6px solid #2563eb;
+}
+
+.congestion{
+    border-left:6px solid #f97316;
+}
+
+.weather{
+    border-left:6px solid #22c55e;
+}
+
+.status{
+    border-left:6px solid #8b5cf6;
+}
+
+.card h3{
+    margin-bottom:15px;
+}
+
+.card h2{
+    margin-bottom:10px;
+    color:#111827;
+}
+
+.card p{
+    color:#6b7280;
+}
+
+/* Footer */
+
+.footer{
+    margin-top:40px;
+    background:#1e3a8a;
+    color:white;
+    text-align:center;
+    padding:18px;
+}
+
+.footer p{
+    margin:5px 0;
+}
