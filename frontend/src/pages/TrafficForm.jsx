@@ -1,9 +1,10 @@
 import { useState } from "react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
+import { toast } from "react-toastify";
 
 function TrafficForm() {
-    const [formData, setFormData] = useState({
+    const [traffic, setTraffic] = useState({
         location: "",
         road_name: "",
         vehicle_count: "",
@@ -12,32 +13,31 @@ function TrafficForm() {
     });
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
+        setTraffic({
+            ...traffic,
+            [e.target.name]:
+                e.target.name === "vehicle_count" ||
+                e.target.name === "average_speed"
+                    ? Number(e.target.value)
+                    : e.target.value
         });
     };
 
-    const saveRecord = async () => {
+    const submitTraffic = async () => {
         try {
             await api.post(
                 "/traffic",
-                {
-                    ...formData,
-                    vehicle_count: Number(formData.vehicle_count),
-                    average_speed: Number(formData.average_speed)
-                },
+                traffic,
                 {
                     headers: {
-                        Authorization:
-                            `Bearer ${localStorage.getItem("access_token")}`
+                        Authorization: `Bearer ${localStorage.getItem("access_token")}`
                     }
                 }
             );
 
-            alert("Traffic Record Added Successfully!");
+            toast.success("Traffic record added successfully!");
 
-            setFormData({
+            setTraffic({
                 location: "",
                 road_name: "",
                 vehicle_count: "",
@@ -47,7 +47,7 @@ function TrafficForm() {
 
         } catch (error) {
             console.log(error);
-            alert("Failed to save record");
+            toast.error("Failed to add traffic record.");
         }
     };
 
@@ -55,50 +55,62 @@ function TrafficForm() {
         <>
             <Navbar />
 
-            <div style={{ padding: "30px" }}>
-                <h1>Add Traffic Record</h1>
+            <div
+                style={{
+                    maxWidth: "700px",
+                    margin: "40px auto",
+                    background: "white",
+                    padding: "30px",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+                }}
+            >
+                <h1 style={{ textAlign: "center" }}>
+                    🚦 Add Traffic Record
+                </h1>
 
+                <label>Location</label>
                 <input
                     name="location"
-                    placeholder="Location"
-                    value={formData.location}
+                    value={traffic.location}
                     onChange={handleChange}
                 />
 
                 <br /><br />
 
+                <label>Road Name</label>
                 <input
                     name="road_name"
-                    placeholder="Road Name"
-                    value={formData.road_name}
+                    value={traffic.road_name}
                     onChange={handleChange}
                 />
 
                 <br /><br />
 
+                <label>Vehicle Count</label>
                 <input
                     type="number"
                     name="vehicle_count"
-                    placeholder="Vehicle Count"
-                    value={formData.vehicle_count}
+                    value={traffic.vehicle_count}
                     onChange={handleChange}
                 />
 
                 <br /><br />
 
+                <label>Average Speed (km/h)</label>
                 <input
                     type="number"
                     name="average_speed"
-                    placeholder="Average Speed"
-                    value={formData.average_speed}
+                    value={traffic.average_speed}
                     onChange={handleChange}
                 />
 
                 <br /><br />
 
+                <label>Congestion Level</label>
                 <select
                     name="congestion_level"
-                    value={formData.congestion_level}
+                    value={traffic.congestion_level}
                     onChange={handleChange}
                 >
                     <option>Low</option>
@@ -108,8 +120,16 @@ function TrafficForm() {
 
                 <br /><br />
 
-                <button onClick={saveRecord}>
-                    Save Traffic Record
+                <button
+                    onClick={submitTraffic}
+                    style={{
+                        width: "100%",
+                        background: "#2563eb",
+                        color: "white",
+                        fontSize: "16px"
+                    }}
+                >
+                    Add Traffic Record
                 </button>
             </div>
         </>

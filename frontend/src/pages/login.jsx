@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 console.log("NEW LOGIN CODE RUNNING");
 
@@ -32,7 +33,17 @@ function Login() {
                 response.data.access_token
             );
 
-            alert("Login Successful!");
+            localStorage.setItem(
+                "role",
+                response.data.role
+            );
+
+            localStorage.setItem(
+                "role",
+                response.data.role
+            );
+
+            toast.success("Login Successful!");
 
             navigate("/dashboard");
 

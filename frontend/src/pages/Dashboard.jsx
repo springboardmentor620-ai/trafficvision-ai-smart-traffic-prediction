@@ -3,6 +3,8 @@ import api from "../services/api";
 import Navbar from "../components/Navbar";
 import DashboardCard from "../components/DashboardCard";
 import Charts from "../components/Charts";
+import { toast } from "react-toastify";
+import Loader from "../components/Loader";
 
 function Dashboard() {
     const [summary, setSummary] = useState(null);
@@ -27,7 +29,7 @@ function Dashboard() {
             setSummary(response.data);
         } catch (error) {
             console.log(error);
-            alert("Failed to load dashboard");
+            toast.error("Failed to load dashboard");
         }
     };
 
@@ -72,14 +74,20 @@ function Dashboard() {
     }, []);
 
     if (!summary) {
-        return <h2>Loading...</h2>;
+        return <Loader />;
     }
 
     return (
         <>
             <Navbar />
 
-            <div style={{ padding: "30px" }}>
+            <div
+                style={{
+                    padding: "30px",
+                    background: "#f5f7fb",
+                    minHeight: "100vh"
+                }}
+            >
                 <h1>🚦 TrafficVision AI Dashboard</h1>
 
                 <hr />

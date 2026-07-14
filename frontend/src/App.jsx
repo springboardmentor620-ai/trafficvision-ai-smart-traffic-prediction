@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import TrafficForm from "./pages/TrafficForm";
 import TrafficList from "./pages/TrafficList";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EditTraffic from "./pages/EditTraffic";
 
 function App() {
     return (
@@ -38,6 +39,15 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <TrafficList />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/traffic/edit/:id"
+                    element={
+                        <ProtectedRoute>
+                            <EditTraffic />
                         </ProtectedRoute>
                     }
                 />

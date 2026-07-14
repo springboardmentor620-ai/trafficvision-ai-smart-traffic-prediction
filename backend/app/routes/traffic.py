@@ -4,8 +4,11 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.traffic import TrafficRecord
-from app.schemas.traffic import TrafficCreate, TrafficResponse
-
+from app.schemas.traffic import (
+    TrafficCreate,
+    TrafficResponse,
+    TrafficUpdate
+)
 from app.dependencies import (
     get_current_user,
     require_role
@@ -88,29 +91,28 @@ def get_traffic(
 
     return traffic
 
+
 @router.put("/{traffic_id}", response_model=TrafficResponse)
 def update_traffic(
     traffic_id: int,
-    traffic: TrafficCreate,
+    traffic: TrafficUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    record = db.query(TrafficRecord).filter(
-        TrafficRecord.id == traffic_id
-    ).first()
-    
+    record = (
+        db.query(TrafficRecord)
+        .filter(
+            TrafficRecord.id == traffic_id,
+            TrafficRecord.user_id == current_user.id
+        )
+        .first()
+    )
+
     if not record:
         raise HTTPException(
             status_code=404,
             detail="Traffic record not found"
         )
-    
-    if record.user_id != current_user.id:
-        raise HTTPException(
-            status_code=403,
-            detail="You are not allowed to modify this record"
-        )
-
 
     record.location = traffic.location
     record.road_name = traffic.road_name
@@ -122,6 +124,7 @@ def update_traffic(
     db.refresh(record)
 
     return record
+
 
 @router.delete("/{traffic_id}")
 def delete_traffic(

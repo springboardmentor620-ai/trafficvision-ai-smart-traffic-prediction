@@ -8,6 +8,13 @@ class TrafficCreate(BaseModel):
     average_speed: float
     congestion_level: str
 
+class TrafficUpdate(BaseModel):
+    location: str
+    road_name: str
+    vehicle_count: int
+    average_speed: float
+    congestion_level: str
+
 
 class TrafficResponse(BaseModel):
     id: int
