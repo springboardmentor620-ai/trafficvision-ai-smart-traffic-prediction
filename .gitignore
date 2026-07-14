@@ -216,3 +216,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Next.js
+frontend/node_modules/
+frontend/.next/
+
+# Backend Virtual Environment
+backend/venv/
+
+# VS Code
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
