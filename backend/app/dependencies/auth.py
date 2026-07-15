@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.config.auth import SECRET_KEY, ALGORITHM
 from app.database.connection import get_db
 from app.models.user import User
+from app.constants.roles import ADMIN, TRAFFIC_OPERATOR
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -46,10 +47,22 @@ def get_current_user(
 def require_admin(
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role != "Admin":
+    if current_user.role != ADMIN:
         raise HTTPException(
             status_code=403,
             detail="Admin access required"
+        )
+
+    return current_user
+
+
+def require_operator(
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role not in [ADMIN, TRAFFIC_OPERATOR]:
+        raise HTTPException(
+            status_code=403,
+            detail="Traffic Operator or Admin access required"
         )
 
     return current_user

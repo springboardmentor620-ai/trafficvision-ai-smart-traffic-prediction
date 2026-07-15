@@ -344,7 +344,7 @@ To run the complete application, start the backend and frontend in separate term
 ```bash
 cd backend
 
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
 ```
 
 The backend will be available at:
@@ -399,10 +399,6 @@ These interfaces allow you to:
 - Test APIs directly from the browser.
 - Inspect request and response schemas.
 - Verify authentication and authorization workflows.
-
-```
-
-```
 
 ## 🌐 API Overview
 

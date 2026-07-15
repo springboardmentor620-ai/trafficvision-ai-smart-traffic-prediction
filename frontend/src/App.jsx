@@ -3,8 +3,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/admin/Dashboard";
+import OperatorDashboard from "./pages/operator/Dashboard";
+import CommuterDashboard from "./pages/commuter/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 function App() {
   return (
@@ -17,13 +20,38 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         <Route
-          path="/dashboard"
+          path="/admin"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <RoleProtectedRoute allowedRole="admin">
+                <AdminDashboard />
+              </RoleProtectedRoute>
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/operator"
+          element={
+            <ProtectedRoute>
+              <RoleProtectedRoute allowedRole="traffic_operator">
+                <OperatorDashboard />
+              </RoleProtectedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/commuter"
+          element={
+            <ProtectedRoute>
+              <RoleProtectedRoute allowedRole="commuter">
+                <CommuterDashboard />
+              </RoleProtectedRoute>
+            </ProtectedRoute>
+          }
+        />
+        
       </Routes>
     </BrowserRouter>
   );

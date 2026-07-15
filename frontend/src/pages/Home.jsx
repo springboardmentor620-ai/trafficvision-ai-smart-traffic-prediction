@@ -1,20 +1,18 @@
-import { Link } from "react-router-dom";
+import PublicNavbar from "../components/PublicNavbar";
+import HeroSection from "../components/HeroSection";
+import FeaturesSection from "../components/FeaturesSection";
+import HowItWorksSection from "../components/HowItWorksSection";
+
+import "../styles/Home.css";
 
 function Home() {
   return (
-    <div>
-      <h1>TrafficVision AI</h1>
-
-      <p>Smart Traffic Management System</p>
-
-      <Link to="/login">
-        <button>Login</button>
-      </Link>
-
-      <Link to="/register">
-        <button>Register</button>
-      </Link>
-    </div>
+    <>
+      <PublicNavbar />
+      <HeroSection />
+      <FeaturesSection />
+      <HowItWorksSection />
+    </>
   );
 }
 

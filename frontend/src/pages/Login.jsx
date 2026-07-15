@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { login } from "../services/auth";
+import { login, getCurrentUser } from "../services/auth";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,12 +13,28 @@ function Login() {
     e.preventDefault();
 
     try {
+      // Login and receive JWT
       const data = await login(email, password);
 
+      // Save token
       localStorage.setItem("token", data.access_token);
 
-      navigate("/dashboard");
-    } catch (error) {
+      // Fetch logged-in user
+      const user = await getCurrentUser();
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Redirect based on role
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else if (user.role === "traffic_operator") {
+        navigate("/operator");
+      } else if (user.role === "commuter") {
+        navigate("/commuter");
+      } else {
+        alert("Unknown user role");
+      }
+
+    } catch {
       alert("Invalid email or password");
     }
   }

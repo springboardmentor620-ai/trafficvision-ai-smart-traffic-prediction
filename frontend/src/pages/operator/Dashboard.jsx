@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { getTraffic } from "../services/traffic";
+import { getTraffic } from "../../services/traffic";
+import Navbar from "../../components/Navbar";
+import Sidebar from "../../components/Sidebar";
+import TrafficCard from "../../components/TrafficCard";
+import TrafficChart from "../../components/TrafficChart";
+import TrafficTable from "../../components/TrafficTable";
+import api from "../../services/api";
 
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import TrafficCard from "../components/TrafficCard";
-import TrafficChart from "../components/TrafficChart";
-import TrafficTable from "../components/TrafficTable";
-import api from "../services/api";
-
-import "../styles/chart.css";
+import "../../styles/chart.css";
 
 function Dashboard() {
 
