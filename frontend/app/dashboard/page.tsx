@@ -1,70 +1,54 @@
 "use client";
-
-import { useRouter } from "next/navigation";
-import { logout } from "../utils/auth";
-
+import { useEffect, useState } from "react";
+import { getDashboardStats } from "../services/api";
+import Sidebar from "../components/sidebar";
+import Navbar from "../components/navbar";
 export default function Dashboard() {
-  const router = useRouter();
 
-  function handleLogout() {
-    logout();
-    router.push("/login");
-  }
+  const [stats, setStats] = useState<any>(null);
 
+  useEffect(() => {
+    getDashboardStats().then((data) => {
+      setStats(data);
+    });
+  }, []);
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="flex min-h-screen bg-gray-100">
 
-      {/* Navbar */}
-      <nav className="bg-blue-700 text-white flex justify-between items-center px-8 py-4 shadow-lg">
-        <h1 className="text-2xl font-bold">
-          🚦 TrafficVision AI
-        </h1>
+      <Sidebar />
 
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
-        >
-          Logout
-        </button>
-      </nav>
+      <div className="flex-1">
 
-      {/* Main Content */}
-      <div className="p-8">
+        <Navbar />
 
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">
-          Dashboard
-        </h2>
+        <div className="p-8">
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <h1 className="text-3xl font-bold text-black">
+            TrafficVision Dashboard
+          </h1>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-blue-600">
-              👤 User
-            </h3>
+          <div className="grid grid-cols-2 gap-6 mt-8">
 
-            <p className="mt-3 text-gray-700">
-              Logged in Successfully
-            </p>
-          </div>
+            <div className="bg-white p-6 rounded-xl shadow">
+              <h2 className="text-xl font-bold text-black">Vehicles</h2>
+              <p className="text-4xl text-blue-600 mt-3">{stats?.total_records}</p>
+            </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-green-600">
-              🔐 Authentication
-            </h3>
+            <div className="bg-white p-6 rounded-xl shadow">
+              <h2 className="text-xl font-bold text-black">Traffic Signals</h2>
+              <p className="text-4xl text-green-600 mt-3">{stats?.junctions}</p>
+            </div>
 
-            <p className="mt-3 text-gray-700">
-              JWT Enabled
-            </p>
-          </div>
+            <div className="bg-white p-6 rounded-xl shadow">
+              <h2 className="text-xl font-bold text-black">Alerts</h2>
+              <p className="text-4xl text-red-600 mt-3">{stats?.average_vehicles}</p>
+            </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-red-600">
-              🚦 Backend
-            </h3>
+            <div className="bg-white p-6 rounded-xl shadow">
+              <h2 className="text-xl font-bold text-black">Congestion</h2>
+              <p className="text-4xl text-purple-600 mt-3">{stats?.maximum_vehicles}</p>
+            </div>
 
-            <p className="mt-3 text-gray-700">
-              Connected Successfully
-            </p>
           </div>
 
         </div>

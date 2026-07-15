@@ -1,26 +1,21 @@
 const API_URL = "http://127.0.0.1:8000";
 
-export async function loginUser(data: {
-  username: string;
+export async function login(data: {
+  email: string;
   password: string;
 }) {
-  const formData = new URLSearchParams();
-
-  formData.append("username", data.username);
-  formData.append("password", data.password);
-
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
     },
-    body: formData,
+    body: JSON.stringify(data),
   });
 
   return response.json();
 }
 
-export async function registerUser(data: {
+export async function register(data: {
   full_name: string;
   email: string;
   password: string;
@@ -33,5 +28,9 @@ export async function registerUser(data: {
     body: JSON.stringify(data),
   });
 
+  return response.json();
+}
+export async function getDashboardStats() {
+  const response = await fetch("http://127.0.0.1:8000/dashboard/stats");
   return response.json();
 }
