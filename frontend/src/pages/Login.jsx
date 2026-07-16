@@ -1,29 +1,42 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
+import PublicNavbar from "../components/PublicNavbar";
 import { login, getCurrentUser } from "../services/auth";
+import "../styles/Login.css";
 
 function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  async function handleLogin(e) {
+  function handleChange(e) {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
 
     try {
-      // Login and receive JWT
-      const data = await login(email, password);
+      const data = await login(
+        formData.email,
+        formData.password
+      );
 
-      // Save token
       localStorage.setItem("token", data.access_token);
 
-      // Fetch logged-in user
       const user = await getCurrentUser();
-      localStorage.setItem("user", JSON.stringify(user));
 
-      // Redirect based on role
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
+
       if (user.role === "admin") {
         navigate("/admin");
       } else if (user.role === "traffic_operator") {
@@ -31,44 +44,69 @@ function Login() {
       } else if (user.role === "commuter") {
         navigate("/commuter");
       } else {
-        alert("Unknown user role");
+        alert("Unknown user role.");
       }
 
     } catch {
-      alert("Invalid email or password");
+      alert("Invalid email or password.");
     }
   }
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1>TrafficVision AI</h1>
+    <>
+      <PublicNavbar />
 
-      <form onSubmit={handleLogin}>
+      <div className="login-container">
+        <div className="login-card">
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <h1>Welcome Back</h1>
 
-        <br /><br />
+          <p>
+            Sign in to continue using TrafficVision AI.
+          </p>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <form onSubmit={handleSubmit}>
 
-        <br /><br />
+            <div className="form-group">
+              <label>Email Address</label>
 
-        <button type="submit">
-          Login
-        </button>
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
 
-      </form>
-    </div>
+            <div className="form-group">
+              <label>Password</label>
+
+              <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+              />
+            </div>
+
+            <button type="submit">
+              Login
+            </button>
+
+          </form>
+
+          <p className="auth-link">
+            Don't have an account?{" "}
+            <Link to="/register">
+              Create Account
+            </Link>
+          </p>
+
+        </div>
+      </div>
+    </>
   );
 }
 

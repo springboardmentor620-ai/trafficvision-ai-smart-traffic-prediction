@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import PublicNavbar from "../components/PublicNavbar";
 import { register } from "../services/auth";
 import "../styles/Register.css";
 
 function Register() {
   
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -41,6 +44,7 @@ function Register() {
       console.log(response);
 
       alert("Registration successful!");
+      navigate("/login");
 
     } catch (error) {
       console.error(error);
@@ -119,14 +123,22 @@ function Register() {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="traffic_operator">Operator</option>
+                <option value="traffic_operator">Traffic Operator</option>
                 <option value="admin">Admin</option>
+                <option value="commuter">Commuter</option>
               </select>
             </div>
 
             <button type="submit">
               Create Account
             </button>
+
+            <p className="auth-link">
+              Already have an account?{" "}
+              <Link to="/login">
+                Login
+              </Link>
+            </p>
 
           </form>
 

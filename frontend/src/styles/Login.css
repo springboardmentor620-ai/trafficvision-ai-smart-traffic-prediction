@@ -1,8 +1,8 @@
 /* ===========================
-   Register Page
+   Login Page
 =========================== */
 
-.register-container {
+.login-container {
   min-height: calc(100vh - 80px);
 
   display: flex;
@@ -14,7 +14,7 @@
   padding: 40px 20px;
 }
 
-.register-card {
+.login-card {
   width: 100%;
   max-width: 500px;
 
@@ -27,13 +27,13 @@
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
 }
 
-.register-card h1 {
+.login-card h1 {
   text-align: center;
   color: #2563eb;
   margin-bottom: 10px;
 }
 
-.register-card p {
+.login-card p {
   text-align: center;
   color: #64748b;
   margin-bottom: 30px;
@@ -71,7 +71,7 @@
   border-color: #2563eb;
 }
 
-.register-card button {
+.login-card button {
   width: 100%;
 
   padding: 14px;
@@ -90,7 +90,7 @@
   transition: background 0.3s;
 }
 
-.register-card button:hover {
+.login-card button:hover {
   background: #1d4ed8;
 }
 
