@@ -5,7 +5,8 @@ from app.schemas.prediction import (
     PredictionResponse
 )
 
-from app.services.prediction_service import predict_congestion
+from app.services.prediction_service import predict_traffic
+
 from app.dependencies import get_current_user
 from app.models.user import User
 
@@ -23,9 +24,4 @@ def predict(
     request: PredictionRequest,
     current_user: User = Depends(get_current_user)
 ):
-    result = predict_congestion(
-        request.vehicle_count,
-        request.average_speed
-    )
-
-    return result
+    return predict_traffic(request)

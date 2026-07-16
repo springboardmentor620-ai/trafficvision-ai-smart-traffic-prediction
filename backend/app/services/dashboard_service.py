@@ -1,153 +1,128 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, extract
 
-from app.models.traffic import TrafficRecord
-
-
+from app.models.traffic_dataset import TrafficDataset
 
 
-def get_dashboard_summary(db: Session, user_id: int):
-    query = db.query(TrafficRecord).filter(
-        TrafficRecord.user_id == user_id
-    )
+def get_dashboard_summary(db: Session):
 
-    total_records = query.count()
+    total = db.query(TrafficDataset).count()
 
-    high = query.filter(
-        TrafficRecord.congestion_level == "High"
-    ).count()
-
-    medium = query.filter(
-        TrafficRecord.congestion_level == "Medium"
-    ).count()
-
-    low = query.filter(
-        TrafficRecord.congestion_level == "Low"
-    ).count()
-
-    avg_speed = db.query(
-        func.avg(TrafficRecord.average_speed)
-    ).filter(
-        TrafficRecord.user_id == user_id
+    avg_traffic = db.query(
+        func.avg(TrafficDataset.traffic_volume)
     ).scalar()
 
-    avg_vehicle = db.query(
-        func.avg(TrafficRecord.vehicle_count)
-    ).filter(
-        TrafficRecord.user_id == user_id
+    max_traffic = db.query(
+        func.max(TrafficDataset.traffic_volume)
+    ).scalar()
+
+    min_traffic = db.query(
+        func.min(TrafficDataset.traffic_volume)
+    ).scalar()
+
+    avg_temp = db.query(
+        func.avg(TrafficDataset.temp)
+    ).scalar()
+
+    avg_clouds = db.query(
+        func.avg(TrafficDataset.clouds_all)
     ).scalar()
 
     return {
-        "total_records": total_records,
-        "high_congestion": high,
-        "medium_congestion": medium,
-        "low_congestion": low,
-        "average_speed": round(avg_speed or 0, 2),
-        "average_vehicle_count": round(avg_vehicle or 0, 2)
+        "total_records": total,
+        "average_traffic": round(avg_traffic or 0, 2),
+        "max_traffic": max_traffic or 0,
+        "min_traffic": min_traffic or 0,
+        "average_temperature": round(avg_temp or 0, 2),
+        "average_clouds": round(avg_clouds or 0, 2)
     }
 
-def get_top_roads(db: Session, user_id: int):
-    avg_vehicle = func.avg(
-        TrafficRecord.vehicle_count
-    ).label("avg_vehicle_count")
 
-    roads = (
-        db.query(
-            TrafficRecord.road_name,
-            avg_vehicle
-        )
-        .filter(
-            TrafficRecord.user_id == user_id
-        )
-        .group_by(
-            TrafficRecord.road_name
-        )
-        .order_by(
-            avg_vehicle.desc()
-        )
-        .limit(5)
-        .all()
-    )
+def get_weather_distribution(db: Session):
 
-    return [
-        {
-            "road_name": road.road_name,
-            "avg_vehicle_count": round(
-                float(road.avg_vehicle_count),
-                2
-            )
-        }
-        for road in roads
-    ]
-
-def get_congestion_chart(db: Session, user_id: int):
     result = (
         db.query(
-            TrafficRecord.congestion_level,
-            func.count(TrafficRecord.id).label("count")
+            TrafficDataset.weather_main,
+            func.count(TrafficDataset.id).label("count")
         )
-        .filter(
-            TrafficRecord.user_id == user_id
-        )
-        .group_by(
-            TrafficRecord.congestion_level
-        )
+        .group_by(TrafficDataset.weather_main)
         .all()
     )
 
     return [
         {
-            "congestion_level": row.congestion_level,
-            "count": row.count
+            "weather_main": r.weather_main,
+            "count": r.count
         }
-        for row in result
+        for r in result
     ]
 
-def get_speed_analysis(db: Session, user_id: int):
+
+def get_hourly_traffic(db: Session):
+
     result = (
         db.query(
-            TrafficRecord.road_name,
-            func.avg(TrafficRecord.average_speed).label("average_speed")
+            extract("hour", TrafficDataset.date_time).label("hour"),
+            func.avg(TrafficDataset.traffic_volume).label("average_traffic")
         )
-        .filter(
-            TrafficRecord.user_id == user_id
-        )
-        .group_by(
-            TrafficRecord.road_name
-        )
+        .group_by("hour")
+        .order_by("hour")
         .all()
     )
 
     return [
         {
-            "road_name": row.road_name,
-            "average_speed": round(float(row.average_speed), 2)
+            "hour": int(r.hour),
+            "average_traffic": round(float(r.average_traffic), 2)
         }
-        for row in result
+        for r in result
     ]
 
-def get_top_locations(db: Session, user_id: int):
+
+def get_weather_traffic(db: Session):
+
     result = (
         db.query(
-            TrafficRecord.location,
-            func.count(TrafficRecord.id).label("records")
+            TrafficDataset.weather_main,
+            func.avg(TrafficDataset.traffic_volume).label("average_traffic")
         )
-        .filter(
-            TrafficRecord.user_id == user_id
-        )
-        .group_by(
-            TrafficRecord.location
-        )
-        .order_by(
-            func.count(TrafficRecord.id).desc()
-        )
+        .group_by(TrafficDataset.weather_main)
         .all()
     )
 
     return [
         {
-            "location": row.location,
-            "records": row.records
+            "weather_main": r.weather_main,
+            "average_traffic": round(float(r.average_traffic), 2)
         }
-        for row in result
+        for r in result
+    ]
+
+def get_daywise_traffic(db: Session):
+    result = (
+        db.query(
+            extract("dow", TrafficDataset.date_time).label("day"),
+            func.avg(TrafficDataset.traffic_volume).label("avg")
+        )
+        .group_by(extract("dow", TrafficDataset.date_time))
+        .order_by(extract("dow", TrafficDataset.date_time))
+        .all()
+    )
+
+    days = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+    ]
+
+    return [
+        {
+            "day": days[int(r.day)],
+            "average_traffic": round(float(r.avg), 2)
+        }
+        for r in result
     ]

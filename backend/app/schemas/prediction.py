@@ -1,9 +1,19 @@
 from pydantic import BaseModel
 
+
 class PredictionRequest(BaseModel):
-    vehicle_count: int
-    average_speed: float
+    holiday: str
+    temp: float
+    rain_1h: float
+    snow_1h: float
+    clouds_all: int
+    weather_main: str
+    weather_description: str
+    hour: int
+    day: int
+    month: int
+    weekday: int
+
 
 class PredictionResponse(BaseModel):
-    predicted_congestion: str
-    confidence: float
+    predicted_traffic: int

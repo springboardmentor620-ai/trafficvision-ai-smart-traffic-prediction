@@ -3,15 +3,17 @@ import api from "../services/api";
 import Navbar from "../components/Navbar";
 import DashboardCard from "../components/DashboardCard";
 import Charts from "../components/Charts";
-import { toast } from "react-toastify";
 import Loader from "../components/Loader";
+import { toast } from "react-toastify";
 
 function Dashboard() {
     const [summary, setSummary] = useState(null);
+
     const [topRoads, setTopRoads] = useState([]);
-    const [topLocations, setTopLocations] = useState([]);
-    const [speedAnalysis, setSpeedAnalysis] = useState([]);
-    const [congestionChart, setCongestionChart] = useState([]);
+    const [weatherDistribution, setWeatherDistribution] = useState([]);
+    const [hourlyTraffic, setHourlyTraffic] = useState([]);
+    const [weatherTraffic, setWeatherTraffic] = useState([]);
+    const [daywiseTraffic, setDaywiseTraffic] = useState([]);
 
     const getAuthHeader = () => ({
         headers: {
@@ -29,48 +31,77 @@ function Dashboard() {
             setSummary(response.data);
         } catch (error) {
             console.log(error);
-            toast.error("Failed to load dashboard");
+            toast.error("Failed to load dashboard summary");
         }
     };
 
     const loadTopRoads = async () => {
-        const response = await api.get(
-            "/dashboard/top-roads",
-            getAuthHeader()
-        );
-        setTopRoads(response.data);
+        try {
+            const response = await api.get(
+                "/dashboard/top-roads",
+                getAuthHeader()
+            );
+
+            setTopRoads(response.data);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
-    const loadTopLocations = async () => {
-        const response = await api.get(
-            "/dashboard/top-locations",
-            getAuthHeader()
-        );
-        setTopLocations(response.data);
+    const loadWeatherDistribution = async () => {
+        try {
+            const response = await api.get(
+                "/dashboard/weather-distribution",
+                getAuthHeader()
+            );
+
+            setWeatherDistribution(response.data);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
-    const loadSpeedAnalysis = async () => {
-        const response = await api.get(
-            "/dashboard/speed-analysis",
-            getAuthHeader()
-        );
-        setSpeedAnalysis(response.data);
+    const loadHourlyTraffic = async () => {
+        try {
+            const response = await api.get(
+                "/dashboard/hourly-traffic",
+                getAuthHeader()
+            );
+
+            setHourlyTraffic(response.data);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
-    const loadCongestionChart = async () => {
+    const loadWeatherTraffic = async () => {
+        try {
+            const response = await api.get(
+                "/dashboard/weather-traffic",
+                getAuthHeader()
+            );
+
+            setWeatherTraffic(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const loadDaywiseTraffic = async () => {
         const response = await api.get(
-            "/dashboard/congestion-chart",
+            "/dashboard/daywise-traffic",
             getAuthHeader()
         );
-        setCongestionChart(response.data);
+
+        setDaywiseTraffic(response.data);
     };
 
     useEffect(() => {
         loadSummary();
-        loadTopRoads();
-        loadTopLocations();
-        loadSpeedAnalysis();
-        loadCongestionChart();
+        loadWeatherDistribution();
+        loadHourlyTraffic();
+        loadWeatherTraffic();
+        loadDaywiseTraffic();
     }, []);
 
     if (!summary) {
@@ -88,18 +119,16 @@ function Dashboard() {
                     minHeight: "100vh"
                 }}
             >
-                <h1>🚦 TrafficVision AI Dashboard</h1>
+                <h1>🚦 TrafficVision AI Analytics Dashboard</h1>
 
                 <hr />
-
-                <h2>Dashboard Summary</h2>
 
                 <div
                     style={{
                         display: "flex",
                         flexWrap: "wrap",
                         gap: "20px",
-                        marginTop: "20px",
+                        marginTop: "25px",
                         marginBottom: "30px"
                     }}
                 >
@@ -110,21 +139,21 @@ function Dashboard() {
                     />
 
                     <DashboardCard
-                        title="High Congestion"
+                        title="High Traffic"
                         value={summary.high_congestion}
                         color="#dc2626"
                     />
 
                     <DashboardCard
-                        title="Medium Congestion"
+                        title="Medium Traffic"
                         value={summary.medium_congestion}
-                        color="#d97706"
+                        color="#f59e0b"
                     />
 
                     <DashboardCard
-                        title="Low Congestion"
+                        title="Low Traffic"
                         value={summary.low_congestion}
-                        color="#16a34a"
+                        color="#22c55e"
                     />
 
                     <DashboardCard
@@ -140,13 +169,11 @@ function Dashboard() {
                     />
                 </div>
 
-                <hr />
-
                 <Charts
-                    topRoads={topRoads}
-                    congestionChart={congestionChart}
-                    topLocations={topLocations}
-                    speedAnalysis={speedAnalysis}
+                    weatherDistribution={weatherDistribution}
+                    hourlyTraffic={hourlyTraffic}
+                    weatherTraffic={weatherTraffic}
+                    daywiseTraffic={daywiseTraffic}
                 />
             </div>
         </>

@@ -1,11 +1,11 @@
 import {
+    ResponsiveContainer,
     BarChart,
     Bar,
     XAxis,
     YAxis,
-    CartesianGrid,
     Tooltip,
-    ResponsiveContainer,
+    CartesianGrid,
     PieChart,
     Pie,
     Cell,
@@ -14,45 +14,38 @@ import {
     Line
 } from "recharts";
 
-const COLORS = ["#ef4444", "#f59e0b", "#22c55e"];
+const COLORS = [
+    "#2563eb",
+    "#22c55e",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+    "#06b6d4",
+    "#ec4899"
+];
 
 function Charts({
-    topRoads,
-    congestionChart,
-    topLocations,
-    speedAnalysis
+    weatherDistribution,
+    hourlyTraffic,
+    weatherTraffic,
+    daywiseTraffic
 }) {
     return (
         <>
-            <h2>Top Roads</h2>
+            {/* Weather Distribution */}
 
-            <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={topRoads}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="road_name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar
-                        dataKey="avg_vehicle_count"
-                        fill="#3b82f6"
-                    />
-                </BarChart>
-            </ResponsiveContainer>
-
-            <br />
-
-            <h2>Congestion Analysis</h2>
+            <h2>🌦 Weather Distribution</h2>
 
             <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                     <Pie
-                        data={congestionChart}
+                        data={weatherDistribution}
                         dataKey="count"
-                        nameKey="congestion_level"
+                        nameKey="weather_main"
                         outerRadius={120}
                         label
                     >
-                        {congestionChart.map((entry, index) => (
+                        {weatherDistribution.map((entry, index) => (
                             <Cell
                                 key={index}
                                 fill={COLORS[index % COLORS.length]}
@@ -67,38 +60,88 @@ function Charts({
 
             <br />
 
-            <h2>Top Locations</h2>
+            {/* Hourly Traffic */}
 
-            <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={topLocations}>
+            <h2>🕒 Average Hourly Traffic</h2>
+
+            <ResponsiveContainer width="100%" height={320}>
+                <LineChart
+                    data={hourlyTraffic}
+                    margin={{
+                        top: 20,
+                        right: 30,
+                        left: 20,
+                        bottom: 10
+                    }}
+                >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="location" />
+                    <XAxis dataKey="hour" />
                     <YAxis />
                     <Tooltip />
+
+                    <Line
+                        type="monotone"
+                        dataKey="average_traffic"
+                        stroke="#16a34a"
+                        strokeWidth={3}
+                    />
+                </LineChart>
+            </ResponsiveContainer>
+
+            <br />
+
+            {/* Day Wise Traffic */}
+
+            <h2>📅 Average Traffic by Day</h2>
+
+            <ResponsiveContainer width="100%" height={320}>
+                <BarChart
+                    data={daywiseTraffic}
+                    margin={{
+                        top: 20,
+                        right: 30,
+                        left: 20,
+                        bottom: 10
+                    }}
+                >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
+
                     <Bar
-                        dataKey="records"
-                        fill="#10b981"
+                        dataKey="average_traffic"
+                        fill="#6366f1"
                     />
                 </BarChart>
             </ResponsiveContainer>
 
             <br />
 
-            <h2>Average Speed Analysis</h2>
+            {/* Weather vs Traffic */}
 
-            <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={speedAnalysis}>
+            <h2>🌧 Weather vs Average Traffic</h2>
+
+            <ResponsiveContainer width="100%" height={320}>
+                <BarChart
+                    data={weatherTraffic}
+                    margin={{
+                        top: 20,
+                        right: 30,
+                        left: 20,
+                        bottom: 10
+                    }}
+                >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="road_name" />
+                    <XAxis dataKey="weather_main" />
                     <YAxis />
                     <Tooltip />
-                    <Line
-                        type="monotone"
-                        dataKey="average_speed"
-                        stroke="#8b5cf6"
-                        strokeWidth={3}
+
+                    <Bar
+                        dataKey="average_traffic"
+                        fill="#8b5cf6"
                     />
-                </LineChart>
+                </BarChart>
             </ResponsiveContainer>
         </>
     );

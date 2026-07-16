@@ -2,6 +2,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+import traceback
 
 
 async def http_exception_handler(
@@ -35,10 +36,12 @@ async def internal_exception_handler(
     request: Request,
     exc: Exception
 ):
+    traceback.print_exc()   # <-- Add this line
+
     return JSONResponse(
         status_code=500,
         content={
             "success": False,
-            "message": "Internal Server Error"
+            "message": str(exc)   # <-- Show the actual error temporarily
         }
     )

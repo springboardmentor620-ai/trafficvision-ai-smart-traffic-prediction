@@ -15,6 +15,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.routes.route import router as route_router
 
 from app.routes.alert import router as alert_router
+from app.routes.analytics import router as analytics_router
 
 from app.exceptions.handlers import (
     http_exception_handler,
@@ -26,9 +27,12 @@ import app.models.user
 
 import app.models.traffic
 
+from app.models.traffic_dataset import TrafficDataset
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="TrafficVision AI")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -49,11 +53,12 @@ app.add_exception_handler(
     validation_exception_handler
 )
 
-app.add_exception_handler(
-    Exception,
-    internal_exception_handler
-)
+#app.add_exception_handler(
+#    Exception,
+#    internal_exception_handler
+#)
 
+app.include_router(analytics_router)
 app.include_router(auth_router)
 app.include_router(traffic_router)
 app.include_router(dashboard_router)
