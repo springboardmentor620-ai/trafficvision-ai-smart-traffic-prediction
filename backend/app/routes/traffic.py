@@ -77,11 +77,17 @@ def get_all_traffic(
 @router.get("/{traffic_id}", response_model=TrafficResponse)
 def get_traffic(
     traffic_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    traffic = db.query(TrafficRecord).filter(
-        TrafficRecord.id == traffic_id
-    ).first()
+    traffic = (
+        db.query(TrafficRecord)
+        .filter(
+            TrafficRecord.id == traffic_id,
+            TrafficRecord.user_id == current_user.id
+        )
+        .first()
+    )
 
     if not traffic:
         raise HTTPException(

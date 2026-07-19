@@ -4,13 +4,17 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import TrafficForm from "./pages/TrafficForm";
 import TrafficList from "./pages/TrafficList";
-import ProtectedRoute from "./components/ProtectedRoute";
 import EditTraffic from "./pages/EditTraffic";
+import Analytics from "./pages/Analytics";
+import Prediction from "./pages/Prediction";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
+
                 <Route
                     path="/"
                     element={<Login />}
@@ -51,6 +55,25 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+
+                <Route
+                    path="/analytics"
+                    element={
+                        <ProtectedRoute>
+                            <Analytics />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/prediction"
+                    element={
+                        <ProtectedRoute>
+                            <Prediction />
+                        </ProtectedRoute>
+                    }
+                />
+
             </Routes>
         </BrowserRouter>
     );

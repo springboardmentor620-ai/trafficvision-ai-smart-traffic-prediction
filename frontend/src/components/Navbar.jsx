@@ -4,6 +4,7 @@ import api from "../services/api";
 
 function Navbar() {
     const navigate = useNavigate();
+
     const role = localStorage.getItem("role");
     const [user, setUser] = useState(null);
 
@@ -25,9 +26,8 @@ function Navbar() {
             );
 
             setUser(response.data);
-
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
 
@@ -62,6 +62,26 @@ function Navbar() {
                 Dashboard
             </Link>
 
+            <Link
+                to="/analytics"
+                style={{
+                    color: "white",
+                    textDecoration: "none"
+                }}
+            >
+                Analytics
+            </Link>
+
+            <Link
+                to="/prediction"
+                style={{
+                    color: "white",
+                    textDecoration: "none"
+                }}
+            >
+                Prediction
+            </Link>
+
             {role === "admin" && (
                 <Link
                     to="/traffic/add"
@@ -87,9 +107,7 @@ function Navbar() {
             <div style={{ marginLeft: "auto" }}>
                 {user && (
                     <>
-                        👤 <strong>{user.name}</strong>
-                        {" | "}
-                        {user.role}
+                        👤 <strong>{user.name}</strong> | {user.role}
                     </>
                 )}
             </div>

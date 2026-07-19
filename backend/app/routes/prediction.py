@@ -24,4 +24,4 @@ def predict(
     request: PredictionRequest,
     current_user: User = Depends(get_current_user)
 ):
-    return predict_traffic(request)
+    return predict_traffic(request) 

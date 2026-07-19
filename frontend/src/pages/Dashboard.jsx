@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
 import DashboardCard from "../components/DashboardCard";
@@ -7,6 +8,8 @@ import Loader from "../components/Loader";
 import { toast } from "react-toastify";
 
 function Dashboard() {
+    const navigate = useNavigate();
+    const role = localStorage.getItem("role");
     const [summary, setSummary] = useState(null);
 
     const [topRoads, setTopRoads] = useState([]);
@@ -108,6 +111,19 @@ function Dashboard() {
         return <Loader />;
     }
 
+    const buttonStyle = {
+        background: "#2563eb",
+        color: "white",
+        border: "none",
+        borderRadius: "12px",
+        padding: "18px",
+        fontSize: "17px",
+        fontWeight: "bold",
+        cursor: "pointer",
+        transition: "0.3s",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
+    };
+
     return (
         <>
             <Navbar />
@@ -167,6 +183,48 @@ function Dashboard() {
                         value={summary.average_vehicle_count}
                         color="#0891b2"
                     />
+                </div>
+
+                <h2 style={{ marginTop: "40px" }}>⚡ Quick Actions</h2>
+
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                        gap: "20px",
+                        marginTop: "20px",  
+                        marginBottom: "40px"
+                    }}
+                >
+                    {role === "admin" && (
+                        <button
+                            onClick={() => navigate("/traffic/add")}
+                            style={buttonStyle}
+                        >
+                            ➕ Add Traffic Record
+                        </button>
+                    )}
+
+                    <button
+                        onClick={() => navigate("/traffic/list")}
+                        style={buttonStyle}
+                    >
+                        📋 Traffic Records
+                    </button>
+
+                    <button
+                        onClick={() => navigate("/analytics")}
+                        style={buttonStyle}
+                    >
+                        📊 Analytics
+                    </button>
+
+                    <button
+                        onClick={() => navigate("/prediction")}
+                        style={buttonStyle}
+                    >
+                        🤖 Traffic Prediction
+                    </button>
                 </div>
 
                 <Charts
