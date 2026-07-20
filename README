@@ -1,154 +1,190 @@
 # Smart Traffic Prediction & Congestion Management System
 
-The Smart Traffic Prediction & Congestion Management System** is an AI-powered traffic management platform designed to monitor real-time traffic conditions, predict congestion using Machine Learning, optimize travel routes, generate intelligent alerts, and provide interactive analytics dashboards. The system aims to reduce traffic congestion, improve travel efficiency, and support smart city transportation initiatives.
+The **Smart Traffic Prediction & Congestion Management System** is an AI-powered web application developed to analyze traffic conditions, predict congestion levels using Machine Learning, and provide traffic insights through an interactive dashboard. The system helps users understand traffic patterns and supports smarter transportation planning.
 
-## Project Objective
+---
 
-The objective of this project is to develop an intelligent traffic management system that can:
+Project Objective
 
-* Monitor real-time traffic conditions
-* Predict traffic congestion using Artificial Intelligence and Machine Learning
-* Analyze traffic flow and peak-hour traffic patterns
-* Recommend optimized travel routes
-* Generate congestion and emergency alerts
-* Visualize traffic insights through interactive dashboards
+The objective of this project is to build an intelligent traffic management system that can:
 
-## Key Features
+- Analyze traffic data collected from different areas.
+- Predict traffic congestion using Machine Learning.
+- Display traffic information through an interactive dashboard.
+- Help users understand traffic conditions for better travel planning.
+- Provide a scalable foundation for future smart city traffic solutions.
 
-* User Authentication & Role-Based Access
-* Real-Time Traffic Monitoring
-* AI-Based Traffic Prediction
-* Congestion Detection
-* Route Optimization & Travel Time Estimation
-* Smart Alert & Notification System
-* Interactive Traffic Analytics Dashboard
-* Machine Learning Prediction Models
-* Historical Traffic Analysis
-* Responsive User Interface
+---
 
-## Project Modules
+Work Completed
 
-### User Management
+1. Project Initialization
+- Created project structure
+- Initialized Git repository
+- Uploaded project to GitHub
+- Configured frontend and backend
 
-* User Registration
-* Secure Login
-* Role-Based Access Control
-* Profile Management
+---
 
-### Traffic Monitoring
+2. Frontend Development
+- Developed the application using React.js
+- Created responsive UI
+- Implemented:
+  - Home Page
+  - Login Page
+  - Registration Page
+  - User Dashboard
+  - Navbar
+  - Footer
+- Connected frontend with backend APIs using Axios
 
-* Live Traffic Data Collection
-* Vehicle Density Monitoring
-* Traffic Status Visualization
+---
 
-### Traffic Prediction
+3. Backend Development
+- Developed REST APIs using FastAPI
+- Organized backend into:
+  - Routes
+  - Services
+  - Schemas
+  - Utilities
+- Configured CORS
+- Implemented modular project architecture
 
-* Machine Learning-Based Congestion Prediction
-* Peak Hour Analysis
-* Traffic Trend Forecasting
+---
 
-### Route Analysis
+4. User Authentication
+Implemented secure authentication using MongoDB.
 
-* Best Route Recommendation
-* Alternate Route Suggestions
-* Estimated Travel Time
+Features:
+- User Registration
+- User Login
+- Password Hashing
+- JWT Authentication
+- Role-Based Access (Admin & Traffic Operator)
 
-### Alert & Notification
+---
 
-* Congestion Alerts
-* Accident Notifications
-* Emergency Route Alerts
+5. MongoDB Integration
+- Connected FastAPI with MongoDB
+- Created Users collection
+- Imported Bangalore Traffic Dataset into MongoDB
+- Successfully stored **8936 traffic records**
 
-### Analytics Dashboard
+---
 
-* Traffic Statistics
-* Daily & Weekly Reports
-* Interactive Charts and Graphs
-* Traffic Heatmaps
+6. Dataset Exploration (EDA)
+Performed Exploratory Data Analysis using Pandas.
 
-### AI Prediction
+Completed:
+- Dataset inspection
+- Missing value analysis
+- Duplicate value checking
+- Statistical summary
+- Column analysis
 
-* Machine Learning Model Training
-* Real-Time Prediction Engine
-* Traffic Pattern Analysis
+Generated graphs for:
+- Traffic Volume by Area
+- Average Speed Distribution
+- Congestion Level Distribution
 
-## Tech Stack
+---
 
-### Frontend
+7. Data Preprocessing
+Performed preprocessing before model training.
 
-* React.js
-* Tailwind CSS
-* HTML5
-* CSS3
-* JavaScript
+Completed:
+- Converted Date into Year, Month and Day
+- Encoded categorical columns
+- Prepared dataset for Machine Learning
 
-### Backend
+---
 
-* FastAPI
-* Python
+8. Machine Learning Model
+Developed a congestion prediction model using **Random Forest Regressor**.
 
-### Database
+Completed:
+- Train-Test Split
+- Model Training
+- Model Evaluation
+- Saved trained model (`traffic_model.pkl`)
+- Saved Label Encoders (`label_encoders.pkl`)
 
-* PostgreSQL
+---
 
-### AI / Machine Learning
+9. Traffic APIs
 
-* TensorFlow
-* Scikit-learn
-* Pandas
-* NumPy
+Implemented APIs for:
 
-### APIs
+### Authentication
+- Register User
+- Login User
 
-* Google Maps API
-* OpenStreetMap API
+### Traffic Module
+- Fetch Available Areas
+- Fetch Area Details
 
-### DevOps
+### Prediction Module
+- Predict Traffic Congestion
 
-* Docker
-* Git & GitHub
+All APIs were successfully tested using Swagger UI.
 
-## Project Structure
+---
 
-```text
-Smart-Traffic-Prediction-Congestion-Management-System/
-│
-├── frontend/
-├── backend/
-├── ml/
-├── database/
-├── api/
-├── docs/
-├── tests/
-├── models/
-├── static/
-├── README.md
-├── LICENSE
-└── .gitignore
-```
+10. Dashboard Features
 
-## Future Enhancements
+Implemented an interactive dashboard with:
 
-* Live CCTV Camera Integration
-* Accident Detection using Computer Vision
-* Emergency Vehicle Priority Management
-* Weather-Based Traffic Prediction
-* Mobile Application (Android & iOS)
-* IoT Sensor Integration
-* Smart Traffic Signal Control
-* Voice-Based Navigation Assistance
-* Cloud Deployment
-* AI-Based Traffic Incident Detection
+- Total Areas
+- Total Dataset Records
+- AI Model Information
+- Database Status
+- Area Selection Dropdown
+- Traffic Details Display
+- AI-Based Congestion Prediction
 
-## Expected Outcomes
+---
 
-* Improved traffic flow and congestion management
-* Reduced travel time through intelligent route optimization
-* Accurate traffic prediction using Machine Learning
-* Enhanced road safety with real-time alerts
-* Data-driven decision making for traffic authorities
-* Better support for smart city transportation systems
+# Current Features
 
-## License
+- User Authentication
+- MongoDB Database Integration
+- Traffic Dataset Management
+- Machine Learning Prediction
+- Traffic Area Selection
+- Area-wise Traffic Details
+- Congestion Prediction
+- Interactive Dashboard
+- REST APIs
+- Swagger Documentation
 
-This project is developed for educational and internship purposes. It can be extended for research and real-world smart city traffic management applications.
+---
+
+# Technology Stack
+
+## Frontend
+- React.js
+- HTML5
+- CSS3
+- JavaScript
+- Axios
+- React Router
+
+## Backend
+- FastAPI
+- Python
+
+## Database
+- MongoDB
+
+## Machine Learning
+- Scikit-learn
+- Random Forest Regressor
+- Pandas
+- NumPy
+- Joblib
+
+## Development Tools
+- Git
+- GitHub
+- VS Code
+- Swagger UI

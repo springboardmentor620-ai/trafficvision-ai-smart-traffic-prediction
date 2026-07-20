@@ -10,7 +10,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-
+import Prediction from "./pages/Prediction";
 function App() {
   return (
     <BrowserRouter>
@@ -31,7 +31,7 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
-
+        <Route path="/prediction" element={<Prediction />} />
         <Route
           path="/user-dashboard"
           element={<UserDashboard />}
