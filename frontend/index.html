@@ -23,6 +23,16 @@
         <form id="loginForm">
           <input type="email" id="loginEmail" placeholder="Email (must be @gmail.com)" required>
           <input type="password" id="loginPassword" placeholder="Password" required>
+          
+          <!-- Role Selection Dropdown on Login -->
+          <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
+            <select id="loginRole" style="flex: 1; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 0.9rem;">
+              <option value="" disabled selected>Select Role</option>
+              <option value="admin">Admin / Traffic Authority</option>
+              <option value="operator">Traffic Operator</option>
+            </select>
+          </div>
+          
           <div style="display: flex; justify-content: space-between; align-items: center; margin: 8px 0;">
             <span class="remember"><input type="checkbox" id="rememberMe"> Remember me</span>
             <span class="forget"><a href="#" style="color: #6366f1; text-decoration: none;">Forgot password?</a></span>
@@ -77,6 +87,7 @@
           <input type="password" id="regPassword" placeholder="Password (min 6 chars, 1 special, 1 number)" required>
           <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required>
           
+          <!-- Role Selection in Register -->
           <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
             <select id="regRole" style="flex: 1; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 0.9rem;">
               <option value="" disabled selected>Select Role</option>
@@ -148,7 +159,14 @@
 
     function saveSession(token, user) {
       if (token) localStorage.setItem('access_token', token);
-      if (user) localStorage.setItem('user', JSON.stringify(user));
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+    }
+
+    function getSession() {
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user) : null;
     }
 
     function clearSession() {
@@ -202,6 +220,7 @@
       
       const email = document.getElementById('loginEmail').value.trim().toLowerCase();
       const password = document.getElementById('loginPassword').value;
+      const role = document.getElementById('loginRole').value; // Get selected role
 
       if (!email || !password) {
         showAlert('loginAlert', 'Please enter both email and password.');
@@ -213,15 +232,20 @@
         return;
       }
 
+      if (!role) {
+        showAlert('loginAlert', 'Please select your role.');
+        return;
+      }
+
       const submitBtn = this.querySelector('button');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
       submitBtn.disabled = true;
 
       try {
-        const result = await apiRequest('/login', 'POST', { email, password });
+        const result = await apiRequest('/login', 'POST', { email, password, role });
         saveSession(result.access_token || result.token, result.user);
-        showAlert('loginAlert', 'Login successful! Redirecting...', 'success');
+        showAlert('loginAlert', `Login successful! Welcome ${result.user.name} (${result.user.role})`, 'success');
         
         setTimeout(() => {
           window.location.href = 'dashboard.html';
@@ -285,7 +309,7 @@
         });
 
         saveSession(result.access_token || result.token, result.user);
-        showAlert('registerAlert', 'Registration successful! Redirecting...', 'success');
+        showAlert('registerAlert', `Registration successful! Welcome ${result.user.name} (${result.user.role})`, 'success');
         
         setTimeout(() => {
           window.location.href = 'dashboard.html';
