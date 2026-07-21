@@ -124,7 +124,6 @@ function Register() {
                 onChange={handleChange}
               >
                 <option value="traffic_operator">Traffic Operator</option>
-                <option value="admin">Admin</option>
                 <option value="commuter">Commuter</option>
               </select>
             </div>

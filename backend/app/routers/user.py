@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.database.connection import get_db
 from app.dependencies.auth import get_current_user, require_admin
 from app.models.user import User
+from app.constants.roles import ADMIN, TRAFFIC_OPERATOR, COMMUTER
 from app.schemas.user import (
     UserRegister,
     UserResponse,
@@ -29,6 +30,18 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=400,
             detail="Email already registered"
+        )
+    
+    allowed_roles = [
+        ADMIN,
+        TRAFFIC_OPERATOR,
+        COMMUTER,
+    ]
+
+    if user.role not in allowed_roles:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid role",
         )
 
     new_user = User(

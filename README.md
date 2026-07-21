@@ -14,7 +14,9 @@ The current implementation includes user authentication using JWT, role-based ac
 
 ## 🚧 Project Status
 
-**Current Milestone:** Week 1 & 2 – Project Initialization, Authentication & Live Traffic Monitoring
+**Completed Milestone:** Week 1 & 2 – Project Initialization, Design Process & Core Setup
+
+**Current Milestone:** Week 3 & 4 – Traffic Prediction & Route Optimization
 
 ### ✅ Completed
 
@@ -33,17 +35,34 @@ The current implementation includes user authentication using JWT, role-based ac
 - Traffic trend chart
 - Live traffic table
 - Git version control and GitHub repository setup
+- Role-specific dashboards (Admin, Traffic Operator, Commuter)
+- Dashboard component refactoring
+- Dashboard layout architecture
+- Public navigation bar
+- Improved Login UI
+- Improved Register UI
+- Dataset selection
+- Data quality assessment
+- Missing value analysis
+- Duplicate analysis
+- Exploratory data analysis
+  - Traffic volume distribution
+  - Area-wise traffic analysis
+  - Speed analysis
+  - Congestion analysis
+  - Weather analysis
+  - Correlation analysis
 
 ### 🚧 Currently In Progress
 
-- Professional Home Page
-- Public Navigation Bar
-- Register Page UI
-- Login Page UI redesign
-- Dashboard UI enhancement
+- Feature Engineering (In Progress)
 
 ### 📅 Upcoming Milestones
 
+- Dataset selection
+- Exploratory Data Analysis (EDA)
+- Data preprocessing
+- Dataset integration with PostgreSQL
 - Traffic CRUD operations
 - AI-based congestion prediction
 - Route optimization
@@ -102,6 +121,11 @@ The primary objectives of TrafficVision AI are:
 - Live Traffic Data Table
 - Logged-in User Information
 - Logout Functionality
+- Dashboard Layout
+- Dashboard Header
+- Dashboard Cards
+- Dashboard Content
+- Role-specific dashboards
 
 #### Development
 
@@ -114,10 +138,6 @@ The primary objectives of TrafficVision AI are:
 
 ### 🚀 Planned Features
 
-- Professional Home Page UI
-- Professional Login & Register UI
-- Responsive Design
-- Dashboard UI Enhancement
 - Traffic Data CRUD Operations
 - Traffic Analytics
 - AI-Based Congestion Prediction
@@ -137,6 +157,22 @@ The primary objectives of TrafficVision AI are:
 | **Authentication**    | JWT, OAuth2 Password Flow, Passlib (bcrypt) |
 | **Development Tools** | Git, GitHub, VS Code, pgAdmin               |
 | **Configuration**     | Python Virtual Environment, python-dotenv   |
+
+## 📊 Machine Learning Workflow
+
+TrafficVision AI follows a structured data science pipeline before integrating machine learning into the application.
+
+1. Dataset Collection
+2. Dataset Evaluation
+3. Exploratory Data Analysis (EDA)
+4. Data Cleaning
+5. Feature Engineering
+6. Data Visualization
+7. PostgreSQL Integration
+8. Machine Learning Model Training
+9. Model Evaluation
+10. Prediction API Development
+11. Dashboard Integration
 
 ## 🏗️ System Architecture
 
@@ -187,8 +223,13 @@ TrafficVision-AI/
 │   ├── src/
 │   │   ├── assets/
 │   │   ├── components/
+│   │   │   └── dashboard/
 │   │   ├── pages/
+│   │   │   ├── admin/
+│   │   │   ├── operator/
+│   │   │   └── commuter/
 │   │   ├── services/
+│   │   ├── styles/
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   │
@@ -490,32 +531,44 @@ The development of TrafficVision AI has been carried out in multiple phases, wit
 
 ---
 
-### 🎨 Current Development Phase
+### 📊 Phase 6: Dashboard Architecture
+
+**Completed**
+
+- Dashboard Layout
+- Dashboard Header
+- Dashboard Cards
+- Dashboard Content
+- Dashboard Refactoring
+
+---
+
+### 📈 Phase 7: Data Engineering
 
 **In Progress**
 
-- Professional Home Page
-- Public Navigation Bar
-- Register Page UI
-- Login Page Redesign
-- Dashboard UI Enhancement
+- Dataset Evaluation
+- Exploratory Data Analysis (EDA)
+- Data Cleaning
+- Feature Engineering
 
 ## 🛠️ Problems Faced & Solutions
 
 During the development of TrafficVision AI, several technical challenges were encountered and resolved. Documenting these issues helps future contributors understand the development process and provides troubleshooting guidance.
 
-| Problem                                         | Solution                                                                                                 |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Python environment setup and PATH configuration | Installed Python correctly, configured the virtual environment, and verified the Python installation.    |
-| PostgreSQL connection issues                    | Configured PostgreSQL correctly and verified the database connection before integrating it with FastAPI. |
-| SQLAlchemy database configuration               | Organized the database layer into a dedicated module and configured session management.                  |
-| Missing database driver (`psycopg`)             | Installed the required PostgreSQL driver and updated the database connection string.                     |
-| Environment variable management                 | Moved sensitive configuration values to a `.env` file using `python-dotenv`.                             |
-| CORS errors between React and FastAPI           | Configured FastAPI CORS middleware to allow frontend requests during development.                        |
-| OAuth2 authentication (422 Validation Error)    | Updated the frontend login request to use the correct `OAuth2PasswordRequestForm` format.                |
-| JWT authentication issues                       | Implemented secure token generation, validation, and protected API endpoints.                            |
-| Frontend–Backend communication                  | Configured Axios with a reusable API service and verified backend connectivity.                          |
-| Dashboard data integration                      | Replaced static frontend data with live data retrieved from backend APIs.                                |
+| Problem                                                | Solution                                                                                                 |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Python environment setup and PATH configuration        | Installed Python correctly, configured the virtual environment, and verified the Python installation.    |
+| PostgreSQL connection issues                           | Configured PostgreSQL correctly and verified the database connection before integrating it with FastAPI. |
+| SQLAlchemy database configuration                      | Organized the database layer into a dedicated module and configured session management.                  |
+| Missing database driver (`psycopg`)                    | Installed the required PostgreSQL driver and updated the database connection string.                     |
+| Environment variable management                        | Moved sensitive configuration values to a `.env` file using `python-dotenv`.                             |
+| CORS errors between React and FastAPI                  | Configured FastAPI CORS middleware to allow frontend requests during development.                        |
+| OAuth2 authentication (422 Validation Error)           | Updated the frontend login request to use the correct `OAuth2PasswordRequestForm` format.                |
+| JWT authentication issues                              | Implemented secure token generation, validation, and protected API endpoints.                            |
+| Frontend–Backend communication                         | Configured Axios with a reusable API service and verified backend connectivity.                          |
+| Dashboard data integration                             | Replaced static frontend data with live data retrieved from backend APIs.                                |
+| Large dashboard component became difficult to maintain | Refactored the dashboard into reusable React components following component-based architecture.          |
 
 ## 🧪 Testing
 
@@ -532,6 +585,7 @@ The following components have been tested during development to ensure the appli
 | Frontend–Backend Integration | ✅ Passed | Verified Axios communication with FastAPI                                 |
 | Dashboard                    | ✅ Passed | Successfully displayed live traffic data from PostgreSQL                  |
 | Authentication Flow          | ✅ Passed | Verified login, token storage, protected routes, and logout functionality |
+| Role-Based Dashboards        | ✅ Passed | Verified navigation and access for Admin, Traffic Operator, and Commuter  |
 
 ## 🗺️ Roadmap
 
@@ -559,6 +613,11 @@ The following enhancements are planned for future phases of TrafficVision AI:
 - Route Optimization
 - Traffic Pattern Analysis
 - Predictive Analytics
+- Dataset Evaluation
+- Exploratory Data Analysis (EDA)
+- Feature Engineering
+- Model Training
+- Model Evaluation
 
 ### 📊 Analytics & Reporting
 
