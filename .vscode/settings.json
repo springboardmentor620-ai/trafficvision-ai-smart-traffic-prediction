@@ -1,5 +1,5 @@
 {
-    "python.analysis.extraPaths": [
-        "./analysis/src"
-    ]
+  "python.analysis.extraPaths": ["./analysis/src", "./backend/app"],
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "python.analysis.autoImportCompletions": true
 }

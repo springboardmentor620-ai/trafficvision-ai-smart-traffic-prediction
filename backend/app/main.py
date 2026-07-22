@@ -8,6 +8,7 @@ from app.models.user import User
 from app.models.traffic import Traffic
 from app.routers.user import router as user_router
 from app.routers.traffic import router as traffic_router
+from app.routers.prediction import router as prediction_router
 
 app = FastAPI()
 
@@ -23,6 +24,7 @@ app.add_middleware(
 
 app.include_router(user_router)
 app.include_router(traffic_router)
+app.include_router(prediction_router)
 
 Base.metadata.create_all(bind=engine)
 

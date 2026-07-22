@@ -52,19 +52,28 @@ The current implementation includes user authentication using JWT, role-based ac
   - Congestion analysis
   - Weather analysis
   - Correlation analysis
+- Feature Engineering
+- Data Preprocessing Pipeline
+- Machine Learning Model Training
+- Decision Tree Model
+- Random Forest Model
+- Extra Trees Model
+- Gradient Boosting Model
+- Model Performance Comparison
+- Hyperparameter Tuning
+- Final Random Forest Model Selection
+- Model Serialization using Joblib
+- FastAPI AI Prediction API
+- Swagger Prediction Endpoint Testing
 
 ### 🚧 Currently In Progress
 
-- Feature Engineering (In Progress)
+- React Prediction Dashboard
+- Google Maps Integration
+- Interactive Traffic Visualization
 
 ### 📅 Upcoming Milestones
 
-- Dataset selection
-- Exploratory Data Analysis (EDA)
-- Data preprocessing
-- Dataset integration with PostgreSQL
-- Traffic CRUD operations
-- AI-based congestion prediction
 - Route optimization
 - Analytics and reporting
 - Real-time notifications
@@ -127,6 +136,16 @@ The primary objectives of TrafficVision AI are:
 - Dashboard Content
 - Role-specific dashboards
 
+#### Artificial Intelligence
+
+- Traffic Congestion Prediction
+- Random Forest Machine Learning Model
+- Feature Engineering Pipeline
+- Automated Data Preprocessing
+- Hyperparameter Tuned Model
+- REST Prediction API
+- Swagger API Testing
+
 #### Development
 
 - Git version control
@@ -160,19 +179,22 @@ The primary objectives of TrafficVision AI are:
 
 ## 📊 Machine Learning Workflow
 
-TrafficVision AI follows a structured data science pipeline before integrating machine learning into the application.
+TrafficVision AI follows a complete machine learning pipeline for congestion prediction.
 
 1. Dataset Collection
-2. Dataset Evaluation
+2. Data Quality Assessment
 3. Exploratory Data Analysis (EDA)
 4. Data Cleaning
 5. Feature Engineering
-6. Data Visualization
-7. PostgreSQL Integration
-8. Machine Learning Model Training
-9. Model Evaluation
-10. Prediction API Development
-11. Dashboard Integration
+6. Data Preprocessing
+7. Model Training
+8. Model Comparison
+9. Hyperparameter Tuning
+10. Model Selection (Random Forest Regressor)
+11. Model Serialization (Joblib)
+12. FastAPI Prediction API
+13. React Dashboard Integration (In Progress)
+14. Google Maps Integration (Planned)
 
 ## 🏗️ System Architecture
 
@@ -459,6 +481,14 @@ These interfaces allow you to:
 | GET    | `/me`    | Authenticated | Retrieve the currently logged-in user's profile |
 | GET    | `/users` | Admin Only    | Retrieve the list of all registered users       |
 
+---
+
+### 🤖 Prediction API
+
+| Method | Endpoint              | Access        | Description                                                      |
+| ------ | --------------------- | ------------- | ---------------------------------------------------------------- |
+| POST   | `/prediction/predict` | Authenticated | Predict traffic congestion using the trained Random Forest model |
+
 ## 📅 Development Progress
 
 The development of TrafficVision AI has been carried out in multiple phases, with each phase focusing on a specific aspect of the system before progressing to the next.
@@ -543,14 +573,22 @@ The development of TrafficVision AI has been carried out in multiple phases, wit
 
 ---
 
-### 📈 Phase 7: Data Engineering
+### 📈 Phase 7: Data Engineering & Machine Learning
 
-**In Progress**
+**Completed**
 
 - Dataset Evaluation
+- Data Quality Assessment
 - Exploratory Data Analysis (EDA)
 - Data Cleaning
 - Feature Engineering
+- Data Preprocessing
+- Machine Learning Model Training
+- Model Comparison
+- Hyperparameter Tuning
+- Random Forest Model Selection
+- Model Deployment
+- FastAPI Prediction API
 
 ## 🛠️ Problems Faced & Solutions
 
@@ -574,18 +612,19 @@ During the development of TrafficVision AI, several technical challenges were en
 
 The following components have been tested during development to ensure the application functions as expected.
 
-| Component                    | Status    | Testing Method                                                            |
-| ---------------------------- | --------- | ------------------------------------------------------------------------- |
-| Backend API                  | ✅ Passed | Tested using FastAPI Swagger UI (`/docs`)                                 |
-| Database Connection          | ✅ Passed | Verified PostgreSQL connectivity and CRUD operations                      |
-| User Registration            | ✅ Passed | Successfully created new user accounts                                    |
-| User Login                   | ✅ Passed | JWT token generated after successful authentication                       |
-| Protected APIs               | ✅ Passed | Verified access using JWT authentication                                  |
-| Role-Based Access Control    | ✅ Passed | Tested Admin and User authorization                                       |
-| Frontend–Backend Integration | ✅ Passed | Verified Axios communication with FastAPI                                 |
-| Dashboard                    | ✅ Passed | Successfully displayed live traffic data from PostgreSQL                  |
-| Authentication Flow          | ✅ Passed | Verified login, token storage, protected routes, and logout functionality |
-| Role-Based Dashboards        | ✅ Passed | Verified navigation and access for Admin, Traffic Operator, and Commuter  |
+| Component                    | Status    | Testing Method                                                                                       |
+| ---------------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| Backend API                  | ✅ Passed | Tested using FastAPI Swagger UI (`/docs`)                                                            |
+| Database Connection          | ✅ Passed | Verified PostgreSQL connectivity and CRUD operations                                                 |
+| User Registration            | ✅ Passed | Successfully created new user accounts                                                               |
+| User Login                   | ✅ Passed | JWT token generated after successful authentication                                                  |
+| Protected APIs               | ✅ Passed | Verified access using JWT authentication                                                             |
+| Role-Based Access Control    | ✅ Passed | Tested Admin and User authorization                                                                  |
+| Frontend–Backend Integration | ✅ Passed | Verified Axios communication with FastAPI                                                            |
+| Dashboard                    | ✅ Passed | Successfully displayed live traffic data from PostgreSQL                                             |
+| Authentication Flow          | ✅ Passed | Verified login, token storage, protected routes, and logout functionality                            |
+| Role-Based Dashboards        | ✅ Passed | Verified navigation and access for Admin, Traffic Operator, and Commuter                             |
+| AI Prediction API            | ✅ Passed | Successfully predicted low, medium and high congestion levels using the deployed Random Forest model |
 
 ## 🗺️ Roadmap
 
