@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>TrafficVision AI — Live Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <h1>TrafficVision AI</h1>
+    </div>
+    <div class="topbar-right">
+      <span id="usernameLabel" class="mono" style="font-size:13px;color:var(--muted);"></span>
+      <span id="roleBadge" class="role-badge"></span>
+      <button class="logout-btn" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="section-header">
+      <h2>Live Traffic Monitoring</h2>
+      <span class="live-tag"><span class="live-dot"></span>refreshing every 5s</span>
+    </div>
+    <div id="roadGrid" class="road-grid">
+      <div class="empty-state">Loading live road data…</div>
+    </div>
+
+    <div id="operatorPanel" class="panel" style="display:none;">
+      <h3>Add a monitored road</h3>
+      <form id="roadForm" class="form-row">
+        <div class="field">
+          <label>Road name</label>
+          <input type="text" id="roadName" placeholder="e.g. Church Street" required />
+        </div>
+        <div class="field">
+          <label>Location</label>
+          <input type="text" id="roadLocation" placeholder="e.g. Sector 6" />
+        </div>
+        <div class="field">
+          <label>Lane capacity</label>
+          <input type="number" id="roadCapacity" value="100" min="1" required />
+        </div>
+        <button type="submit">Add road</button>
+      </form>
+      <p class="hint">Congestion level is computed automatically as vehicle_count / lane_capacity — Traffic Prediction Module will refine this in Milestone 2.</p>
+    </div>
+
+    <div id="adminPanel" class="panel" style="display:none;">
+      <h3>Registered users (User Management Module — RBAC)</h3>
+      <table id="usersTable">
+        <thead><tr><th>Username</th><th>Full name</th><th>Role</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
