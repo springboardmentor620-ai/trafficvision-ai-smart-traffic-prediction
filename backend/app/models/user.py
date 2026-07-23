@@ -22,3 +22,8 @@ class User(Base):
     "TrafficRecord",
     back_populates="owner"
     )
+
+    prediction_history = relationship(
+        "PredictionHistory",
+        back_populates="user"
+    )

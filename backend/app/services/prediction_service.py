@@ -2,6 +2,8 @@ import os
 import joblib
 import numpy as np
 
+from app.models.prediction_history import PredictionHistory
+
 BASE_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..")
 )
@@ -27,14 +29,21 @@ description_encoder = joblib.load(
 )
 
 
-def predict_traffic(data):
+def predict_traffic(data, db, current_user):
 
+    print("Supported Holidays:")
+    print(holiday_encoder.classes_)
 
-    holiday = holiday_encoder.transform([data.holiday])[0]
+    holiday = holiday_encoder.transform(
+        [data.holiday]
+    )[0]
 
     weather = weather_encoder.transform(
         [data.weather_main]
     )[0]
+
+    print("Supported Weather Descriptions:")
+    print(description_encoder.classes_)
 
     description = description_encoder.transform(
         [data.weather_description]
@@ -56,6 +65,43 @@ def predict_traffic(data):
 
     prediction = model.predict(features)
 
+    predicted_value = int(prediction[0])
+
+    if predicted_value < 2500:
+        congestion = "Low"
+        route = "Current Route"
+    elif predicted_value < 4500:
+        congestion = "Medium"
+        route = "Inner Ring Road"
+    else:
+        congestion = "High"
+        route = "Outer Ring Road"
+
+    history = PredictionHistory(
+        user_id=current_user.id,
+        holiday=data.holiday,
+        temp=data.temp,
+        rain_1h=data.rain_1h,
+        snow_1h=data.snow_1h,
+        clouds_all=data.clouds_all,
+        weather_main=data.weather_main,
+        weather_description=data.weather_description,
+        hour=data.hour,
+        day=data.day,
+        month=data.month,
+        weekday=data.weekday,
+        distance=data.distance,
+        predicted_traffic=predicted_value,
+        congestion=congestion,
+        recommended_route=route
+    )
+
+    db.add(history)
+    db.commit()
+    db.refresh(history)
+
     return {
-        "predicted_traffic": int(prediction[0])
+        "predicted_traffic": predicted_value,
+        "congestion": congestion,
+        "recommended_route": route
     }

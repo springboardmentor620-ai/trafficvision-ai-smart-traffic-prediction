@@ -1,17 +1,23 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
-console.log("NEW LOGIN CODE RUNNING");
+import "../styles/auth.css";
 
 function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+
     const navigate = useNavigate();
 
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+
     const login = async () => {
+
+        setLoading(true);
+
         try {
+
             const formData = new URLSearchParams({
                 username: email,
                 password: password
@@ -27,7 +33,6 @@ function Login() {
                 }
             );
 
-            // Save JWT token
             localStorage.setItem(
                 "access_token",
                 response.data.access_token
@@ -38,54 +43,105 @@ function Login() {
                 response.data.role
             );
 
-            localStorage.setItem(
-                "role",
-                response.data.role
-            );
-
-            toast.success("Login Successful!");
+            toast.success("Welcome back!");
 
             navigate("/dashboard");
 
         } catch (error) {
-            console.log(error.response);
 
-            if (error.response) {
-                console.log(error.response.data);
-                alert(JSON.stringify(error.response.data));
-            } else {
-                console.log(error);
-            }
+            toast.error(
+                error.response?.data?.detail ||
+                "Invalid email or password"
+            );
+
+        } finally {
+
+            setLoading(false);
+
         }
+
     };
 
     return (
-        <div style={{ marginTop: "80px", textAlign: "center" }}>
-            <h1>🚦 TrafficVision AI</h1>
 
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
+        <div className="auth-container">
 
-            <br /><br />
+            <div className="auth-card">
 
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
+                <div className="logo">
+                    🚦
+                </div>
 
-            <br /><br />
+                <h1 className="title">
+                    TrafficVision AI
+                </h1>
 
-            <button onClick={login}>
-                Login
-            </button>
+                <p className="subtitle">
+                    Smart Traffic Prediction System
+                </p>
+
+                <div className="input-group">
+
+                    <label>Email</label>
+
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") login();
+                        }}
+                    />
+
+                </div>
+
+                <div className="input-group">
+
+                    <label>Password</label>
+
+                    <input
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") login();
+                        }}
+                    />
+
+                </div>
+
+                <button
+                    className="auth-btn"
+                    onClick={login}
+                    disabled={loading}
+                >
+
+                    {loading
+                        ? "Logging in..."
+                        : "Login"}
+
+                </button>
+
+                <div className="auth-link">
+
+                    Don't have an account?
+
+                    <br /><br />
+
+                    <Link to="/register">
+                        Create Account
+                    </Link>
+
+                </div>
+
+            </div>
+
         </div>
+
     );
+
 }
 
 export default Login;

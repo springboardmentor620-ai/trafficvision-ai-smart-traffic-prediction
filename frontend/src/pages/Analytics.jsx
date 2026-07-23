@@ -1,33 +1,29 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
-import DashboardCard from "../components/DashboardCard";
-import Loader from "../components/Loader";
-import { toast } from "react-toastify";
-
 import {
     ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell,
+    Tooltip,
+    Legend,
     BarChart,
     Bar,
     XAxis,
     YAxis,
     CartesianGrid,
-    Tooltip,
-    PieChart,
-    Pie,
-    Cell,
-    Legend,
     LineChart,
     Line
 } from "recharts";
 
 const COLORS = [
     "#2563eb",
-    "#16a34a",
-    "#dc2626",
+    "#22c55e",
     "#f59e0b",
-    "#7c3aed",
-    "#0891b2"
+    "#ef4444",
+    "#8b5cf6",
+    "#06b6d4"
 ];
 
 function Analytics() {
@@ -44,56 +40,71 @@ function Analytics() {
     });
 
     useEffect(() => {
-        loadData();
+
+        loadSummary();
+        loadWeather();
+        loadHoliday();
+        loadHourly();
+
     }, []);
 
-    const loadData = async () => {
-        try {
+    const loadSummary = async () => {
 
-            const [
-                summaryRes,
-                weatherRes,
-                holidayRes,
-                hourlyRes
-            ] = await Promise.all([
+        const response = await api.get(
+            "/analytics/summary",
+            getAuthHeader()
+        );
 
-                api.get(
-                    "/analytics/summary",
-                    getAuthHeader()
-                ),
+        setSummary(response.data);
 
-                api.get(
-                    "/analytics/weather",
-                    getAuthHeader()
-                ),
-
-                api.get(
-                    "/analytics/holiday",
-                    getAuthHeader()
-                ),
-
-                api.get(
-                    "/analytics/hourly",
-                    getAuthHeader()
-                )
-
-            ]);
-
-            setSummary(summaryRes.data);
-            setWeather(weatherRes.data);
-            setHoliday(holidayRes.data);
-            setHourly(hourlyRes.data);
-
-        }
-        catch (error) {
-            console.log(error);
-            toast.error("Failed to load analytics.");
-        }
     };
 
-    if (!summary) {
-        return <Loader />;
-    }
+    const loadWeather = async () => {
+
+        const response = await api.get(
+            "/analytics/weather",
+            getAuthHeader()
+        );
+
+        setWeather(response.data);
+
+    };
+
+    const loadHoliday = async () => {
+
+        const response = await api.get(
+            "/analytics/holiday",
+            getAuthHeader()
+        );
+
+        setHoliday(response.data);
+
+    };
+
+    const loadHourly = async () => {
+
+        const response = await api.get(
+            "/analytics/hourly",
+            getAuthHeader()
+        );
+
+        setHourly(response.data);
+
+    };
+
+    if (!summary)
+        return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
+
+
+    const cardStyle = {
+        background: "linear-gradient(135deg,#2563eb,#1e40af)",
+        color: "white",
+        padding: "25px",
+        borderRadius: "18px",
+        textAlign: "center",
+        boxShadow: "0 10px 25px rgba(0,0,0,.15)",
+        transition: "0.3s"
+    };
 
     return (
         <>
@@ -107,108 +118,158 @@ function Analytics() {
                 }}
             >
 
-                <h1>📊 Traffic Analytics Dashboard</h1>
+                <>
+                    <h1
+                        style={{
+                            color: "#1e3a8a",
+                            marginBottom: "5px",
+                            fontSize: "34px",
+                            fontWeight: "700"
+                        }}
+                    >
+                        📊 Traffic Analytics Dashboard
+                    </h1>
 
-                <hr />
+                    <p
+                        style={{
+                            color: "#666",
+                            marginBottom: "35px",
+                            fontSize: "17px"
+                        }}
+                    >
+                        Visual insights of traffic patterns based on weather, holidays and time.
+                    </p>
+                </>
 
                 <div
                     style={{
-                        display: "flex",
-                        gap: "20px",
-                        flexWrap: "wrap",
-                        marginTop: "25px",
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+                        gap: "25px",
+                        marginBottom: "45px"
+                    }}
+                >
+
+                    <div style={cardStyle}>
+                        <h3>📄 Total Records</h3>
+                        <h1>{summary.total_records}</h1>
+                    </div>
+
+                    <div style={cardStyle}>
+                        <h3>🚗 Average Traffic</h3>
+                        <h1>{summary.average_traffic}</h1>
+                    </div>
+
+                    <div style={cardStyle}>
+                        <h3>📈 Maximum Traffic</h3>
+                        <h1>{summary.maximum_traffic}</h1>
+                    </div>
+
+                    <div style={cardStyle}>
+                        <h3>📉 Minimum Traffic</h3>
+                        <h1>{summary.minimum_traffic}</h1>
+                    </div>
+
+                </div>
+
+                <div
+                    style={{
+                        background: "white",
+                        padding: "25px",
+                        borderRadius: "18px",
+                        boxShadow: "0 10px 25px rgba(0,0,0,.08)",
                         marginBottom: "35px"
                     }}
                 >
 
-                    <DashboardCard
-                        title="Total Records"
-                        value={summary.total_records}
-                        color="#2563eb"
-                    />
+                <h2
+                    style={{
+                        color: "#1e3a8a",
+                        marginBottom: "20px"
+                    }}
+                >
+                🌦 Weather Analysis
+                </h2>
 
-                    <DashboardCard
-                        title="Average Traffic"
-                        value={summary.average_traffic}
-                        color="#16a34a"
-                    />
-
-                    <DashboardCard
-                        title="Maximum Traffic"
-                        value={summary.maximum_traffic}
-                        color="#dc2626"
-                    />
-
-                    <DashboardCard
-                        title="Minimum Traffic"
-                        value={summary.minimum_traffic}
-                        color="#7c3aed"
-                    />
-
-                </div>
-
-                <h2>Traffic by Weather</h2>
-
-                <ResponsiveContainer width="100%" height={320}>
+                <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={weather}>
-                        <CartesianGrid strokeDasharray="3 3"/>
-                        <XAxis dataKey="weather"/>
-                        <YAxis/>
-                        <Tooltip/>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="weather" />
+                        <YAxis />
+                        <Tooltip />
+
                         <Bar
                             dataKey="average_traffic"
                             fill="#2563eb"
                         />
                     </BarChart>
                 </ResponsiveContainer>
+                </div>
 
-                <br/><br/>
+                <div
+    style={{
+        background: "white",
+        padding: "25px",
+        borderRadius: "18px",
+        boxShadow: "0 10px 25px rgba(0,0,0,.08)",
+        marginBottom: "35px"
+    }}
+>
+    <h2
+        style={{
+            color: "#1e3a8a",
+            marginBottom: "20px"
+        }}
+    >
+        🎉 Holiday Analysis
+    </h2>
 
-                <h2>Holiday Traffic Distribution</h2>
+    <ResponsiveContainer width="100%" height={350}>
+        <PieChart>
+            <Pie
+                data={holiday}
+                dataKey="average_traffic"
+                nameKey="holiday"
+                outerRadius={120}
+                label
+            >
+                {holiday.map((item, index) => (
+                    <Cell
+                        key={index}
+                        fill={COLORS[index % COLORS.length]}
+                    />
+                ))}
+            </Pie>
+
+            <Tooltip />
+            <Legend />
+        </PieChart>
+    </ResponsiveContainer>
+</div>
+
+            <div
+                style={{
+                    background: "white",
+                    padding: "25px",
+                    borderRadius: "18px",
+                    boxShadow: "0 10px 25px rgba(0,0,0,.08)"
+                }}
+            >
+                <h2
+                    style={{
+                        color: "#1e3a8a",
+                        marginBottom: "20px"
+                    }}
+                >
+                    🕒 Hourly Traffic
+                </h2>
 
                 <ResponsiveContainer width="100%" height={350}>
-                    <PieChart>
-
-                        <Pie
-                            data={holiday}
-                            dataKey="average_traffic"
-                            nameKey="holiday"
-                            outerRadius={120}
-                            label
-                        >
-
-                            {
-                                holiday.map((entry,index)=>(
-                                    <Cell
-                                        key={index}
-                                        fill={COLORS[index % COLORS.length]}
-                                    />
-                                ))
-                            }
-
-                        </Pie>
-
-                        <Tooltip/>
-                        <Legend/>
-
-                    </PieChart>
-                </ResponsiveContainer>
-
-                <br/><br/>
-
-                <h2>Hourly Traffic Trend</h2>
-
-                <ResponsiveContainer width="100%" height={350}>
-
                     <LineChart data={hourly}>
-
-                        <CartesianGrid strokeDasharray="3 3"/>
-
-                        <XAxis dataKey="hour"/>
-
-                        <YAxis/>
-
-                        <Tooltip/>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="hour" />
+                        <YAxis />
+                        <Tooltip />
 
                         <Line
                             type="monotone"
@@ -216,10 +277,9 @@ function Analytics() {
                             stroke="#dc2626"
                             strokeWidth={3}
                         />
-
                     </LineChart>
-
                 </ResponsiveContainer>
+            </div>
 
             </div>
         </>

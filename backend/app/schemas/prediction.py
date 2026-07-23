@@ -13,6 +13,7 @@ class PredictionRequest(BaseModel):
     day: int
     month: int
     weekday: int
+    distance: float
 
 
 class PredictionResponse(BaseModel):

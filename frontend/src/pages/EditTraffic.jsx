@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import api from "../services/api";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import api from "../services/api";
 import { toast } from "react-toastify";
 
 function EditTraffic() {
+
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -13,7 +14,7 @@ function EditTraffic() {
         road_name: "",
         vehicle_count: "",
         average_speed: "",
-        congestion_level: ""
+        congestion_level: "Low"
     });
 
     const getAuthHeader = () => ({
@@ -22,12 +23,9 @@ function EditTraffic() {
         }
     });
 
-    useEffect(() => {
-        loadTraffic();
-    }, []);
-
     const loadTraffic = async () => {
         try {
+
             const response = await api.get(
                 `/traffic/${id}`,
                 getAuthHeader()
@@ -36,109 +34,234 @@ function EditTraffic() {
             setTraffic(response.data);
 
         } catch (error) {
+
             console.log(error);
-            toast.error("Failed to load traffic record.");
+            toast.error("Unable to load traffic record.");
+
         }
     };
 
+    useEffect(() => {
+        loadTraffic();
+    }, []);
+
+    const handleChange = (e) => {
+
+        setTraffic({
+            ...traffic,
+            [e.target.name]:
+                e.target.name === "vehicle_count" ||
+                e.target.name === "average_speed"
+                    ? Number(e.target.value)
+                    : e.target.value
+        });
+
+    };
+
     const updateTraffic = async () => {
+
         try {
+
             await api.put(
                 `/traffic/${id}`,
                 traffic,
                 getAuthHeader()
             );
 
-            toast.success("Traffic record updated successfully!");
+            toast.success("Traffic record updated.");
 
-            setTimeout(() => {
-                navigate("/traffic/list");
-            }, 1500);
+            navigate("/traffic/list");
 
         } catch (error) {
+
             console.log(error);
-            toast.error("Failed to update traffic record.");
+            toast.error("Update failed.");
+
         }
+
     };
 
     return (
         <>
             <Navbar />
 
-            <div style={{ padding: "30px" }}>
-                <h1>Edit Traffic Record</h1>
+            <div
+                style={{
+                    maxWidth: "750px",
+                    margin: "40px auto",
+                    background: "white",
+                    padding: "35px",
+                    borderRadius: "20px",
+                    boxShadow: "0 12px 30px rgba(0,0,0,.12)"
+                }}
+            >
+
+                <h1
+                    style={{
+                        textAlign: "center",
+                        color: "#1e3a8a",
+                        marginBottom: "10px"
+                    }}
+                >
+                    ✏️ Edit Traffic Record
+                </h1>
+
+                <p
+                    style={{
+                        textAlign: "center",
+                        color: "#666",
+                        marginBottom: "30px"
+                    }}
+                >
+                    Update traffic information and save the latest details.
+                </p>
+
+                <label>Location</label>
 
                 <input
-                    placeholder="Location"
+                    name="location"
                     value={traffic.location}
-                    onChange={(e) =>
-                        setTraffic({
-                            ...traffic,
-                            location: e.target.value
-                        })
-                    }
+                    onChange={handleChange}
+                    style={{
+                        width: "100%",
+                        padding: "14px",
+                        marginTop: "8px",
+                        borderRadius: "10px",
+                        border: "1px solid #d1d5db",
+                        fontSize: "15px",
+                        outline: "none",
+                        boxSizing: "border-box"
+                    }}
                 />
 
                 <br /><br />
 
+                <label>Road Name</label>
+
                 <input
-                    placeholder="Road Name"
+                    name="road_name"
                     value={traffic.road_name}
-                    onChange={(e) =>
-                        setTraffic({
-                            ...traffic,
-                            road_name: e.target.value
-                        })
-                    }
+                    onChange={handleChange}
+                    style={{
+                        width: "100%",
+                        padding: "14px",
+                        marginTop: "8px",
+                        borderRadius: "10px",
+                        border: "1px solid #d1d5db",
+                        fontSize: "15px",
+                        outline: "none",
+                        boxSizing: "border-box"
+                    }}
                 />
 
                 <br /><br />
 
+                <label>Vehicle Count</label>
+
                 <input
                     type="number"
-                    placeholder="Vehicle Count"
+                    name="vehicle_count"
                     value={traffic.vehicle_count}
-                    onChange={(e) =>
-                        setTraffic({
-                            ...traffic,
-                            vehicle_count: Number(e.target.value)
-                        })
-                    }
+                    onChange={handleChange}
+                    style={{
+                        width: "100%",
+                        padding: "14px",
+                        marginTop: "8px",
+                        borderRadius: "10px",
+                        border: "1px solid #d1d5db",
+                        fontSize: "15px",
+                        outline: "none",
+                        boxSizing: "border-box"
+                    }}
                 />
 
                 <br /><br />
+
+                <label>Average Speed</label>
 
                 <input
                     type="number"
-                    placeholder="Average Speed"
+                    name="average_speed"
                     value={traffic.average_speed}
-                    onChange={(e) =>
-                        setTraffic({
-                            ...traffic,
-                            average_speed: Number(e.target.value)
-                        })
-                    }
+                    onChange={handleChange}
+                    style={{
+                        width: "100%",
+                        padding: "14px",
+                        marginTop: "8px",
+                        borderRadius: "10px",
+                        border: "1px solid #d1d5db",
+                        fontSize: "15px",
+                        outline: "none",
+                        boxSizing: "border-box"
+                    }}
                 />
 
                 <br /><br />
 
-                <input
-                    placeholder="Congestion Level"
+                <label>Congestion Level</label>
+
+                <select
+                    name="congestion_level"
                     value={traffic.congestion_level}
-                    onChange={(e) =>
-                        setTraffic({
-                            ...traffic,
-                            congestion_level: e.target.value
-                        })
-                    }
-                />
+                    onChange={handleChange}
+                    style={{
+                        width: "100%",
+                        padding: "14px",
+                        marginTop: "8px",
+                        borderRadius: "10px",
+                        border: "1px solid #d1d5db",
+                        fontSize: "15px"
+                    }}
+                >
+                    <option>Low</option>
+                    <option>Medium</option>
+                    <option>High</option>
+                </select>
 
                 <br /><br />
 
-                <button onClick={updateTraffic}>
-                    Update
-                </button>
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "15px",
+                        marginTop: "25px"
+                    }}
+                >
+                    <button
+                        onClick={() => navigate("/traffic/list")}
+                        style={{
+                            flex: 1,
+                            padding: "14px",
+                            background: "#6b7280",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "10px",
+                            cursor: "pointer",
+                            fontWeight: "bold"
+                        }}
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        onClick={updateTraffic}
+                        style={{
+                            flex: 2,
+                            padding: "14px",
+                            background: "#2563eb",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "10px",
+                            cursor: "pointer",
+                            fontWeight: "bold"
+                        }}
+                    >
+                        💾 Update Record
+                    </button>
+                </div>  
+
             </div>
+
         </>
     );
 }

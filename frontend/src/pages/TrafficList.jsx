@@ -113,7 +113,26 @@ function TrafficList() {
                     minHeight: "100vh"
                 }}
             >
-                <h1>🚦 Traffic Records</h1>
+                <>
+                    <h1
+                        style={{
+                            color: "#1e3a8a",
+                            marginBottom: "5px"
+                        }}
+                    >
+                        🚦 Traffic Records
+                    </h1>
+
+                    <p
+                        style={{
+                            color: "#666",
+                            marginBottom: "30px",
+                            fontSize: "17px"
+                        }}
+                    >
+                        Manage, search, edit and export traffic records.
+                    </p>
+                </>
 
                 <div
                     style={{
@@ -129,28 +148,47 @@ function TrafficList() {
                         type="text"
                         placeholder="🔍 Search by Location or Road..."
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        style={{
-                            width: "350px",
-                            padding: "12px 15px",
-                            borderRadius: "8px",
-                            border: "1px solid #ccc",
-                            outline: "none",
-                            fontSize: "15px"
+                        onFocus={(e) => {
+                            e.target.style.border = "2px solid #2563eb";
                         }}
-                    />
+
+                        onBlur={(e) => {
+                            e.target.style.border = "1px solid #d1d5db";
+                        }}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                        style={{
+                            width: "380px",
+                            padding: "14px 18px",
+                            borderRadius: "12px",
+                            border: "1px solid #d1d5db",
+                            outline: "none",
+                            fontSize: "15px",
+                            background: "white",
+                            boxShadow: "0 3px 10px rgba(0,0,0,.08)"
+                        }}
+                    />  
 
                     <CSVLink
                         data={csvData}
                         filename="traffic_records.csv"
+                        onMouseEnter={(e) => {
+                            e.target.style.background = "#15803d";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = "#16a34a";
+                        }}
                         style={{
                             background: "#16a34a",
                             color: "white",
-                            padding: "12px 20px",
+                            padding: "14px 24px",
+                            borderRadius: "12px",
                             textDecoration: "none",
-                            borderRadius: "8px",
                             fontWeight: "bold",
-                            boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
+                            boxShadow: "0 6px 15px rgba(0,0,0,.12)",
+                            transition: "0.3s"
                         }}
                     >
                         ⬇ Download CSV
@@ -159,59 +197,59 @@ function TrafficList() {
 
                 <table
                     style={{
-                        width: "100%",
-                        borderCollapse: "collapse",
-                        background: "white",
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                        boxShadow: "0 6px 18px rgba(0,0,0,0.12)"
+                        width:"100%",
+                        borderCollapse:"collapse",
+                        background:"white",
+                        borderRadius:"18px",
+                        overflow:"hidden",
+                        boxShadow:"0 12px 30px rgba(0,0,0,.10)"
                     }}
                 >
                     <thead
                         style={{
-                            background: "#2563eb",
+                            background: "#1e3a8a",
                             color: "white"
                         }}
                     >
                         <tr>
-                            <th style={{ padding: "15px" }}>ID</th>
+                            <th style={{ padding: "18px", fontSize: "16px" }}>ID</th>
 
                             <th
-                                style={{ padding: "15px", cursor: "pointer" }}
+                                style={{ padding: "18px", cursor: "pointer" }}
                                 onClick={() => sortRecords("location")}
                             >
                                 Location ⇅
                             </th>
 
                             <th
-                                style={{ padding: "15px", cursor: "pointer" }}
+                                style={{ padding: "18px", cursor: "pointer" }}
                                 onClick={() => sortRecords("road_name")}
                             >
                                 Road ⇅
                             </th>
 
                             <th
-                                style={{ padding: "15px", cursor: "pointer" }}
+                                style={{ padding: "18px", cursor: "pointer" }}
                                 onClick={() => sortRecords("vehicle_count")}
                             >
                                 Vehicles ⇅
                             </th>
 
                             <th
-                                style={{ padding: "15px", cursor: "pointer" }}
+                                style={{ padding: "18px", cursor: "pointer" }}
                                 onClick={() => sortRecords("average_speed")}
                             >
                                 Speed ⇅
                             </th>
 
                             <th
-                                style={{ padding: "15px", cursor: "pointer" }}
+                                style={{ padding: "18px", cursor: "pointer" }}
                                 onClick={() => sortRecords("congestion_level")}
                             >
                                 Congestion ⇅
                             </th>
 
-                            <th style={{ padding: "15px" }}>
+                            <th style={{ padding: "18px" }}>
                                 Actions
                             </th>
                         </tr>
@@ -231,30 +269,40 @@ function TrafficList() {
                                     background:
                                         index % 2 === 0
                                             ? "#ffffff"
-                                            : "#f9fafb"
+                                            : "#f9fafb",
+                                    transition: "0.3s"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = "#eef4ff";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background =
+                                        index % 2 === 0
+                                            ? "#ffffff"
+                                            : "#f9fafb";
                                 }}
                             >
-                                <td style={{ padding: "15px" }}>
+                                <td style={{ padding: "18px" }}>
                                     {record.id}
                                 </td>
 
-                                <td style={{ padding: "15px" }}>
+                                <td style={{ padding: "18px" }}>
                                     {record.location}
                                 </td>
 
-                                <td style={{ padding: "15px" }}>
+                                <td style={{ padding: "18px" }}>
                                     {record.road_name}
                                 </td>
 
-                                <td style={{ padding: "15px" }}>
+                                <td style={{ padding: "18px" }}>
                                     {record.vehicle_count}
                                 </td>
 
-                                <td style={{ padding: "15px" }}>
+                                <td style={{ padding: "18px" }}>
                                     {record.average_speed} km/h
                                 </td>
 
-                                <td style={{ padding: "15px" }}>
+                                <td style={{ padding: "18px" }}>
                                     <span
                                         style={{
                                             padding: "6px 14px",
@@ -275,42 +323,58 @@ function TrafficList() {
 
                                 <td
                                     style={{
-                                        padding: "15px",
-                                        textAlign: "center"
+                                        padding: "18px",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        gap: "10px"
                                     }}
                                 >
                                     <button
                                         onClick={() =>
                                             navigate(`/traffic/edit/${record.id}`)
                                         }
+                                        onMouseEnter={(e) => {
+                                            e.target.style.background = "#1d4ed8";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.background = "#2563eb";
+                                        }}
                                         style={{
                                             background: "#2563eb",
                                             color: "white",
                                             border: "none",
-                                            padding: "8px 16px",
-                                            borderRadius: "6px",
+                                            padding: "10px 18px",
+                                            borderRadius: "8px",
                                             cursor: "pointer",
-                                            marginRight: "10px",
-                                            fontWeight: "bold"
+                                            fontWeight: "bold",
+                                            transition: "0.3s",
                                         }}
                                     >
-                                        Edit
+                                        ✏️ Edit
                                     </button>
 
                                     {role === "admin" && (
                                         <button
                                             onClick={() => deleteRecord(record.id)}
+                                            onMouseEnter={(e) => {
+                                                e.target.style.background = "#b91c1c";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.background = "#dc2626";
+                                            }}
                                             style={{
                                                 background: "#dc2626",
                                                 color: "white",
                                                 border: "none",
-                                                padding: "8px 16px",
-                                                borderRadius: "6px",
+                                                padding: "10px 18px",
+                                                borderRadius: "8px",
                                                 cursor: "pointer",
-                                                fontWeight: "bold"
+                                                fontWeight: "bold",
+                                                transition: "0.3s"
                                             }}
                                         >
-                                            Delete
+                                            🗑 Delete
                                         </button>
                                     )}
                                 </td>
@@ -320,7 +384,7 @@ function TrafficList() {
                 </table>
                 <div
                     style={{
-                        marginTop: "25px",
+                        marginTop: "30px",
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
@@ -330,29 +394,49 @@ function TrafficList() {
                     <button
                         disabled={currentPage === 1}
                         onClick={() => setCurrentPage(currentPage - 1)}
+                        onMouseEnter={(e) => {
+                            if (!e.target.disabled)
+                                e.target.style.background = "#1d4ed8";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = "#1e40af";
+                        }}
                         style={{
                             padding: "10px 18px",
-                            background: "#2563eb",
+                            background: "#1e40af",
                             color: "white",
                             border: "none",
                             borderRadius: "6px",
                             cursor: "pointer",
-                            opacity: currentPage === 1 ? 0.5 : 1
+                            opacity: currentPage === 1 ? 0.5 : 1,
+                            transition: "0.3s"
                         }}
                     >
                         Previous
                     </button>
 
-                    <h3>
+                    <h3
+                        style={{
+                            color: "#1e3a8a",
+                            margin: 0
+                        }}
+                    >
                         Page {currentPage} of {totalPages || 1}
                     </h3>
 
                     <button
                         disabled={currentPage === totalPages || totalPages === 0}
                         onClick={() => setCurrentPage(currentPage + 1)}
+                        onMouseEnter={(e) => {
+                            if (!e.target.disabled)
+                                e.target.style.background = "#1d4ed8";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = "#1e40af";
+                        }}
                         style={{
                             padding: "10px 18px",
-                            background: "#2563eb",
+                            background: "#1e40af",
                             color: "white",
                             border: "none",
                             borderRadius: "6px",
@@ -360,7 +444,8 @@ function TrafficList() {
                             opacity:
                                 currentPage === totalPages || totalPages === 0
                                     ? 0.5
-                                    : 1
+                                    : 1,
+                            transition: "0.3s"
                         }}
                     >
                         Next

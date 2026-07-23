@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
 
 function TrafficForm() {
+    const navigate = useNavigate();
+
+    const [loading, setLoading] = useState(false);
+
     const [traffic, setTraffic] = useState({
         location: "",
         road_name: "",
@@ -11,6 +16,18 @@ function TrafficForm() {
         average_speed: "",
         congestion_level: "Low"
     });
+
+    const inputStyle = {
+        width: "100%",
+        padding: "14px",
+        marginTop: "8px",
+        borderRadius: "10px",
+        border: "1px solid #d1d5db",
+        fontSize: "15px",
+        boxSizing: "border-box",
+        outline: "none",
+        transition: "0.3s"
+    };
 
     const handleChange = (e) => {
         setTraffic({
@@ -24,7 +41,21 @@ function TrafficForm() {
     };
 
     const submitTraffic = async () => {
+
+        if (
+            !traffic.location.trim() ||
+            !traffic.road_name.trim() ||
+            traffic.vehicle_count <= 0 ||
+            traffic.average_speed <= 0
+        ) {
+            toast.error("Please fill all fields correctly.");
+            return;
+        }
+
         try {
+
+            setLoading(true);
+
             await api.post(
                 "/traffic",
                 traffic,
@@ -35,19 +66,19 @@ function TrafficForm() {
                 }
             );
 
-            toast.success("Traffic record added successfully!");
+            toast.success("Traffic Record Added Successfully!");
 
-            setTraffic({
-                location: "",
-                road_name: "",
-                vehicle_count: "",
-                average_speed: "",
-                congestion_level: "Low"
-            });
+            navigate("/traffic/list");
 
         } catch (error) {
+
             console.log(error);
             toast.error("Failed to add traffic record.");
+
+        } finally {
+
+            setLoading(false);
+
         }
     };
 
@@ -57,80 +88,130 @@ function TrafficForm() {
 
             <div
                 style={{
-                    maxWidth: "700px",
-                    margin: "40px auto",
-                    background: "white",
-                    padding: "30px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+                    minHeight: "100vh",
+                    background: "#f5f7fb",
+                    padding: "40px"
                 }}
             >
-                <h1 style={{ textAlign: "center" }}>
-                    🚦 Add Traffic Record
-                </h1>
-
-                <label>Location</label>
-                <input
-                    name="location"
-                    value={traffic.location}
-                    onChange={handleChange}
-                />
-
-                <br /><br />
-
-                <label>Road Name</label>
-                <input
-                    name="road_name"
-                    value={traffic.road_name}
-                    onChange={handleChange}
-                />
-
-                <br /><br />
-
-                <label>Vehicle Count</label>
-                <input
-                    type="number"
-                    name="vehicle_count"
-                    value={traffic.vehicle_count}
-                    onChange={handleChange}
-                />
-
-                <br /><br />
-
-                <label>Average Speed (km/h)</label>
-                <input
-                    type="number"
-                    name="average_speed"
-                    value={traffic.average_speed}
-                    onChange={handleChange}
-                />
-
-                <br /><br />
-
-                <label>Congestion Level</label>
-                <select
-                    name="congestion_level"
-                    value={traffic.congestion_level}
-                    onChange={handleChange}
-                >
-                    <option>Low</option>
-                    <option>Medium</option>
-                    <option>High</option>
-                </select>
-
-                <br /><br />
-
-                <button
-                    onClick={submitTraffic}
+                <div
                     style={{
-                        width: "100%",
-                        background: "#2563eb",
-                        color: "white",
-                        fontSize: "16px"
+                        maxWidth: "750px",
+                        margin: "0 auto",
+                        background: "white",
+                        borderRadius: "18px",
+                        padding: "35px",
+                        boxShadow: "0 12px 30px rgba(0,0,0,.08)"
                     }}
                 >
-                    Add Traffic Record
-                </button>
+                    <h1
+                        style={{
+                            textAlign: "center",
+                            color: "#1e3a8a",
+                            marginBottom: "10px"
+                        }}
+                    >
+                        🚦 Add Traffic Record
+                    </h1>
+
+                    <p
+                        style={{
+                            textAlign: "center",
+                            color: "#6b7280",
+                            marginBottom: "35px"
+                        }}
+                    >
+                        Enter the traffic details below to add a new traffic record.
+                    </p>
+
+                    <label><b>📍 Location</b></label>
+
+                    <input
+                        style={inputStyle}
+                        placeholder="Ex: Hyderabad"
+                        name="location"
+                        value={traffic.location}
+                        onChange={handleChange}
+                    />
+
+                    <br /><br />
+
+                    <label><b>🛣 Road Name</b></label>
+
+                    <input
+                        style={inputStyle}
+                        placeholder="Ex: ORR Road"
+                        name="road_name"
+                        value={traffic.road_name}
+                        onChange={handleChange}
+                    />
+
+                    <br /><br />
+
+                    <label><b>🚗 Vehicle Count</b></label>
+
+                    <input
+                        style={inputStyle}
+                        type="number"
+                        placeholder="Ex: 450"
+                        name="vehicle_count"
+                        value={traffic.vehicle_count}
+                        onChange={handleChange}
+                    />
+
+                    <br /><br />
+
+                    <label><b>⚡ Average Speed (km/h)</b></label>
+
+                    <input
+                        style={inputStyle}
+                        type="number"
+                        placeholder="Ex: 60"
+                        name="average_speed"
+                        value={traffic.average_speed}
+                        onChange={handleChange}
+                    />
+
+                    <br /><br />
+
+                    <label><b>🚥 Congestion Level</b></label>
+
+                    <select
+                        style={inputStyle}
+                        name="congestion_level"
+                        value={traffic.congestion_level}
+                        onChange={handleChange}
+                    >
+                        <option value="Low">🟢 Low</option>
+                        <option value="Medium">🟡 Medium</option>
+                        <option value="High">🔴 High</option>
+                    </select>
+
+                    <br /><br /><br />
+
+                    <button
+                        onClick={submitTraffic}
+                        disabled={loading}
+                        style={{
+                            width: "100%",
+                            padding: "15px",
+                            background: loading
+                                ? "#94a3b8"
+                                : "linear-gradient(90deg,#2563eb,#1d4ed8)",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "12px",
+                            fontSize: "17px",
+                            fontWeight: "bold",
+                            cursor: loading ? "not-allowed" : "pointer",
+                            transition: ".3s",
+                            boxShadow: "0 10px 20px rgba(37,99,235,.25)"
+                        }}
+                    >
+                        {loading
+                            ? "Adding Traffic Record..."
+                            : "➕ Add Traffic Record"}
+                    </button>
+                </div>
             </div>
         </>
     );

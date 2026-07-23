@@ -26,8 +26,9 @@ function Navbar() {
             );
 
             setUser(response.data);
+
         } catch (error) {
-            console.error(error);
+            console.log(error);
         }
     };
 
@@ -37,95 +38,132 @@ function Navbar() {
         navigate("/");
     };
 
+    const navLinkStyle = {
+        color: "white",
+        textDecoration: "none",
+        fontWeight: "600",
+        padding: "10px 16px",
+        borderRadius: "10px",
+        transition: "all .3s ease"
+    };
+
     return (
         <div
             style={{
-                background: "#2563eb",
-                color: "white",
-                padding: "15px 30px",
+                background:
+                    "linear-gradient(90deg,#1e3a8a,#2563eb)",
+                padding: "16px 35px",
                 display: "flex",
                 alignItems: "center",
-                gap: "20px"
+                gap: "12px",
+                position: "sticky",
+                top: 0,
+                zIndex: 999,
+                boxShadow: "0 8px 25px rgba(0,0,0,.18)"
             }}
         >
-            <h2 style={{ margin: 0 }}>
-                🚦 TrafficVision AI
-            </h2>
-
             <Link
                 to="/dashboard"
                 style={{
                     color: "white",
-                    textDecoration: "none"
+                    textDecoration: "none",
+                    fontSize: "28px",
+                    fontWeight: "700",
+                    marginRight: "25px"
                 }}
             >
-                Dashboard
+                🚦 TrafficVision AI
             </Link>
 
-            <Link
-                to="/analytics"
-                style={{
-                    color: "white",
-                    textDecoration: "none"
-                }}
-            >
-                Analytics
-            </Link>
-
-            <Link
-                to="/prediction"
-                style={{
-                    color: "white",
-                    textDecoration: "none"
-                }}
-            >
-                Prediction
-            </Link>
-
-            {role === "admin" && (
+            {[
+                { name: "Dashboard", path: "/dashboard" },
+                { name: "Analytics", path: "/analytics" },
+                { name: "Prediction", path: "/prediction" },
+                ...(role === "admin"
+                    ? [{ name: "Add Traffic", path: "/traffic/add" }]
+                    : []),
+                { name: "Traffic Records", path: "/traffic/list" }
+            ].map((item) => (
                 <Link
-                    to="/traffic/add"
-                    style={{
-                        color: "white",
-                        textDecoration: "none"
+                    key={item.name}
+                    to={item.path}
+                    style={navLinkStyle}
+                    onMouseEnter={(e) => {
+                        e.target.style.background =
+                            "rgba(255,255,255,.18)";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.background = "transparent";
                     }}
                 >
-                    Add Traffic
+                    {item.name}
                 </Link>
-            )}
+            ))}
 
-            <Link
-                to="/traffic/list"
+            <div
                 style={{
-                    color: "white",
-                    textDecoration: "none"
+                    marginLeft: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "18px"
                 }}
             >
-                Traffic Records
-            </Link>
-
-            <div style={{ marginLeft: "auto" }}>
                 {user && (
-                    <>
-                        👤 <strong>{user.name}</strong> | {user.role}
-                    </>
-                )}
-            </div>
+                    <div
+                        style={{
+                            background:
+                                "rgba(255,255,255,.18)",
+                            padding: "10px 18px",
+                            borderRadius: "14px",
+                            color: "white",
+                            textAlign: "center",
+                            minWidth: "150px"
+                        }}
+                    >
+                        <div
+                            style={{
+                                fontWeight: "700",
+                                fontSize: "16px"
+                            }}
+                        >
+                            👤 {user.name}
+                        </div>
 
-            <button
-                onClick={logout}
-                style={{
-                    marginLeft: "20px",
-                    padding: "8px 15px",
-                    border: "none",
-                    borderRadius: "5px",
-                    background: "#dc2626",
-                    color: "white",
-                    cursor: "pointer"
-                }}
-            >
-                Logout
-            </button>
+                        <div
+                            style={{
+                                fontSize: "13px",
+                                opacity: .9
+                            }}
+                        >
+                            {user.role.toUpperCase()}
+                        </div>
+                    </div>
+                )}
+
+                <button
+                    onClick={logout}
+                    onMouseEnter={(e) => {
+                        e.target.style.background = "#b91c1c";
+                        e.target.style.transform = "scale(1.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.background = "#ef4444";
+                        e.target.style.transform = "scale(1)";
+                    }}
+                    style={{
+                        background: "#ef4444",
+                        color: "white",
+                        border: "none",
+                        padding: "12px 20px",
+                        borderRadius: "12px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        transition: "all .3s ease"
+                    }}
+                >
+                    🚪 Logout
+                </button>
+            </div>
         </div>
     );
 }

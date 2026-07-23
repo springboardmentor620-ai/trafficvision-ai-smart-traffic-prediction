@@ -17,6 +17,9 @@ from app.routes.route import router as route_router
 from app.routes.alert import router as alert_router
 from app.routes.analytics import router as analytics_router
 
+from app.database import Base, engine
+from app.models import *
+
 from app.exceptions.handlers import (
     http_exception_handler,
     validation_exception_handler,
@@ -33,10 +36,13 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="TrafficVision AI")
 
+Base.metadata.create_all(bind=engine)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "http://localhost:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],

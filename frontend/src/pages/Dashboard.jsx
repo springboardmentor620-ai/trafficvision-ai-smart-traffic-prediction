@@ -10,9 +10,8 @@ import { toast } from "react-toastify";
 function Dashboard() {
     const navigate = useNavigate();
     const role = localStorage.getItem("role");
-    const [summary, setSummary] = useState(null);
 
-    const [topRoads, setTopRoads] = useState([]);
+    const [summary, setSummary] = useState(null);
     const [weatherDistribution, setWeatherDistribution] = useState([]);
     const [hourlyTraffic, setHourlyTraffic] = useState([]);
     const [weatherTraffic, setWeatherTraffic] = useState([]);
@@ -35,19 +34,6 @@ function Dashboard() {
         } catch (error) {
             console.log(error);
             toast.error("Failed to load dashboard summary");
-        }
-    };
-
-    const loadTopRoads = async () => {
-        try {
-            const response = await api.get(
-                "/dashboard/top-roads",
-                getAuthHeader()
-            );
-
-            setTopRoads(response.data);
-        } catch (error) {
-            console.log(error);
         }
     };
 
@@ -91,12 +77,16 @@ function Dashboard() {
     };
 
     const loadDaywiseTraffic = async () => {
-        const response = await api.get(
-            "/dashboard/daywise-traffic",
-            getAuthHeader()
-        );
+        try {
+            const response = await api.get(
+                "/dashboard/daywise-traffic",
+                getAuthHeader()
+            );
 
-        setDaywiseTraffic(response.data);
+            setDaywiseTraffic(response.data);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     useEffect(() => {
@@ -115,13 +105,13 @@ function Dashboard() {
         background: "#2563eb",
         color: "white",
         border: "none",
-        borderRadius: "12px",
-        padding: "18px",
-        fontSize: "17px",
-        fontWeight: "bold",
+        borderRadius: "16px",
+        padding: "22px",
+        fontSize: "18px",
+        fontWeight: "600",
         cursor: "pointer",
-        transition: "0.3s",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
+        transition: "all .3s ease",
+        boxShadow: "0 10px 25px rgba(37,99,235,.25)"
     };
 
     return (
@@ -135,17 +125,33 @@ function Dashboard() {
                     minHeight: "100vh"
                 }}
             >
-                <h1>🚦 TrafficVision AI Analytics Dashboard</h1>
+                <h1
+                    style={{
+                        color: "#1e3a8a",
+                        marginBottom: "8px",
+                        fontSize: "36px",
+                        fontWeight: "700"
+                    }}
+                >
+                    🚦 TrafficVision AI
+                </h1>
 
-                <hr />
+                <p
+                    style={{
+                        color: "#6b7280",
+                        fontSize: "18px",
+                        marginBottom: "30px"
+                    }}
+                >
+                    Smart Traffic Monitoring & Prediction Dashboard
+                </p>
 
                 <div
                     style={{
                         display: "flex",
                         flexWrap: "wrap",
                         gap: "20px",
-                        marginTop: "25px",
-                        marginBottom: "30px"
+                        marginBottom: "40px"
                     }}
                 >
                     <DashboardCard
@@ -185,21 +191,37 @@ function Dashboard() {
                     />
                 </div>
 
-                <h2 style={{ marginTop: "40px" }}>⚡ Quick Actions</h2>
+                <h2
+                    style={{
+                        color: "#1e3a8a",
+                        marginTop: "50px",
+                        marginBottom: "25px"
+                    }}
+                >
+                    ⚡ Quick Actions
+                </h2>
 
                 <div
                     style={{
                         display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                        gridTemplateColumns:
+                            "repeat(auto-fit, minmax(220px,1fr))",
                         gap: "20px",
-                        marginTop: "20px",  
-                        marginBottom: "40px"
+                        marginBottom: "45px"
                     }}
                 >
                     {role === "admin" && (
                         <button
                             onClick={() => navigate("/traffic/add")}
                             style={buttonStyle}
+                            onMouseEnter={(e) => {
+                                e.target.style.background = "#1d4ed8";
+                                e.target.style.transform = "translateY(-4px)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.background = "#2563eb";
+                                e.target.style.transform = "translateY(0)";
+                            }}
                         >
                             ➕ Add Traffic Record
                         </button>
@@ -208,6 +230,14 @@ function Dashboard() {
                     <button
                         onClick={() => navigate("/traffic/list")}
                         style={buttonStyle}
+                        onMouseEnter={(e) => {
+                            e.target.style.background = "#1d4ed8";
+                            e.target.style.transform = "translateY(-4px)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = "#2563eb";
+                            e.target.style.transform = "translateY(0)";
+                        }}
                     >
                         📋 Traffic Records
                     </button>
@@ -215,6 +245,14 @@ function Dashboard() {
                     <button
                         onClick={() => navigate("/analytics")}
                         style={buttonStyle}
+                        onMouseEnter={(e) => {
+                            e.target.style.background = "#1d4ed8";
+                            e.target.style.transform = "translateY(-4px)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = "#2563eb";
+                            e.target.style.transform = "translateY(0)";
+                        }}
                     >
                         📊 Analytics
                     </button>
@@ -222,10 +260,27 @@ function Dashboard() {
                     <button
                         onClick={() => navigate("/prediction")}
                         style={buttonStyle}
+                        onMouseEnter={(e) => {
+                            e.target.style.background = "#1d4ed8";
+                            e.target.style.transform = "translateY(-4px)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = "#2563eb";
+                            e.target.style.transform = "translateY(0)";
+                        }}
                     >
                         🤖 Traffic Prediction
                     </button>
                 </div>
+
+                <h2
+                    style={{
+                        color: "#1e3a8a",
+                        marginBottom: "25px"
+                    }}
+                >
+                    📈 Traffic Statistics
+                </h2>
 
                 <Charts
                     weatherDistribution={weatherDistribution}
