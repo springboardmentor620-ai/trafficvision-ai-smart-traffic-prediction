@@ -47,14 +47,81 @@ TrafficVision AI is a Smart Traffic Prediction and Congestion Management System 
 #  Project Structure
 
 ```
-TrafficVision-AI
+TrafficVision-AI/
 │
-├── frontend
-├── backend
-├── database
-├── docker
-├── docs
-├── ml_model
+├── backend/
+│   │
+│   ├── models/
+│   │   ├── traffic.py
+│   │   └── user.py
+│   │
+│   ├── routers/
+│   │   ├── auth.py
+│   │   └── traffic.py
+│   │
+│   ├── services/
+│   │   ├── auth_service.py
+│   │   └── traffic_service.py
+│   │
+│   ├── database/
+│   │   ├── database.py
+│   │   └── trafficvision_db.sql
+│   │
+│   ├── dataset/
+│   │   └── smart_mobility_dataset.csv
+│   │
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── .env
+│   └── README.md
+│
+├── frontend/
+│   │
+│   ├── public/
+│   │
+│   ├── src/
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Login.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── TrafficRecords.jsx
+│   │   │   └── LiveMap.jsx
+│   │   │
+│   │   ├── services/
+│   │   │   └── trafficService.js
+│   │   │
+│   │   ├── styles/
+│   │   │   ├── Login.css
+│   │   │   ├── Dashboard.css
+│   │   │   ├── TrafficRecords.css
+│   │   │   └── LiveMap.css
+│   │   │
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   │
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── vite.config.js
+│   └── README.md
+│
+├── database/
+│   ├── users.sql
+│   └── trafficvision_db.sql
+│
+├── docker/
+│   └── (Docker files - Future Implementation)
+│
+├── docs/
+│   ├── Project_Report.docx
+│   ├── Architecture.png
+│   └── Screenshots/
+│
+├── ml_model/
+│   └── (AI Prediction Module - Week 5+)
+│
+├── .gitignore
+├── LICENSE
 ├── README.md
 └── package-lock.json
 ```
