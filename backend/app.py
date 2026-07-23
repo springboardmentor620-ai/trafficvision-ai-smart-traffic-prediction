@@ -1,21 +1,17 @@
 from fastapi import FastAPI
+from routers.auth import router as auth_router
+from routers.traffic import router as traffic_router
 
 app = FastAPI(
     title="TrafficVision AI API",
     version="1.0"
 )
 
+app.include_router(auth_router)
+app.include_router(traffic_router)
+
 @app.get("/")
 def home():
     return {
-        "message": "Welcome to TrafficVision AI Backend"
-    }
-
-@app.get("/traffic")
-def traffic():
-    return {
-        "vehicle_count": 1250,
-        "congestion": "Medium",
-        "weather": "Sunny",
-        "traffic_status": "Normal"
+        "message": "TrafficVision AI Backend Running Successfully"
     }

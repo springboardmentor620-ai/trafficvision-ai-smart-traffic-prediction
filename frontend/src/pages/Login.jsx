@@ -10,20 +10,33 @@ function Login() {
   const [error, setError] = useState("");
 
   const handleLogin = () => {
+
     if (!email || !password) {
       setError("Please enter email and password.");
       return;
     }
 
+    // Admin Login
     if (
       email === "admin@trafficvision.com" &&
       password === "admin123"
     ) {
-      setError("");
+      localStorage.setItem("role", "Admin");
       navigate("/dashboard");
-    } else {
-      setError("Invalid email or password.");
+      return;
     }
+
+    // User Login
+    if (
+      email === "user@trafficvision.com" &&
+      password === "user123"
+    ) {
+      localStorage.setItem("role", "User");
+      navigate("/dashboard");
+      return;
+    }
+
+    setError("Invalid Email or Password");
   };
 
   return (
