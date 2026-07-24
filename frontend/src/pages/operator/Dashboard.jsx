@@ -1,66 +1,112 @@
 import { useEffect, useState } from "react";
+
 import { getTraffic } from "../../services/traffic";
+
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
+
 import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import DashboardCards from "../../components/dashboard/DashboardCards";
 import DashboardContent from "../../components/dashboard/DashboardContent";
+import PredictionPanel from "../../components/dashboard/PredictionPanel";
+import TrafficMap from "../../components/dashboard/TrafficMap";
+
 import api from "../../services/api";
 
 import "../../styles/chart.css";
 
 function Dashboard() {
 
-  const [backendStatus, setBackendStatus] = useState("Checking...");
+    const [backendStatus, setBackendStatus] = useState("Checking...");
 
-  useEffect(() => {
-    api
-      .get("/health")
-      .then((response) => {
-        setBackendStatus(response.data.message);
-      })
-      .catch(() => {
-        setBackendStatus("Backend Connection Failed");
-      });
-  }, []);
+    const [trafficData, setTrafficData] = useState([]);
 
-  const [trafficData, setTrafficData] = useState([]);
+    useEffect(() => {
 
-  useEffect(() => {
-    getTraffic()
-      .then((data) => {
-        setTrafficData(data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }, []);
+        api.get("/health")
+            .then((response) => {
 
-  return (
-    <>
-      <Navbar />
+                setBackendStatus(response.data.message);
 
-      <div style={{ display: "flex" }}>
-        <Sidebar />
+            })
+            .catch(() => {
 
-        <main style={{ padding: "20px", flex: 1 }}>
-          <DashboardHeader
-            title="Traffic Dashboard"
-            subtitle="Monitor traffic conditions in real time."
-          />
+                setBackendStatus("Backend Connection Failed");
 
-          <p><strong>Backend Status:</strong> {backendStatus}</p>
+            });
 
-          <br />
+    }, []);
 
-          <DashboardCards trafficData={trafficData} />
+    useEffect(() => {
 
-          <DashboardContent trafficData={trafficData} />
+        getTraffic()
+            .then((data) => {
 
-        </main>
-      </div>
-    </>
-  );
+                setTrafficData(data);
+
+            })
+            .catch((err) => {
+
+                console.error(err);
+
+            });
+
+    }, []);
+
+    return (
+
+        <>
+
+            <Navbar />
+
+            <div style={{ display: "flex" }}>
+
+                <Sidebar />
+
+                <main
+                    style={{
+                        flex: 1,
+                        padding: "20px",
+                        background: "#f5f7fa",
+                        minHeight: "100vh"
+                    }}
+                >
+
+                    <DashboardHeader
+                        title="Traffic Operator Dashboard"
+                        subtitle="Monitor traffic conditions, predict congestion, and manage routes."
+                    />
+
+                    <p>
+
+                        <strong>Backend Status :</strong> {backendStatus}
+
+                    </p>
+
+                    <br />
+
+                    <DashboardCards trafficData={trafficData} />
+
+                    <br />
+
+                    <PredictionPanel />
+
+                    <br />
+
+                    <TrafficMap />
+
+                    <br />
+
+                    <DashboardContent trafficData={trafficData} />
+
+                </main>
+
+            </div>
+
+        </>
+
+    );
+
 }
 
 export default Dashboard;

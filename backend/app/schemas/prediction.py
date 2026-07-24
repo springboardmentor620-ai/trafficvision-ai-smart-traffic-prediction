@@ -37,9 +37,9 @@ class PredictionRequest(BaseModel):
 
     DayOfWeek: int
 
-    Weather: int
+    Weather: str
 
-    Roadwork: int
+    Roadwork: bool
 
 
 class PredictionResponse(BaseModel):

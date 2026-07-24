@@ -2,6 +2,8 @@ import pandas as pd
 
 from fastapi import APIRouter
 
+from datetime import datetime
+
 from app.ml.predictor import predict
 
 from app.schemas.prediction import (
@@ -21,46 +23,64 @@ router = APIRouter(
 )
 def predict_congestion(data: PredictionRequest):
 
+    today = datetime.now()
+
+    weather_map = {
+        "Clear": 0,
+        "Cloudy": 1,
+        "Rain": 2,
+        "Fog": 3,
+        "Storm": 4
+    }
+
+    traffic_volume = data.Traffic_Volume
+
+    if traffic_volume < 15000:
+        category = "Low"
+    elif traffic_volume < 35000:
+        category = "Medium"
+    else:
+        category = "High"
+
     df = pd.DataFrame([{
 
         "Area Name": data.Area_Name,
 
         "Road/Intersection Name": data.Road_Intersection_Name,
 
-        "Traffic Category": data.Traffic_Category,
+        "Traffic Category": category,
 
         "Traffic Volume": data.Traffic_Volume,
 
         "Average Speed": data.Average_Speed,
 
-        "Travel Time Index": data.Travel_Time_Index,
+        "Travel Time Index": 1.2,
 
-        "Road Capacity Utilization": data.Road_Capacity_Utilization,
+        "Road Capacity Utilization": 70,
 
-        "Incident Reports": data.Incident_Reports,
+        "Incident Reports": 1,
 
-        "Environmental Impact": data.Environmental_Impact,
+        "Environmental Impact": 100,
 
-        "Public Transport Usage": data.Public_Transport_Usage,
+        "Public Transport Usage": 40,
 
-        "Traffic Signal Compliance": data.Traffic_Signal_Compliance,
+        "Traffic Signal Compliance": 85,
 
-        "Parking Usage": data.Parking_Usage,
+        "Parking Usage": 70,
 
-        "Pedestrian and Cyclist Count":
-            data.Pedestrian_and_Cyclist_Count,
+        "Pedestrian and Cyclist Count": 120,
 
-        "Year": data.Year,
+        "Year": today.year,
 
-        "Month": data.Month,
+        "Month": today.month,
 
-        "Day": data.Day,
+        "Day": today.day,
 
-        "DayOfWeek": data.DayOfWeek,
+        "DayOfWeek": today.weekday(),
 
-        "Weather": data.Weather,
+        "Weather": weather_map[data.Weather],
 
-        "Roadwork": data.Roadwork
+        "Roadwork": int(data.Roadwork)
 
     }])
 

@@ -1,0 +1,127 @@
+trafficvision-ai-smart-traffic-prediction/
+│
+├── analysis/
+│   ├── datasets/
+│   │   ├── raw/
+│   │   │   └──  Banglore_traffic_Dataset.csv
+│   │   └── processed/
+│   │   │   └──  traffic_processed.csv
+│   ├── models/
+│   │   └── best_model.pkl
+│   ├── notebooks/
+│   │   ├── 00_environment_setup.ipynb
+│   │   ├── 01_dataset_evaluator.ipynb
+│   │   ├── 02_eda.ipynb
+│   │   ├── 03_feature_engineering.ipynb
+│   │   ├── 04_preprocessing.ipynb
+│   │   ├── 05_model_training.ipynb
+│   │   ├── 06_model_comparison.ipynb
+│   │   └── 07_hyperparameter_tuning.ipynb
+│   └── src/
+│       ├── eda.py
+│       ├── feature_engineering.py
+│       ├── preprocessing.py
+│       ├── quality.py
+│
+├── backend/
+│   ├── app/
+│   │   ├── config/
+│   │   │   └── auth.py
+│   │   ├── constants/
+│   │   │   └── roles.py
+│   │   ├── database/
+│   │   │   ├── base.py
+│   │   │   └── connection.py
+│   │   ├── dependencies/
+│   │   │   └── auth.py
+│   │   ├── ml/
+│   │   │   ├── best_model.pkl
+│   │   │   └── predictor.py
+│   │   ├── models/
+│   │   │   ├── traffic.py
+│   │   │   └── user.py
+│   │   ├── routers/
+│   │   │   ├── prediction.py
+│   │   │   ├── traffic.py
+│   │   │   └── user.py
+│   │   ├── schemas/
+│   │   │   ├── prediction.py
+│   │   │   ├── traffic.py
+│   │   │   └── user.py
+│   │   ├── utils/
+│   │   │   └── security.py
+│   │   └── main.py
+│   ├── requirements.txt
+│   ├── .env
+│   └── .env.example
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── FeaturesSection.jsx
+│   │   │   ├── HeroSection.jsx
+│   │   │   ├── HowItWorksSection.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── ProtectedRoute.jsx
+│   │   │   ├── PublicNavbar.jsx
+│   │   │   ├── RoleProtectedRoute.jsx
+│   │   │   ├── Sidebar.jsx
+│   │   │   ├── TrafficCard.jsx
+│   │   │   ├── TrafficChart.jsx
+│   │   │   ├── TrafficTable.jsx
+│   │   │   └── dashboard/
+│   │   │       ├── DashboardCards.jsx
+│   │   │       ├── DashboardContent.jsx
+│   │   │       ├── DashboardHeader.jsx
+│   │   │       ├── DashboardLayout.jsx
+│   │   │       ├── PredictionPanel.jsx
+│   │   │       ├── TrafficMap.jsx
+│   │   │       ├── RoutePlanner.jsx
+│   │   │       └── RouteRecommendation.jsx
+│   │   ├── pages/
+│   │   │   ├── Home.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   ├── admin/
+│   │   │       └── Dashboard.jsx
+│   │   │   ├── operator/
+│   │   │       ├── Dashboard.jsx
+│   │   │       └── Prediction.jsx
+│   │   │   └── commuter/
+│   │   │       └── Dashboard.jsx
+│   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   ├── auth.js
+│   │   │   ├── prediction.js
+│   │   │   ├── mapPrediction.js
+│   │   │   ├── traffic.js
+│   │   │   └── user.js
+│   │   ├── styles/
+│   │   │   ├── chart.css
+│   │   │   ├── global.css
+│   │   │   ├── HeroSection.css
+│   │   │   ├── Home.css
+│   │   │   ├── HowItWorks.css
+│   │   │   ├── Login.css
+│   │   │   ├── map.css
+│   │   │   ├── prediction.css
+│   │   │   ├── Register.css
+│   │   │   ├── trafficcard.css
+│   │   │   └── traffictable.css
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── .env
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── README.md
+│   └── vite.config.js
+│
+├── .gitignore
+├── LICENSE
+├── project_structure.txt
+└── README.md
