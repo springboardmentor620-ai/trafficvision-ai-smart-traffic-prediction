@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>TrafficVision AI — Sign Up</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <h1>TrafficVision AI</h1>
+    </div>
+    <p class="subtitle">Create a public commuter account</p>
+
+    <form id="signupForm">
+      <label>Full name</label>
+      <input type="text" id="fullName" placeholder="Jane Doe" autocomplete="name" />
+
+      <label>Username</label>
+      <input type="text" id="username" placeholder="janedoe" required autocomplete="username" />
+
+      <label>Email (optional)</label>
+      <input type="email" id="email" placeholder="jane@example.com" autocomplete="email" />
+
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" required minlength="6" autocomplete="new-password" />
+
+      <button type="submit">Create account</button>
+      <p id="errorMsg" class="error"></p>
+      <p id="successMsg" class="success"></p>
+    </form>
+
+    <div class="demo-creds">
+      <strong>Note</strong>
+      <div>New accounts are created with read-only "Public / Commuter" access — view live traffic only.</div>
+      <div style="margin-top:8px;">Already have an account? <a href="index.html" class="link">Sign in</a></div>
+      <div>Need Operator/Admin access? Ask your system administrator.</div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const form = document.getElementById('signupForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.textContent = '';
+      successMsg.textContent = '';
+
+      const full_name = document.getElementById('fullName').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            password,
+            full_name: full_name || null,
+            email: email || null,
+            role: 'viewer', // public signup is always read-only; backend enforces this too
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || 'Could not create account');
+        }
+
+        successMsg.textContent = 'Account created! Redirecting to sign in…';
+        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+      } catch (err) {
+        errorMsg.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>
