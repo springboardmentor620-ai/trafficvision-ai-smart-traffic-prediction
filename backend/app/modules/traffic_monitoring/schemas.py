@@ -73,3 +73,16 @@ class LiveMonitoringSummary(BaseModel):
     total_vehicles: int
     roads_by_level: dict  # e.g. {"low": 3, "moderate": 5, "high": 1, "severe": 0}
     roads: List[LiveRoadStatus]
+class RoadUtilization(BaseModel):
+    """
+    One road's utilization: how full it is relative to its capacity,
+    used for the "Road utilization analysis" feature.
+    """
+    road_id: int
+    road_name: str
+    zone: Optional[str]
+    capacity: int
+    vehicle_count: int
+    utilization_percent: float
+    congestion_level: Optional[CongestionLevel] = None
+    

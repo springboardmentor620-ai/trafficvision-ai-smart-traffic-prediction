@@ -10,12 +10,14 @@ import {
   BarChart3,
   Bell,
   Users,
+  TrendingUp,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/live-map", label: "Live map", icon: Map },
   { href: "/dashboard/monitoring", label: "Traffic monitoring", icon: Activity },
+  { href: "/dashboard/prediction", label: "Traffic prediction", icon: TrendingUp },
   { href: "/dashboard/routes", label: "Route analysis", icon: Route },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/alerts", label: "Alerts", icon: Bell },

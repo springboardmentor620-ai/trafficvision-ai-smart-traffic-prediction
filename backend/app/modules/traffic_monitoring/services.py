@@ -117,3 +117,30 @@ def simulate_readings_for_all_roads(db: Session) -> list[TrafficReading]:
         avg_speed = round(random.uniform(8, 60), 1)
         readings.append(record_traffic_reading(db, road.id, vehicle_count, avg_speed))
     return readings
+def get_road_utilization(db: Session) -> list[dict]:
+    """
+    Road utilization analysis: how full each road is relative to its
+    capacity, based on its most recent reading. Ranked highest-utilization
+    first, so the most strained roads surface at the top.
+    """
+    roads = get_all_roads(db)
+    latest_by_road = get_latest_reading_per_road(db)
+
+    utilization = []
+    for road in roads:
+        reading = latest_by_road.get(road.id)
+        vehicle_count = reading.vehicle_count if reading else 0
+        utilization_percent = round((vehicle_count / road.capacity) * 100, 1) if road.capacity else 0.0
+
+        utilization.append({
+            "road_id": road.id,
+            "road_name": road.name,
+            "zone": road.zone,
+            "capacity": road.capacity,
+            "vehicle_count": vehicle_count,
+            "utilization_percent": utilization_percent,
+            "congestion_level": reading.congestion_level if reading else None,
+        })
+
+    utilization.sort(key=lambda r: r["utilization_percent"], reverse=True)
+    return utilization
