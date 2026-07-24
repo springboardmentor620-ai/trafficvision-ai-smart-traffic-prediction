@@ -13,17 +13,22 @@ def register(
     user_in: schemas.UserCreate,
     db: Session = Depends(get_db),
 ):
-    # Only an admin (Traffic Authority) is meant to create operator/admin accounts
-    # in production. For bootstrap simplicity in this milestone, the very first
-    # account created in an empty database automatically becomes admin.
+    """Public self-signup — for the 'Public / Commuters' user type only.
+
+    This endpoint always creates a 'viewer' account, regardless of what role
+    is sent in the request. Traffic Authorities (admin) and Traffic Operators
+    are NOT allowed to self-register here — per the architecture, only an
+    admin can create those (see POST /users, admin-only). The one exception
+    is bootstrap: if the database is completely empty, the very first account
+    created becomes admin automatically, so there's always an initial admin
+    to log in with.
+    """
     existing = db.query(models.User).filter(models.User.username == user_in.username).first()
     if existing:
         raise HTTPException(status_code=400, detail="Username already registered")
 
     any_user_exists = db.query(models.User).first() is not None
-    role = user_in.role
-    if not any_user_exists:
-        role = "admin"  # bootstrap: first account becomes admin automatically
+    role = "admin" if not any_user_exists else "viewer"
 
     user = models.User(
         username=user_in.username,

@@ -28,3 +28,30 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def run_lightweight_migrations():
+    """Add any new columns that don't exist yet on an existing database, without
+    touching existing data. SQLAlchemy's create_all() only creates missing
+    TABLES, not missing COLUMNS on tables that already exist — so when a new
+    field is added to a model (e.g. Road.latitude), anyone with an existing
+    database needs this to pick it up automatically on next startup.
+    """
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(engine)
+    if "roads" not in inspector.get_table_names():
+        return  # fresh DB — create_all() will create it with all current columns
+
+    existing_columns = {col["name"] for col in inspector.get_columns("roads")}
+    statements = []
+    if "latitude" not in existing_columns:
+        statements.append("ALTER TABLE roads ADD COLUMN latitude FLOAT")
+    if "longitude" not in existing_columns:
+        statements.append("ALTER TABLE roads ADD COLUMN longitude FLOAT")
+
+    if statements:
+        with engine.connect() as conn:
+            for stmt in statements:
+                conn.execute(text(stmt))
+            conn.commit()

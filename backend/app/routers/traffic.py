@@ -40,6 +40,64 @@ def list_roads(db: Session = Depends(get_db), current_user: models.User = Depend
     return db.query(models.Road).all()
 
 
+@router.get("/roads/{road_id}", response_model=schemas.RoadOut)
+def get_road(
+    road_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(security.get_current_user),
+):
+    """Read a single road's details (CRUD: Read)."""
+    road = db.query(models.Road).filter(models.Road.id == road_id).first()
+    if not road:
+        raise HTTPException(status_code=404, detail="Road not found")
+    return road
+
+
+@router.put("/roads/{road_id}", response_model=schemas.RoadOut)
+def update_road(
+    road_id: int,
+    road_update: schemas.RoadUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(security.require_roles("admin", "operator")),
+):
+    """Edit a road's name, location, or lane capacity (CRUD: Update)."""
+    road = db.query(models.Road).filter(models.Road.id == road_id).first()
+    if not road:
+        raise HTTPException(status_code=404, detail="Road not found")
+
+    if road_update.name is not None:
+        road.name = road_update.name
+    if road_update.location is not None:
+        road.location = road_update.location
+    if road_update.lane_capacity is not None:
+        road.lane_capacity = road_update.lane_capacity
+    if road_update.latitude is not None:
+        road.latitude = road_update.latitude
+    if road_update.longitude is not None:
+        road.longitude = road_update.longitude
+
+    db.commit()
+    db.refresh(road)
+    return road
+
+
+@router.delete("/roads/{road_id}", status_code=204)
+def delete_road(
+    road_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(security.require_roles("admin", "operator")),
+):
+    """Remove a road and its historical readings (CRUD: Delete)."""
+    road = db.query(models.Road).filter(models.Road.id == road_id).first()
+    if not road:
+        raise HTTPException(status_code=404, detail="Road not found")
+
+    db.query(models.TrafficReading).filter(models.TrafficReading.road_id == road_id).delete()
+    db.delete(road)
+    db.commit()
+    return None
+
+
 # ---------- Readings (vehicle density tracking) ----------
 @router.post("/readings", response_model=schemas.ReadingOut)
 def submit_reading(

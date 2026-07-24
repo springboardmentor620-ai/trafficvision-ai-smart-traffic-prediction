@@ -33,6 +33,8 @@ class Road(Base):
     name = Column(String(150), nullable=False)
     location = Column(String(150), nullable=True)
     lane_capacity = Column(Integer, default=100)  # vehicles the road can hold before "high" congestion
+    latitude = Column(Float, nullable=True)   # needed for Route Analysis Module (real map routing)
+    longitude = Column(Float, nullable=True)
 
     readings = relationship("TrafficReading", back_populates="road")
 
