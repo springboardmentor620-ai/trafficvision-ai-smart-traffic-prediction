@@ -7,13 +7,12 @@ import * as api from "@/lib/api";
 import { ApiError } from "@/lib/api";
 import { Car, Gauge, RefreshCw, Plus, Send } from "lucide-react";
 
-const LEVEL_STYLES: Record<string, { text: string; bg: string; label: string }> = {
-  low: { text: "text-flow", bg: "bg-flow/10", label: "Low" },
-  moderate: { text: "text-caution", bg: "bg-caution/10", label: "Moderate" },
-  high: { text: "text-caution", bg: "bg-caution/15", label: "High" },
-  severe: { text: "text-congest", bg: "bg-congest/10", label: "Severe" },
+const LEVEL_STYLES: Record<string, { text: string; bg: string; bar: string; label: string }> = {
+  low: { text: "text-flow", bg: "bg-flow/10", bar: "bg-flow", label: "Low" },
+  moderate: { text: "text-caution", bg: "bg-caution/10", bar: "bg-caution", label: "Moderate" },
+  high: { text: "text-caution", bg: "bg-caution/15", bar: "bg-caution", label: "High" },
+  severe: { text: "text-congest", bg: "bg-congest/10", bar: "bg-congest", label: "Severe" },
 };
-
 function timeAgo(iso: string | null): string {
   if (!iso) return "No data yet";
   const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -25,6 +24,7 @@ function timeAgo(iso: string | null): string {
 function MonitoringContent() {
   const { token, user } = useAuth();
   const [data, setData] = useState<api.LiveMonitoringSummary | null>(null);
+  const [utilization, setUtilization] = useState<api.RoadUtilization[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -49,8 +49,12 @@ function MonitoringContent() {
   const fetchLive = useCallback(async () => {
     if (!token) return;
     try {
-      const summary = await api.getLiveMonitoring(token);
+      const [summary, util] = await Promise.all([
+        api.getLiveMonitoring(token),
+        api.getRoadUtilization(token),
+      ]);
       setData(summary);
+      setUtilization(util);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load live traffic data");
@@ -230,6 +234,44 @@ function MonitoringContent() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+      </div>
+
+      {/* Road utilization analysis */}
+      <div className="bg-surface border border-border rounded-xl p-4">
+        <div className="text-sm text-muted mb-1">Road utilization analysis</div>
+        <p className="text-xs text-muted mb-3">
+          How full each road is relative to its capacity — ranked most to least strained.
+        </p>
+        {!utilization || utilization.length === 0 ? (
+          <div className="h-24 flex items-center justify-center text-muted text-sm">
+            No utilization data yet
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {utilization.map((road) => {
+              const style = road.congestion_level ? LEVEL_STYLES[road.congestion_level] : null;
+              return (
+                <div key={road.road_id}>
+                  <div className="flex justify-between items-baseline text-xs mb-1">
+                    <span className="text-ink">
+                      {road.road_name}
+                      {road.zone && <span className="text-muted"> · {road.zone}</span>}
+                    </span>
+                    <span className="text-muted font-mono">
+                      {road.vehicle_count}/{road.capacity} vehicles ({road.utilization_percent}%)
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-surface2 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${style ? style.bar : "bg-muted"}`}
+                      style={{ width: `${Math.min(road.utilization_percent, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

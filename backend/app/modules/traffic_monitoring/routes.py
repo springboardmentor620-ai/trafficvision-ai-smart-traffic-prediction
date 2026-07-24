@@ -12,6 +12,7 @@ from app.modules.traffic_monitoring.schemas import (
     TrafficReadingResponse,
     LiveMonitoringSummary,
     LiveRoadStatus,
+    RoadUtilization,
 )
 
 router = APIRouter()
@@ -139,3 +140,47 @@ def get_live_monitoring(
         roads_by_level=roads_by_level,
         roads=road_statuses,
     )
+@router.get("/monitoring/utilization", response_model=list[RoadUtilization])
+def get_road_utilization(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Returns every road's utilization percentage (vehicle count vs capacity),
+    ranked from most to least utilized.
+    """
+    return services.get_road_utilization(db)
+@router.delete("/monitoring/roads/{road_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_road(
+    road_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "traffic_operator"])),
+):
+    road = services.get_road_by_id(db, road_id)
+    if not road:
+        raise HTTPException(404, "Road not found")
+    db.delete(road)
+    db.commit()
+    return None
+from app.modules.traffic_monitoring.schemas import RoadCreate as RoadUpdate  # reuse same shape for updates
+
+
+@router.put("/monitoring/roads/{road_id}", response_model=RoadResponse)
+def update_road(
+    road_id: int,
+    payload: RoadUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "traffic_operator"])),
+):
+    road = services.get_road_by_id(db, road_id)
+    if not road:
+        raise HTTPException(404, "Road not found")
+
+    road.name = payload.name
+    road.zone = payload.zone
+    road.latitude = payload.latitude
+    road.longitude = payload.longitude
+    road.capacity = payload.capacity
+    db.commit()
+    db.refresh(road)
+    return road
