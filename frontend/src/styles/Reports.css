@@ -1,0 +1,182 @@
+.reports-page {
+  background: #f4f7fb;
+  min-height: 100vh;
+  padding: 40px 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.report-container {
+  max-width: 900px;
+  margin: auto;
+  background: #ffffff;
+  padding: 35px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.report-title {
+  text-align: center;
+  color: #1f3c88;
+  margin-bottom: 25px;
+}
+
+.report-selection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  margin: 30px 0;
+}
+
+.report-selection label {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.report-selection select {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.generate-btn {
+  padding: 12px 24px;
+  background: #1565c0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.generate-btn:hover {
+  background: #0d47a1;
+}
+
+.report-table {
+  margin-top: 25px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:nth-child(even) {
+  background: #f7f9fc;
+}
+
+.table-row span:first-child {
+  font-weight: 600;
+  color: #333;
+}
+
+.table-row span:last-child {
+  font-weight: bold;
+  color: #1565c0;
+}
+
+.roads-list {
+  margin-top: 20px;
+  padding-left: 25px;
+}
+
+.roads-list li {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.summary-box {
+  margin-top: 25px;
+  background: #e8f5e9;
+  border-left: 6px solid #2e7d32;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.summary-box h2 {
+  margin-bottom: 15px;
+  color: #2e7d32;
+}
+
+.summary-box p {
+  margin: 10px 0;
+  line-height: 1.7;
+  color: #333;
+}
+
+.download-buttons {
+  margin-top: 35px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.pdf-btn,
+.ppt-btn {
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.pdf-btn {
+  background: #d32f2f;
+}
+
+.pdf-btn:hover {
+  background: #b71c1c;
+}
+
+.ppt-btn {
+  background: #1976d2;
+}
+
+.ppt-btn:hover {
+  background: #0d47a1;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 30px 0;
+}
+
+@media (max-width: 768px) {
+
+  .report-selection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .download-buttons {
+    flex-direction: column;
+  }
+
+  .pdf-btn,
+  .ppt-btn {
+    width: 100%;
+  }
+
+}

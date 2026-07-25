@@ -1,0 +1,31 @@
+.alerts{
+    background:white;
+    padding:30px;
+    border-radius:18px;
+    margin-top:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+.alerts h2{
+    color:#1e3a8a;
+    margin-bottom:20px;
+}
+
+.alert{
+    padding:18px;
+    border-radius:12px;
+    margin-bottom:15px;
+    color:white;
+}
+
+.high{
+    background:#ef4444;
+}
+
+.medium{
+    background:#f59e0b;
+}
+
+.low{
+    background:#22c55e;
+}

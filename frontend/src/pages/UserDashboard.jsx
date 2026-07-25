@@ -3,7 +3,14 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 
+import TrafficMap from "../components/TrafficMap";
+import TravelTime from "../components/TravelTime";
+
+import TrafficAlerts from "../components/TrafficAlerts";
+import RouteComparison from "../components/RouteComparison";
+
 import { predictTraffic } from "../services/predictionService";
+
 import {
   getAreas,
   getAreaDetails,
@@ -36,8 +43,7 @@ function UserDashboard() {
     loadAreas();
 
   }, []);
-
-  const loadAreas = async () => {
+    const loadAreas = async () => {
 
     try {
 
@@ -161,10 +167,9 @@ function UserDashboard() {
     setLoading(false);
 
   };
-    return (
 
+  return (
     <>
-
       <Navbar />
 
       <div className="dashboard">
@@ -173,213 +178,252 @@ function UserDashboard() {
 
           <h1>Welcome, {name}</h1>
 
-          <p>Traffic Operator Dashboard</p>
+          <p>TrafficVision AI • Smart Traffic Monitoring Dashboard</p>
 
         </div>
 
         <div className="dashboard-cards">
 
           <div className="dashboard-card">
+            <div className="icon">📍</div>
             <h2>{areas.length}</h2>
             <p>Total Areas</p>
           </div>
 
           <div className="dashboard-card">
+            <div className="icon">🚗</div>
             <h2>8936</h2>
             <p>Traffic Records</p>
           </div>
 
           <div className="dashboard-card">
+            <div className="icon">🤖</div>
             <h2>AI</h2>
             <p>Prediction Model</p>
           </div>
 
           <div className="dashboard-card">
-            <h2>MongoDB</h2>
-            <p>Database</p>
+            <div className="icon">🗄️</div>
+              <h2>MongoDB</h2>
+              <p>Database</p>
+            </div>
+
           </div>
 
-        </div>
+          <div className="dashboard-panel">
 
-        <div className="dashboard-panel">
+            <h2>🗺️ Live Traffic Map</h2>
 
-          <h2>Select Traffic Area</h2>
+            <TrafficMap />
 
-          <select
-            value={selectedArea}
-            onChange={(e) => setSelectedArea(e.target.value)}
-          >
+          </div>
 
-            <option value="">Select Area</option>
+          <div className="dashboard-panel">
 
-            {areas.map((area) => (
+            <h2>📍 Select Traffic Area</h2>
 
-              <option
-                key={area}
-                value={area}
-              >
-                {area}
+            <p
+              style={{
+                textAlign: "center",
+                color: "#6b7280",
+                marginBottom: "20px",
+                fontSize: "16px",
+              }}
+            >
+              Monitor live traffic conditions, analyze congestion,
+              and generate AI-powered predictions for Bengaluru traffic.
+            </p>
+
+            <select
+              value={selectedArea}
+              onChange={(e) => setSelectedArea(e.target.value)}
+            >
+
+              <option value="">
+                Select Area
               </option>
 
-            ))}
+              {areas.map((area) => (
+                <option
+                  key={area}
+                  value={area}
+                >
+                  {area}
+                  </option>
+                ))}
 
-          </select>
+            </select>
 
-          <br /><br />
+            <br />
+            <br />
 
-          <button
-            onClick={fetchAreaDetails}
-          >
-            Fetch Area Details
-          </button>
+            <button onClick={fetchAreaDetails}>
+              📊 View Traffic Data
+            </button>
 
-          <button
-            style={{ marginLeft: "10px" }}
-            onClick={handlePrediction}
-            disabled={loading}
-          >
+            <button
+              style={{ marginLeft: "12px" }}
+              onClick={handlePrediction}
+              disabled={loading}
+            >
+              {loading
+                ? "⏳ Predicting..."
+                : "🤖 Predict Traffic"}
+            </button>
 
-            {loading
-              ? "Predicting..."
-              : "Predict Traffic"}
+          </div>
+          {trafficData && (
 
-          </button>
+  <div className="dashboard-panel">
 
+    <h2>📊 Traffic Information</h2>
+
+    <table>
+
+      <tbody>
+
+        <tr>
+          <td><strong>Area</strong></td>
+          <td>{trafficData["Area Name"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Road</strong></td>
+          <td>{trafficData["Road/Intersection Name"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Date</strong></td>
+          <td>{trafficData["Date"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Traffic Volume</strong></td>
+          <td>{trafficData["Traffic Volume"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Average Speed</strong></td>
+          <td>{trafficData["Average Speed"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Travel Time Index</strong></td>
+          <td>{trafficData["Travel Time Index"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Congestion Level</strong></td>
+          <td>{trafficData["Congestion Level"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Road Capacity Utilization</strong></td>
+          <td>{trafficData["Road Capacity Utilization"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Incident Reports</strong></td>
+          <td>{trafficData["Incident Reports"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Weather</strong></td>
+          <td>{trafficData["Weather Conditions"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Parking Usage</strong></td>
+          <td>{trafficData["Parking Usage"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Public Transport Usage</strong></td>
+          <td>{trafficData["Public Transport Usage"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Traffic Signal Compliance</strong></td>
+          <td>{trafficData["Traffic Signal Compliance"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Pedestrian Count</strong></td>
+          <td>{trafficData["Pedestrian and Cyclist Count"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Environmental Impact</strong></td>
+          <td>{trafficData["Environmental Impact"]}</td>
+        </tr>
+
+        <tr>
+          <td><strong>Roadwork</strong></td>
+          <td>{trafficData["Roadwork and Construction Activity"]}</td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+)}
+{prediction !== "" && (
+
+  <div className="prediction-box">
+
+    <h2>🤖 AI Prediction Result</h2>
+
+    <h1>{prediction}</h1>
+
+    <p>
+      Predicted Congestion Level for
+      <strong> {selectedArea}</strong>
+    </p>
+
+    <br />
+
+    <p>
+      <strong>Status :</strong>{" "}
+      {Number(prediction) >= 80
+        ? "🔴 Heavy Traffic"
+        : Number(prediction) >= 50
+        ? "🟠 Moderate Traffic"
+        : "🟢 Smooth Traffic"}
+    </p>
+
+    <p style={{ marginTop: "12px" }}>
+      <strong>Recommendation :</strong>{" "}
+      {Number(prediction) >= 80
+        ? "Use an alternate route during peak hours."
+        : "Traffic is flowing normally."}
+    </p>
+
+  </div>
+
+)}
+        
+
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: "30px",
+            color: "#6b7280",
+            fontSize: "16px",
+          }}
+        >
+          Monitor live traffic conditions, analyze congestion, and generate AI-powered predictions for Bengaluru traffic.
         </div>
 
-        {
-
-          trafficData && (
-
-            <div className="dashboard-panel">
-
-              <h2>Traffic Information</h2>
-
-              <table>
-
-                <tbody>
-
-                  <tr>
-                    <td><strong>Area</strong></td>
-                    <td>{trafficData["Area Name"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Road</strong></td>
-                    <td>{trafficData["Road/Intersection Name"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Date</strong></td>
-                    <td>{trafficData["Date"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Traffic Volume</strong></td>
-                    <td>{trafficData["Traffic Volume"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Average Speed</strong></td>
-                    <td>{trafficData["Average Speed"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Travel Time Index</strong></td>
-                    <td>{trafficData["Travel Time Index"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Congestion Level</strong></td>
-                    <td>{trafficData["Congestion Level"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Road Capacity Utilization</strong></td>
-                    <td>{trafficData["Road Capacity Utilization"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Incident Reports</strong></td>
-                    <td>{trafficData["Incident Reports"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Weather</strong></td>
-                    <td>{trafficData["Weather Conditions"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Parking Usage</strong></td>
-                    <td>{trafficData["Parking Usage"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Public Transport Usage</strong></td>
-                    <td>{trafficData["Public Transport Usage"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Traffic Signal Compliance</strong></td>
-                    <td>{trafficData["Traffic Signal Compliance"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Pedestrian Count</strong></td>
-                    <td>{trafficData["Pedestrian and Cyclist Count"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Environmental Impact</strong></td>
-                    <td>{trafficData["Environmental Impact"]}</td>
-                  </tr>
-
-                  <tr>
-                    <td><strong>Roadwork</strong></td>
-                    <td>{trafficData["Roadwork and Construction Activity"]}</td>
-                  </tr>
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          )
-
-        }
-                {
-
-          prediction !== "" && (
-
-            <div className="prediction-box">
-
-              <h2>AI Prediction Result</h2>
-
-              <h1>{prediction}</h1>
-
-              <p>
-
-                Predicted Congestion Level for
-
-                <strong> {selectedArea}</strong>
-
-              </p>
-
-            </div>
-
-          )
-
-        }
+        
 
       </div>
 
       <Footer />
 
     </>
-
   );
-
 }
 
 export default UserDashboard;

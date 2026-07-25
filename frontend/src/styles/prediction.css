@@ -1,0 +1,155 @@
+.prediction-page {
+  min-height: 100vh;
+  padding: 40px;
+  background: linear-gradient(135deg, #eef5ff, #ffffff);
+}
+
+.prediction-title {
+  text-align: center;
+  color: #0f172a;
+  margin-bottom: 10px;
+  font-size: 34px;
+}
+
+.prediction-subtitle {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 35px;
+}
+
+.prediction-form {
+  max-width: 1100px;
+  margin: auto;
+  background: white;
+  border-radius: 20px;
+  padding: 35px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d6d6d6;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 8px rgba(37,99,235,.2);
+}
+
+.predict-btn {
+  width: 100%;
+  margin-top: 35px;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(90deg,#2563eb,#1d4ed8);
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.predict-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(37,99,235,.3);
+}
+
+.result-card {
+  margin-top: 35px;
+  padding: 30px;
+  border-radius: 18px;
+  background: #f8fbff;
+  border-left: 8px solid #2563eb;
+}
+
+.result-card h2 {
+  margin-bottom: 20px;
+  color: #1e293b;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 20px;
+}
+
+.result-box {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
+
+.result-box h4 {
+  margin-bottom: 10px;
+  color: #475569;
+}
+
+.result-box h3 {
+  color: #2563eb;
+}
+
+.level-good {
+  color: green;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.level-medium {
+  color: orange;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.level-high {
+  color: red;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.ai-box {
+  margin-top: 25px;
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 25px rgba(0,0,0,.08);
+}
+
+.ai-box h3 {
+  color: #2563eb;
+  margin-bottom: 15px;
+}
+
+.ai-box ul {
+  padding-left: 20px;
+}
+
+.ai-box li {
+  margin-bottom: 10px;
+  color: #334155;
+}

@@ -11,6 +11,9 @@ import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Prediction from "./pages/Prediction";
+import Analytics from "./pages/Analytics";
+import Recommendations from "./pages/Recommendations";
+import Reports from "./pages/Reports";
 function App() {
   return (
     <BrowserRouter>
@@ -32,6 +35,10 @@ function App() {
 
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/prediction" element={<Prediction />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/recommendations" element={<Recommendations />} />
+
+        <Route path="/reports" element={<Reports />} />
         <Route
           path="/user-dashboard"
           element={<UserDashboard />}

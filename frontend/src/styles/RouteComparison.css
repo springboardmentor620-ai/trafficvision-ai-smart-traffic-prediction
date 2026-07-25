@@ -1,0 +1,47 @@
+.route-comparison{
+    margin-top:40px;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.route-comparison h2{
+    color:#1e3a8a;
+    margin-bottom:25px;
+}
+
+.route-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+.route-card{
+    border:1px solid #e5e7eb;
+    border-radius:15px;
+    padding:20px;
+    transition:.3s;
+}
+
+.route-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 10px 20px rgba(0,0,0,.08);
+}
+
+.route-color{
+    width:100%;
+    height:6px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+.route-card h3{
+    color:#2563eb;
+    margin-bottom:15px;
+}
+
+.route-card p{
+    margin:8px 0;
+    color:#555;
+}
