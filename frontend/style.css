@@ -210,6 +210,7 @@ td.mono { font-family: 'IBM Plex Mono', monospace; }
 .stat-card .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
 
 #leafletMap { width: 100%; height: 560px; border-radius: var(--radius); border: 1px solid var(--panel-border); background: #0E1826; }
+#routeMap { width: 100%; height: 420px; border-radius: var(--radius); border: 1px solid var(--panel-border); background: #0E1826; margin-bottom: 16px; }
 
 .icon-btn {
   background: none; border: 1px solid var(--panel-border); color: var(--muted);
@@ -217,6 +218,12 @@ td.mono { font-family: 'IBM Plex Mono', monospace; }
 }
 .icon-btn:hover { color: var(--text); border-color: var(--text); }
 .icon-btn.danger:hover { color: var(--red); border-color: var(--red); }
+.icon-btn:disabled, table select:disabled { opacity: 0.45; cursor: not-allowed; }
+
+table select {
+  background: #0E1826; border: 1px solid var(--panel-border); color: var(--text);
+  padding: 5px 8px; border-radius: 6px; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px;
+}
 
 @media (max-width: 900px) {
   .sidebar { width: 64px; }

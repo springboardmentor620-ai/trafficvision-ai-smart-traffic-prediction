@@ -14,13 +14,10 @@ def read_profile(current_user: models.User = Depends(security.get_current_user))
 
 @router.put("/me", response_model=schemas.UserOut)
 def update_profile(
-    full_name: str = None,
     email: str = None,
     current_user: models.User = Depends(security.get_current_user),
     db: Session = Depends(get_db),
 ):
-    if full_name is not None:
-        current_user.full_name = full_name
     if email is not None:
         current_user.email = email
     db.commit()
@@ -56,7 +53,6 @@ def create_user(
 
     user = models.User(
         username=user_in.username,
-        full_name=user_in.full_name,
         email=user_in.email,
         hashed_password=security.hash_password(user_in.password),
         role=user_in.role,
@@ -87,13 +83,11 @@ def update_user(
     current_user: models.User = Depends(security.require_roles("admin")),
     db: Session = Depends(get_db),
 ):
-    """Admin-only: edit a user's role, active status, name, or email (CRUD: Update)."""
+    """Admin-only: edit a user's role, active status, or email (CRUD: Update)."""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if user_update.full_name is not None:
-        user.full_name = user_update.full_name
     if user_update.email is not None:
         user.email = user_update.email
     if user_update.role is not None:

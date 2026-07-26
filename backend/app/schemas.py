@@ -6,7 +6,6 @@ from pydantic import BaseModel, EmailStr, ConfigDict
 # ---------- Auth / Users ----------
 class UserCreate(BaseModel):
     username: str
-    full_name: Optional[str] = None
     email: Optional[EmailStr] = None
     password: str
     role: Literal["admin", "operator", "viewer"] = "viewer"
@@ -16,7 +15,6 @@ class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     username: str
-    full_name: Optional[str]
     email: Optional[str]
     role: str
     is_active: int
@@ -24,8 +22,7 @@ class UserOut(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    """Admin-only edit: change a user's role, active status, name, or email."""
-    full_name: Optional[str] = None
+    """Admin-only edit: change a user's role, active status, or email."""
     email: Optional[EmailStr] = None
     role: Optional[Literal["admin", "operator", "viewer"]] = None
     is_active: Optional[bool] = None

@@ -1,5 +1,6 @@
 import csv
 import io
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
@@ -30,16 +31,35 @@ def train(
     return metrics
 
 
-@router.get("/forecast/{road_id}")
-def forecast(
+@router.get("/forecast_at/{road_id}")
+def forecast_at(
     road_id: int,
-    hours: int = Query(24, ge=1, le=168, description="How many hours ahead to forecast"),
+    target: datetime = Query(..., description="Target date/time to forecast for (ISO 8601)"),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(security.get_current_user),
 ):
-    """Congestion forecasting / peak-hour forecasting for the next N hours."""
+    """Single-point forecast for exactly one date/time (used by the
+    Forecasting page's date/time picker) — as opposed to /forecast and
+    /report below, which return a whole window leading up to a point."""
     try:
-        return prediction.forecast_next_hours(db, road_id, hours)
+        return prediction.forecast_at(db, road_id, target)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/forecast/{road_id}")
+def forecast(
+    road_id: int,
+    hours: int = Query(24, ge=1, le=720, description="How many hours ahead to forecast"),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(security.get_current_user),
+):
+    """Congestion forecasting / peak-hour forecasting going forward. Returns
+    hourly points for roads with real hourly data, or one point per day for
+    roads (like the Bangalore Kaggle dataset) that only have daily history."""
+    try:
+        result = prediction.forecast_next_hours(db, road_id, hours)
+        return result["forecast"]
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -47,7 +67,7 @@ def forecast(
 @router.get("/report/{road_id}")
 def report(
     road_id: int,
-    hours: int = Query(24, ge=1, le=168),
+    hours: int = Query(24, ge=1, le=720),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(security.get_current_user),
 ):
@@ -61,7 +81,7 @@ def report(
 @router.get("/report/{road_id}/download")
 def download_report(
     road_id: int,
-    hours: int = Query(24, ge=1, le=168),
+    hours: int = Query(24, ge=1, le=720),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(security.get_current_user),
 ):
@@ -78,6 +98,7 @@ def download_report(
     writer.writerow(["Lane capacity", rep["lane_capacity"]])
     writer.writerow(["Generated at (UTC)", rep["generated_at"]])
     writer.writerow(["Forecast window (hours)", rep["forecast_window_hours"]])
+    writer.writerow(["Forecast granularity", rep["granularity"]])
     writer.writerow([])
     writer.writerow(["Peak hour", rep["peak_hour"]["forecast_time"], rep["peak_hour"]["predicted_vehicle_count"]])
     writer.writerow(["Quietest hour", rep["quietest_hour"]["forecast_time"], rep["quietest_hour"]["predicted_vehicle_count"]])

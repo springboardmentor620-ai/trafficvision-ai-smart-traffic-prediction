@@ -32,7 +32,6 @@ def register(
 
     user = models.User(
         username=user_in.username,
-        full_name=user_in.full_name,
         email=user_in.email,
         hashed_password=security.hash_password(user_in.password),
         role=role,

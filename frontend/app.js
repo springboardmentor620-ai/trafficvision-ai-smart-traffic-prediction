@@ -315,14 +315,97 @@ async function loadUsers() {
     const res = await authedFetch('/users');
     const users = await res.json();
     const tbody = document.querySelector('#usersTable tbody');
-    tbody.innerHTML = users.map(u => `
-      <tr>
-        <td class="mono">${escapeHtml(u.username)}</td>
-        <td>${escapeHtml(u.full_name || '—')}</td>
-        <td>${escapeHtml(u.role)}</td>
-        <td>${u.is_active ? 'active' : 'disabled'}</td>
+    tbody.innerHTML = users.map(u => {
+      const isSelf = u.username === username;
+      return `
+      <tr data-user-row="${u.id}">
+        <td class="mono">${escapeHtml(u.username)}${isSelf ? ' <span class="hint" style="display:inline;">(you)</span>' : ''}</td>
+        <td>
+          <select class="role-select" data-user-id="${u.id}" ${isSelf ? 'disabled title="You cannot change your own role"' : ''}>
+            <option value="operator" ${u.role === 'operator' ? 'selected' : ''}>Traffic Operator</option>
+            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Traffic Authority (Admin)</option>
+            <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Public / Commuter</option>
+          </select>
+        </td>
+        <td>
+          <button class="icon-btn" data-toggle-active="${u.id}" data-active="${u.is_active ? '1' : '0'}">
+            ${u.is_active ? 'Active — disable' : 'Disabled — enable'}
+          </button>
+        </td>
+        <td>
+          <button class="icon-btn danger" data-delete-user="${u.id}" ${isSelf ? 'disabled title="You cannot delete your own account"' : ''}>Delete</button>
+        </td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
+
+    tbody.querySelectorAll('[data-user-id]').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const userId = sel.dataset.userId;
+        const newRole = sel.value;
+        sel.disabled = true;
+        try {
+          const res = await authedFetch(`/users/${userId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: newRole }),
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || 'Could not update role');
+          }
+        } catch (err) {
+          alert(err.message);
+          loadUsers(); // revert the dropdown to the real value
+          return;
+        }
+        loadUsers();
+      });
+    });
+
+    tbody.querySelectorAll('[data-toggle-active]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.toggleActive;
+        const currentlyActive = btn.dataset.active === '1';
+        btn.disabled = true;
+        try {
+          const res = await authedFetch(`/users/${userId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_active: !currentlyActive }),
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || 'Could not update status');
+          }
+          loadUsers();
+        } catch (err) {
+          alert(err.message);
+          btn.disabled = false;
+        }
+      });
+    });
+
+    tbody.querySelectorAll('[data-delete-user]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const userId = btn.dataset.deleteUser;
+        const row = tbody.querySelector(`tr[data-user-row="${userId}"]`);
+        const rowUsername = row ? row.querySelector('td').textContent.trim() : 'this user';
+        if (!confirm(`Delete account "${rowUsername}"? This cannot be undone.`)) return;
+        btn.disabled = true;
+        try {
+          const res = await authedFetch(`/users/${userId}`, { method: 'DELETE' });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || 'Could not delete user');
+          }
+          loadUsers();
+        } catch (err) {
+          alert(err.message);
+          btn.disabled = false;
+        }
+      });
+    });
   } catch (e) {
     console.error(e);
   }
@@ -370,7 +453,6 @@ async function loadProfile() {
     const u = await res.json();
     document.getElementById('profileUsername').value = u.username;
     document.getElementById('profileRole').value = u.role;
-    document.getElementById('profileFullName').value = u.full_name || '';
     document.getElementById('profileEmail').value = u.email || '';
   } catch (e) {
     console.error(e);
@@ -382,10 +464,9 @@ if (profileForm) {
   profileForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const msg = document.getElementById('profileMsg');
-    const full_name = encodeURIComponent(document.getElementById('profileFullName').value.trim());
     const email = encodeURIComponent(document.getElementById('profileEmail').value.trim());
     try {
-      const res = await authedFetch(`/users/me?full_name=${full_name}&email=${email}`, { method: 'PUT' });
+      const res = await authedFetch(`/users/me?email=${email}`, { method: 'PUT' });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.detail || 'Could not update profile');
@@ -409,13 +490,71 @@ async function populateRouteRoadSelects() {
     const options = roads.map(r => `<option value="${r.id}">${escapeHtml(r.name)}</option>`).join('');
     document.getElementById('originRoadSelect').innerHTML = options;
     document.getElementById('destRoadSelect').innerHTML = options;
-    document.getElementById('conditionRoadSelect').innerHTML = options;
     if (roads.length > 1) document.getElementById('destRoadSelect').value = roads[1].id;
   } catch (e) {
     console.error(e);
   }
 }
 populateRouteRoadSelects();
+
+let routeMap = null;
+let routeMapLayer = null; // L.layerGroup holding the current route polyline + markers
+
+function renderRouteOnMap(data) {
+  const mapDiv = document.getElementById('routeMap');
+  if (typeof L === 'undefined') {
+    mapDiv.innerHTML = `<div class="empty-state" style="padding:60px 20px;">
+      Could not load the map library (Leaflet) from its CDN. Check your internet
+      connection and reload the page.
+    </div>`;
+    return;
+  }
+
+  // The Route Analysis Module labels the first (index 0) route "Primary route".
+  const primary = data.routes.find(r => r.label === 'Primary route') || data.routes[0];
+  if (!primary || !primary.geometry || !primary.geometry.coordinates) return;
+
+  // GeoJSON coordinates are [lon, lat]; Leaflet wants [lat, lon].
+  const latlngs = primary.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+
+  try {
+    if (!routeMap) {
+      routeMap = L.map('routeMap');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19,
+      }).addTo(routeMap);
+    } else {
+      routeMap.invalidateSize();
+    }
+
+    if (routeMapLayer) routeMapLayer.remove();
+    routeMapLayer = L.layerGroup().addTo(routeMap);
+
+    // Primary route line.
+    L.polyline(latlngs, { color: '#38E1C6', weight: 5, opacity: 0.9 }).addTo(routeMapLayer);
+
+    // Any alternates, shown dimmer/dashed for context.
+    data.routes.forEach(r => {
+      if (r === primary || !r.geometry || !r.geometry.coordinates) return;
+      const alt = r.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+      L.polyline(alt, { color: '#7C8CA0', weight: 3, opacity: 0.6, dashArray: '6 8' }).addTo(routeMapLayer);
+    });
+
+    // Origin / destination markers.
+    L.circleMarker([data.origin.latitude, data.origin.longitude], {
+      radius: 8, color: '#2ECC71', fillColor: '#2ECC71', fillOpacity: 0.9, weight: 2,
+    }).bindPopup('Origin').addTo(routeMapLayer);
+    L.circleMarker([data.destination.latitude, data.destination.longitude], {
+      radius: 8, color: '#E63946', fillColor: '#E63946', fillOpacity: 0.9, weight: 2,
+    }).bindPopup('Destination').addTo(routeMapLayer);
+
+    routeMap.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30] });
+  } catch (e) {
+    console.error('Route map render failed:', e);
+    mapDiv.innerHTML = `<div class="empty-state" style="padding:60px 20px;">Map failed to load: ${e.message}</div>`;
+  }
+}
 
 document.getElementById('planRouteBtn').addEventListener('click', async () => {
   const originId = document.getElementById('originRoadSelect').value;
@@ -443,27 +582,13 @@ document.getElementById('planRouteBtn').addEventListener('click', async () => {
         <td>${r.congestion_factor_applied}</td>
       </tr>
     `).join('');
+
+    // Leaflet needs the container visible (non-zero size) before init/fitBounds,
+    // so render on the next frame after resultsBox becomes visible.
+    requestAnimationFrame(() => renderRouteOnMap(data));
   } catch (err) {
     msg.textContent = err.message;
     msg.style.color = 'var(--red)';
-  }
-});
-
-document.getElementById('checkConditionBtn').addEventListener('click', async () => {
-  const roadId = document.getElementById('conditionRoadSelect').value;
-  const result = document.getElementById('conditionResult');
-  result.style.color = '';
-  result.textContent = 'Checking…';
-  try {
-    const res = await authedFetch(`/routes/road-condition/${roadId}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Could not check condition.');
-    result.textContent =
-      `${data.road_name}: ${data.condition} (${data.congestion_level} congestion, ${data.avg_speed_kmph} km/h) — as of ${data.as_of}`;
-    result.style.color = LEVEL_COLOR[data.congestion_level] || '';
-  } catch (err) {
-    result.textContent = err.message;
-    result.style.color = 'var(--red)';
   }
 });
 
@@ -481,13 +606,31 @@ async function populatePredictionRoadSelect() {
     const roads = await res.json();
     const select = document.getElementById('predictionRoadSelect');
     select.innerHTML = roads.map(r => `<option value="${r.id}">${escapeHtml(r.name)}</option>`).join('');
-    const kaggleRoad = roads.find(r => r.name.includes('I-94'));
-    if (kaggleRoad) select.value = kaggleRoad.id;
   } catch (e) {
     console.error(e);
   }
 }
 populatePredictionRoadSelect();
+
+(function initForecastDateTimeDefaults() {
+  const dateInput = document.getElementById('forecastDate');
+  const timeInput = document.getElementById('forecastTime');
+  if (!dateInput || !timeInput) return;
+
+  const toLocalISODate = (d) => {
+    const offset = d.getTimezoneOffset();
+    return new Date(d.getTime() - offset * 60000).toISOString().slice(0, 10);
+  };
+
+  const today = new Date();
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+  const maxDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  dateInput.value = toLocalISODate(tomorrow);
+  dateInput.min = toLocalISODate(today);
+  dateInput.max = toLocalISODate(maxDate);
+  timeInput.value = '00:00';
+})();
 
 function setPredictionMsg(text, isError = false) {
   const msg = document.getElementById('predictionMsg');
@@ -516,31 +659,55 @@ if (trainModelBtn) {
 
 document.getElementById('forecastBtn').addEventListener('click', async () => {
   const roadId = document.getElementById('predictionRoadSelect').value;
-  const hours = document.getElementById('forecastHours').value || 24;
   if (!roadId) return;
+
+  const dateStr = document.getElementById('forecastDate').value;
+  const timeStr = document.getElementById('forecastTime').value || '00:00';
+  if (!dateStr) {
+    setPredictionMsg('Pick a date to forecast.', true);
+    return;
+  }
+
+  const target = new Date(`${dateStr}T${timeStr}:00`);
+  const now = new Date();
+  if (target < now) {
+    setPredictionMsg('Pick a date/time in the future.', true);
+    return;
+  }
+  // Send as a naive ISO string (no trailing "Z") since the backend works in
+  // UTC-naive timestamps throughout.
+  const targetIso = `${dateStr}T${timeStr}:00`;
+
   setPredictionMsg('Generating forecast…');
   try {
-    const res = await authedFetch(`/prediction/report/${roadId}?hours=${hours}`);
+    const res = await authedFetch(`/prediction/forecast_at/${roadId}?target=${encodeURIComponent(targetIso)}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Forecast failed — train a model for this road first.');
 
-    setPredictionMsg('');
-    document.getElementById('predictionSummary').style.display = 'block';
-    document.getElementById('peakHourText').textContent =
-      `${data.peak_hour.forecast_time} — ${data.peak_hour.predicted_vehicle_count} vehicles (${data.peak_hour.predicted_congestion_level})`;
-    document.getElementById('quietHourText').textContent =
-      `${data.quietest_hour.forecast_time} — ${data.quietest_hour.predicted_vehicle_count} vehicles (${data.quietest_hour.predicted_congestion_level})`;
+    const isDaily = data.granularity === 'daily';
+    setPredictionMsg(
+      isDaily
+        ? `This road's real historical data is daily-only, so the model predicts a daily total ` +
+          `(${data.predicted_daily_total} vehicles) and splits it across the hour you picked using ` +
+          `a typical urban rush-hour traffic curve — so the exact time you chose does shape the result.`
+        : ''
+    );
+
+    // A single point in time has no separate "peak" vs "quietest" — hide
+    // that summary block and just show the one forecast row.
+    document.getElementById('predictionSummary').style.display = 'none';
 
     const table = document.getElementById('forecastTable');
     table.style.display = 'table';
+    table.querySelector('thead tr th:first-child').textContent = 'Forecast time';
     const tbody = table.querySelector('tbody');
-    tbody.innerHTML = data.forecast.map(f => `
+    tbody.innerHTML = `
       <tr>
-        <td class="mono">${f.forecast_time}</td>
-        <td class="mono">${f.predicted_vehicle_count}</td>
-        <td style="color:${LEVEL_COLOR[f.predicted_congestion_level]}">${f.predicted_congestion_level}</td>
+        <td class="mono">${data.forecast_time}</td>
+        <td class="mono">${data.predicted_vehicle_count}</td>
+        <td style="color:${LEVEL_COLOR[data.predicted_congestion_level]}">${data.predicted_congestion_level}</td>
       </tr>
-    `).join('');
+    `;
   } catch (err) {
     setPredictionMsg(err.message, true);
   }

@@ -15,9 +15,6 @@
     <p class="subtitle">Create a public commuter account</p>
 
     <form id="signupForm">
-      <label>Full name</label>
-      <input type="text" id="fullName" placeholder="Jane Doe" autocomplete="name" />
-
       <label>Username</label>
       <input type="text" id="username" placeholder="janedoe" required autocomplete="username" />
 
@@ -51,7 +48,6 @@
       errorMsg.textContent = '';
       successMsg.textContent = '';
 
-      const full_name = document.getElementById('fullName').value.trim();
       const username = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
@@ -63,7 +59,6 @@
           body: JSON.stringify({
             username,
             password,
-            full_name: full_name || null,
             email: email || null,
             role: 'viewer', // public signup is always read-only; backend enforces this too
           }),
