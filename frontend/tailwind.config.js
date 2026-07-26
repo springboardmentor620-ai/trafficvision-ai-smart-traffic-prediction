@@ -1,31 +1,35 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,jsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        console: {
-          bg: "#0B0F14",
-          panel: "#121821",
-          panel2: "#1A222D",
-          border: "#232D3A",
-          text: "#E4E9ED",
-          muted: "#7C8A9A",
+        brand: {
+          50: '#f0fdfa',
+          100: '#ccfbf1',
+          500: '#14b8a6',
+          600: '#0d9488',
+          700: '#0f766e',
+          900: '#134e4a',
         },
-        signal: {
-          low: "#34D399",
-          medium: "#FBBF24",
-          high: "#FB923C",
-          severe: "#F43F5E",
-        },
-        accent: "#22D3EE",
+        traffic: {
+          green: '#10b981',
+          amber: '#f59e0b',
+          red: '#ef4444',
+          cyan: '#06b6d4',
+          dark: '#0B132B',
+          card: '#1C2541',
+          accent: '#3A506B',
+        }
       },
       fontFamily: {
-        display: ["'Space Grotesk'", "sans-serif"],
-        mono: ["'JetBrains Mono'", "monospace"],
-        body: ["'Inter'", "sans-serif"],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
     },
   },
   plugins: [],
-};
+}
