@@ -1,23 +1,20 @@
+from contextlib import closing
+
 from database.database import get_connection
 
 
 def authenticate(email, password):
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-
         query = """
         SELECT email, role
         FROM users
         WHERE email = %s AND password = %s
         """
 
-        cursor.execute(query, (email, password))
-
-        user = cursor.fetchone()
-
-        cursor.close()
-        conn.close()
+        with closing(get_connection()) as conn:
+            with closing(conn.cursor()) as cursor:
+                cursor.execute(query, (email, password))
+                user = cursor.fetchone()
 
         if user:
             return {
@@ -31,8 +28,8 @@ def authenticate(email, password):
             "message": "Invalid Email or Password"
         }
 
-    except Exception as e:
+    except Exception as error:
         return {
             "status": "error",
-            "message": str(e)
+            "message": str(error)
         }

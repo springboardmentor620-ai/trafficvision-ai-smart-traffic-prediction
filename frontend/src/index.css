@@ -1,10 +1,1 @@
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, Helvetica, sans-serif;
-}
-
-body{
-  background:#0f172a;
-}
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e6edf9;background:#07111f;font-synthesis:none}*{box-sizing:border-box}body{min-width:320px;min-height:100vh;margin:0;background:radial-gradient(circle at 12% 8%,#1d376320,transparent 28%),radial-gradient(circle at 88% 15%,#0e749020,transparent 24%),#07111f}button,input,select{font:inherit}button{transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease}button:focus-visible,input:focus-visible{outline:2px solid #60a5fa;outline-offset:2px}.glass-panel{background:linear-gradient(135deg,rgba(30,41,59,.88),rgba(15,23,42,.72));border:1px solid rgba(148,163,184,.16);box-shadow:0 18px 42px rgba(0,0,0,.2);backdrop-filter:blur(18px)}.eyebrow{display:block;color:#7dd3fc;font-size:.68rem;font-weight:800;letter-spacing:.13em}.secondary-button,.icon-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(125,211,252,.25);border-radius:10px;background:rgba(30,41,59,.55);color:#dbeafe;padding:10px 13px;cursor:pointer}.secondary-button:hover,.icon-action:hover{transform:translateY(-2px);background:#263b5b;border-color:#60a5fa}.secondary-button:disabled,.icon-action:disabled,.find-btn:disabled{opacity:.65;cursor:not-allowed;transform:none}

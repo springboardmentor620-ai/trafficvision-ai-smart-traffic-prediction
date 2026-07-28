@@ -1,0 +1,1 @@
+.skeleton-line{display:inline-block;width:92px;height:1.25rem;border-radius:7px;background:linear-gradient(90deg,#263750,#3a516e,#263750);background-size:200% 100%;animation:skeleton-shimmer 1.3s infinite}@keyframes skeleton-shimmer{to{background-position:-200% 0}}

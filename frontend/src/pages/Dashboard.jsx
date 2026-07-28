@@ -13,6 +13,7 @@ function Dashboard() {
     traffic_condition: "Loading...",
     weather: "Loading...",
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadStatistics() {
@@ -21,6 +22,8 @@ function Dashboard() {
         setStats(data);
       } catch (error) {
         console.error("Error fetching statistics:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -123,7 +126,7 @@ function Dashboard() {
 
         <div className="card vehicle">
           <h3> Average Vehicle Count</h3>
-          <h2>{stats.average_vehicle_count}</h2>
+          <h2>{isLoading ? <span className="skeleton-line" /> : stats.average_vehicle_count}</h2>
           <p>Average vehicles detected</p>
         </div>
 
@@ -139,7 +142,7 @@ function Dashboard() {
                 : "high"
             }
           >
-            {stats.traffic_condition}
+            {isLoading ? <span className="skeleton-line" /> : stats.traffic_condition}
           </h2>
 
           <p>Current traffic congestion</p>
@@ -147,19 +150,19 @@ function Dashboard() {
 
         <div className="card weather">
           <h3> Weather</h3>
-          <h2>{stats.weather}</h2>
+          <h2>{isLoading ? <span className="skeleton-line" /> : stats.weather}</h2>
           <p>Current weather condition</p>
         </div>
 
         <div className="card speed">
           <h3> Average Speed</h3>
-          <h2>{stats.average_speed} km/h</h2>
+          <h2>{isLoading ? <span className="skeleton-line" /> : `${stats.average_speed} km/h`}</h2>
           <p>Average traffic speed</p>
         </div>
 
         <div className="card status">
           <h3> Total Records</h3>
-          <h2>{stats.total_records}</h2>
+          <h2>{isLoading ? <span className="skeleton-line" /> : stats.total_records}</h2>
           <p>Historical dataset records</p>
         </div>
 
@@ -175,7 +178,7 @@ function Dashboard() {
                 : "high"
             }
           >
-            {stats.average_speed >= 60
+            {isLoading ? <span className="skeleton-line" /> : stats.average_speed >= 60
               ? "Good"
               : stats.average_speed >= 40
               ? "Moderate"

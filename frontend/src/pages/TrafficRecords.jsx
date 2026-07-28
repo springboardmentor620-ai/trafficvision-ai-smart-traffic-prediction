@@ -18,26 +18,12 @@ function TrafficRecords() {
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
 
-  // Load all records
-  useEffect(() => {
-    loadTraffic();
-  }, []);
-
-  async function loadTraffic() {
-    try {
-      const data = await getTrafficRecords();
-      setRecords(data);
-    } catch (error) {
-      console.error("Error loading traffic records:", error);
-    }
-  }
-
-  // Weather & Traffic Condition Filter
   useEffect(() => {
     async function filterTraffic() {
       try {
         if (weather === "" && condition === "") {
-          loadTraffic();
+          const data = await getTrafficRecords();
+          setRecords(data);
         } else {
           const data = await searchTraffic(weather, condition);
           setRecords(data);

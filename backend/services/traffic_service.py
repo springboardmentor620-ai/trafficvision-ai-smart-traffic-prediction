@@ -5,12 +5,36 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DATASET_PATH = BASE_DIR / "dataset" / "traffic_dataset.csv"
 
+DATASET_COLUMN_MAP = {
+    "Date": "Timestamp",
+    "Traffic Volume": "Vehicle_Count",
+    "Average Speed": "Traffic_Speed_kmh",
+    "Congestion Level": "Traffic_Condition",
+    "Weather Conditions": "Weather_Condition",
+}
+
+
+def normalize_traffic_condition(value):
+    """Map the dataset's numeric congestion level to the existing UI labels."""
+    try:
+        congestion = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+
+    if congestion < 35:
+        return "Low"
+    if congestion < 70:
+        return "Medium"
+    return "High"
+
 # Load Dataset
 try:
-    traffic_data = pd.read_csv(DATASET_PATH)
-    print(" Dataset Loaded Successfully")
+    traffic_data = pd.read_csv(DATASET_PATH).rename(columns=DATASET_COLUMN_MAP)
+    if "Traffic_Condition" in traffic_data.columns:
+        traffic_data["Traffic_Condition"] = traffic_data["Traffic_Condition"].map(normalize_traffic_condition)
+    print("Dataset Loaded Successfully")
 except Exception as e:
-    print(" Error loading dataset:", e)
+    print("Error loading dataset:", e)
     traffic_data = pd.DataFrame()
 
 
@@ -65,7 +89,6 @@ def search_traffic(weather="", condition=""):
 
     filtered = traffic_data.copy()
 
-    # Filter by Weather
     if weather:
         filtered = filtered[
             filtered["Weather_Condition"].astype(str).str.contains(
@@ -75,7 +98,6 @@ def search_traffic(weather="", condition=""):
             )
         ]
 
-    # Filter by Traffic Condition
     if condition:
         filtered = filtered[
             filtered["Traffic_Condition"].astype(str).str.contains(
@@ -86,3 +108,62 @@ def search_traffic(weather="", condition=""):
         ]
 
     return filtered.to_dict(orient="records")
+
+
+# ----------------------------------------
+# NEW API
+# Get All Areas
+# ----------------------------------------
+
+def get_all_areas():
+    """
+    Return all unique Area Names
+    """
+
+    if traffic_data.empty:
+        return []
+
+    if "Area Name" not in traffic_data.columns:
+        return []
+
+    areas = sorted(
+        traffic_data["Area Name"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    return areas
+
+
+# ----------------------------------------
+# NEW API
+# Get Roads by Area
+# ----------------------------------------
+
+def get_roads_by_area(area):
+    """
+    Return all roads available for the selected area
+    """
+
+    if traffic_data.empty:
+        return []
+
+    if (
+        "Area Name" not in traffic_data.columns or
+        "Road/Intersection Name" not in traffic_data.columns
+    ):
+        return []
+
+    roads = (
+        traffic_data[
+            traffic_data["Area Name"] == area
+        ]["Road/Intersection Name"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    roads.sort()
+
+    return roads
