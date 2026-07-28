@@ -50,80 +50,41 @@ TrafficVision AI is a Smart Traffic Prediction and Congestion Management System 
 TrafficVision-AI/
 │
 ├── backend/
-│   │
-│   ├── models/
-│   │   ├── traffic.py
-│   │   └── user.py
-│   │
-│   ├── routers/
-│   │   ├── auth.py
-│   │   └── traffic.py
-│   │
-│   ├── services/
-│   │   ├── auth_service.py
-│   │   └── traffic_service.py
-│   │
+│   ├── core/
 │   ├── database/
-│   │   ├── database.py
-│   │   └── trafficvision_db.sql
-│   │
+│   ├── models/
+│   ├── routers/
+│   ├── services/
 │   ├── dataset/
-│   │   └── smart_mobility_dataset.csv
-│   │
-│   ├── main.py
-│   ├── requirements.txt
-│   ├── .env
-│   └── README.md
+│   ├── app.py
+│   └── requirements.txt
 │
 ├── frontend/
-│   │
 │   ├── public/
-│   │
 │   ├── src/
-│   │   │
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── layouts/
 │   │   ├── pages/
-│   │   │   ├── Login.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── TrafficRecords.jsx
-│   │   │   └── LiveMap.jsx
-│   │   │
 │   │   ├── services/
-│   │   │   └── trafficService.js
-│   │   │
 │   │   ├── styles/
-│   │   │   ├── Login.css
-│   │   │   ├── Dashboard.css
-│   │   │   ├── TrafficRecords.css
-│   │   │   └── LiveMap.css
-│   │   │
 │   │   ├── App.jsx
 │   │   ├── main.jsx
 │   │   └── index.css
-│   │
 │   ├── package.json
-│   ├── package-lock.json
-│   ├── vite.config.js
-│   └── README.md
+│   └── vite.config.js
 │
 ├── database/
-│   ├── users.sql
-│   └── trafficvision_db.sql
+│   ├── database.py
+│   └── schema.sql
 │
+├── dataset/
 ├── docker/
-│   └── (Docker files - Future Implementation)
-│
 ├── docs/
-│   ├── Project_Report.docx
-│   ├── Architecture.png
-│   └── Screenshots/
-│
 ├── ml_model/
-│   └── (AI Prediction Module - Week 5+)
-│
-├── .gitignore
-├── LICENSE
 ├── README.md
-└── package-lock.json
+└── .gitignore
 ```
 
 ---
