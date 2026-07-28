@@ -47,16 +47,44 @@ TrafficVision AI is a Smart Traffic Prediction and Congestion Management System 
 #  Project Structure
 
 ```
-TrafficVision-AI
+TrafficVision-AI/
 │
-├── frontend
-├── backend
-├── database
-├── docker
-├── docs
-├── ml_model
+├── backend/
+│   ├── core/
+│   ├── database/
+│   ├── models/
+│   ├── routers/
+│   ├── services/
+│   ├── dataset/
+│   ├── app.py
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── styles/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── package.json
+│   └── vite.config.js
+│
+├── database/
+│   ├── database.py
+│   └── schema.sql
+│
+├── dataset/
+├── docker/
+├── docs/
+├── ml_model/
 ├── README.md
-└── package-lock.json
+└── .gitignore
 ```
 
 ---
