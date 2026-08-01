@@ -2,41 +2,36 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
-from app.core.config import settings
-
+from app.core.exceptions import register_exception_handlers
+from app.db.database import Base
 from app.db.database import engine
-from app.db.base import Base
-
 import app.models
 
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
-    title=settings.APP_NAME,
-    description="Smart Traffic Prediction & Congestion Management System",
-    version=settings.APP_VERSION,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    title="TrafficVision AI",
+    version="1.0.0"
 )
 
-Base.metadata.create_all(bind=engine)
+register_exception_handlers(app)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],      # Change in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(
-    api_router,
-    prefix=settings.API_PREFIX
-)
+app.include_router(api_router)
 
 
-@app.get("/", tags=["Root"])
-def root():
+@app.get("/")
+def home():
+
     return {
-        "project": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "status": "Running",
-        "message": "Welcome to TrafficVision AI Backend"
+
+        "message": "TrafficVision AI Backend Running 🚦"
+
     }

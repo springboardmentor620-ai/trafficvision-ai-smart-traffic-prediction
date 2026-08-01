@@ -7,25 +7,29 @@ class DashboardService:
 
     @staticmethod
     def get_summary(db: Session):
-
         return DashboardRepository.get_summary(db)
 
     @staticmethod
-    def severity(db: Session):
+    def monthly_trend(db: Session):
+        return DashboardRepository.monthly_trend(db)
 
+    @staticmethod
+    def severity_distribution(db: Session):
         return DashboardRepository.severity_distribution(db)
 
     @staticmethod
-    def weather(db: Session):
-
+    def weather_distribution(db: Session):
         return DashboardRepository.weather_distribution(db)
 
     @staticmethod
-    def traffic(db: Session):
-
-        return DashboardRepository.traffic_distribution(db)
+    def road_type_distribution(db: Session):
+        return DashboardRepository.road_type_distribution(db)
 
     @staticmethod
-    def cities(db: Session):
+    def dangerous_cities(db: Session):
+        return DashboardRepository.dangerous_cities(db)
 
-        return DashboardRepository.top_cities(db)
+    @staticmethod
+    def heatmap_data(db: Session):
+
+        return DashboardRepository.heatmap_data(db)

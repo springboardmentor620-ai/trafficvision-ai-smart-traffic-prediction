@@ -2,17 +2,50 @@ from pydantic import BaseModel
 
 
 class DashboardSummary(BaseModel):
+
     total_accidents: int
-    total_states: int
-    total_cities: int
+
+    active_alerts: int
+
     average_risk_score: float
 
+    total_cities: int
 
-class LabelValue(BaseModel):
-    label: str
-    value: int
+    total_states: int
 
 
-class CityStatistics(BaseModel):
+class MonthlyTrend(BaseModel):
+
+    month: int
+
+    total_accidents: int
+
+
+class SeverityDistribution(BaseModel):
+
+    accident_severity: str
+
+    total: int
+
+
+class WeatherDistribution(BaseModel):
+
+    weather: str
+
+    total: int
+
+
+class RoadTypeDistribution(BaseModel):
+
+    road_type: str
+
+    total: int
+
+
+class DangerousCity(BaseModel):
+
     city: str
-    accidents: int
+
+    total_accidents: int
+
+    average_risk_score: float
