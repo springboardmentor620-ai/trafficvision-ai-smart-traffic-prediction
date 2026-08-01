@@ -1,1 +1,0 @@
-# TrafficVision AI App Package
