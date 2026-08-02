@@ -14,7 +14,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.routes.route import router as route_router
 
-from app.routes.alert import router as alert_router
 from app.routes.analytics import router as analytics_router
 
 from app.database import Base, engine
@@ -25,6 +24,8 @@ from app.exceptions.handlers import (
     validation_exception_handler,
     internal_exception_handler
 )
+
+from app.routes import alerts
 
 import app.models.user
 
@@ -70,7 +71,7 @@ app.include_router(traffic_router)
 app.include_router(dashboard_router)
 app.include_router(prediction_router)
 app.include_router(route_router)
-app.include_router(alert_router)
+app.include_router(alerts.router)
 
 @app.get("/")
 def home():

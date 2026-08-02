@@ -18,12 +18,6 @@ class PredictionHistory(Base):
         nullable=False
     )
 
-    user_id = Column(
-        Integer,
-        ForeignKey("users.id"),
-        nullable=False
-    )
-
     holiday = Column(String(100))
     temp = Column(Float)
     rain_1h = Column(Float)
@@ -39,6 +33,15 @@ class PredictionHistory(Base):
     weekday = Column(Integer)
 
     distance = Column(Float)
+
+    source = Column(String(200))
+    destination = Column(String(200))
+
+    source_lat = Column(Float)
+    source_lng = Column(Float)
+
+    destination_lat = Column(Float)
+    destination_lng = Column(Float)
 
     predicted_traffic = Column(Integer)
 

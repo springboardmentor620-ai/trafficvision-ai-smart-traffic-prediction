@@ -11,12 +11,17 @@
     import NotFound from "./pages/NotFound";
     import PredictionHistory from "./pages/PredictionHistory";
 
+    import Alerts from "./pages/Alerts";
+
     import ProtectedRoute from "./components/ProtectedRoute";
+    import Heatmap from "./pages/Heatmap";
 
     function App() {
         return (
             <BrowserRouter>
                 <Routes>
+
+                    <Route path="/alerts" element={<Alerts />} />
 
                     <Route
                         path="/"
@@ -95,6 +100,8 @@
                         path="*"
                         element={<NotFound />}
                     />
+
+                    <Route path="/heatmap" element={<Heatmap />} />
 
                 </Routes>
             </BrowserRouter>

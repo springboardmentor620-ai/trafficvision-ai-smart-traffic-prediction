@@ -79,6 +79,14 @@ def predict_traffic(data, db, current_user):
 
     history = PredictionHistory(
         user_id=current_user.id,
+        source=data.source,
+        destination=data.destination,
+
+        source_lat=data.source_lat,
+        source_lng=data.source_lng,
+
+        destination_lat=data.destination_lat,
+        destination_lng=data.destination_lng,
         holiday=data.holiday,
         temp=data.temp,
         rain_1h=data.rain_1h,

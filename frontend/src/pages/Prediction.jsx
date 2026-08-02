@@ -4,7 +4,11 @@ import api from "../services/api";
 import { toast } from "react-toastify";
 import { jsPDF } from "jspdf";
 import TrafficMap from "../components/TrafficMap";
-import { getCoordinates } from "../services/routeService";
+import {
+    getCoordinates,
+    getRoutes
+} from "../services/routeService";
+import { createAlert } from "../services/alertService";
 
 function Prediction() {
 
@@ -34,10 +38,13 @@ function Prediction() {
     const [delay, setDelay] = useState(null);
     const [avgSpeed, setAvgSpeed] = useState(null);
     const [route, setRoute] = useState("");
+    const [routes, setRoutes] = useState([]);
+    const [bestRoute, setBestRoute] = useState(null);
     const [savedTime, setSavedTime] = useState("");
     const [reason, setReason] = useState("");
     const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(false);
+    const [heatmap, setHeatmap] = useState([]);
 
     const handleChange = (e) => {
         setForm({
@@ -59,6 +66,70 @@ function Prediction() {
             const sourceLocation = await getCoordinates(form.source);
             const destinationLocation = await getCoordinates(form.destination);
 
+            // Get all available routes
+            const routeData = await getRoutes(
+                sourceLocation,
+                destinationLocation
+            );
+
+
+            // Convert routes into a simple array
+            const availableRoutes = routeData.features.map((route, index) => ({
+
+                id: index + 1,
+
+                distance: (
+                    route.properties.summary.distance / 1000
+                ).toFixed(2),
+
+                duration: (
+                    route.properties.summary.duration / 60
+                ).toFixed(1)
+
+            }));
+
+            const loadHeatmap = async () => {
+
+                const response = await api.get(
+                    "/analytics/heatmap",
+                    {
+                        headers: {
+                            Authorization:
+                                `Bearer ${localStorage.getItem("access_token")}`
+                        }
+                    }
+                );
+
+                setHeatmap(response.data);
+
+            };
+
+
+            setRoutes(availableRoutes);
+
+            // Find fastest route
+            const recommendedRoute = availableRoutes.reduce(
+
+                (best, current) =>
+
+                    Number(current.duration) < Number(best.duration)
+
+                        ? current
+
+                        : best
+
+            );
+
+            setBestRoute(recommendedRoute);
+
+            setActualDistance(recommendedRoute.distance);
+
+            setForm(prev => ({
+                ...prev,
+                distance: Number(recommendedRoute.distance)
+            }));
+
+            // Save coordinates for map
             setSourceCoords({
                 ...sourceLocation,
                 name: form.source
@@ -69,94 +140,184 @@ function Prediction() {
                 name: form.destination
             });
 
-            console.log(sourceLocation);
-            console.log(destinationLocation);
+            // Payload for backend
+            const payload = {
 
+                ...form,
 
+                distance: Number(recommendedRoute.distance),
+
+                source_lat: sourceLocation.lat,
+                source_lng: sourceLocation.lng,
+
+                destination_lat: destinationLocation.lat,
+                destination_lng: destinationLocation.lng
+
+            };
+
+            // Predict traffic
             const response = await api.post(
+
                 "/prediction/predict",
-                form,
+
+                payload,
+
                 {
                     headers: {
                         Authorization:
                             `Bearer ${localStorage.getItem("access_token")}`
                     }
                 }
+
             );
 
             const predicted = response.data.predicted_traffic;
 
             setPrediction(predicted);
 
+            // Calculate travel speed
             let speed;
 
             if (predicted < 2500) {
+
                 speed = 60;
+
             }
             else if (predicted < 4500) {
+
                 speed = 40;
+
             }
             else {
+
                 speed = 25;
+
             }
 
-            const time = (form.distance / speed) * 60;
+            // Travel statistics
+            const distanceKm = Number(recommendedRoute.duration);
 
-            const idealTime = (form.distance / 60) * 60;
+            const travelTimeMinutes =
+                (distanceKm / speed) * 60;
+
+            const idealTime =
+                (distanceKm / 60) * 60;
 
             setAvgSpeed(speed);
 
-            setTravelTime(time.toFixed(1));
+            setTravelTime(
+                travelTimeMinutes.toFixed(1)
+            );
 
-            setDelay((time - idealTime).toFixed(1));
+            setDelay(
+                (travelTimeMinutes - idealTime).toFixed(1)
+            );
+
+            // Longest route
+            const longestRoute = availableRoutes.reduce(
+
+                (worst, current) =>
+
+                    Number(current.duration) > Number(worst.duration)
+
+                        ? current
+
+                        : worst
+
+            );
+
+            const saved = (
+
+                Number(longestRoute.duration)
+
+                -
+
+                Number(recommendedRoute.duration)
+
+            ).toFixed(1);
+
+            // Congestion
+            let congestionLevel = "";
+            let trafficStatus = "";
 
             if (predicted < 2500) {
 
-                setRoute("Current Route");
-
-                setSavedTime("0");
-
-                setReason("Traffic is smooth. Continue on the current route.");
+                congestionLevel = "Low";
+                trafficStatus = "Smooth Traffic";
 
             }
             else if (predicted < 4500) {
 
-                setRoute("Inner Ring Road");
-
-                setSavedTime("5");
-
-                setReason("Moderate congestion detected. Inner Ring Road is slightly faster.");
+                congestionLevel = "Medium";
+                trafficStatus = "Moderate Traffic";
 
             }
             else {
 
-                setRoute("Outer Ring Road");
-                setSavedTime("12");
-
-                setReason("Heavy congestion detected. Outer Ring Road is recommended.");
+                congestionLevel = "High";
+                trafficStatus = "Heavy Traffic";
 
             }
 
-            // Decide congestion level
-            if (predicted < 2500) {
-                setCongestion("🟢 Low");
-                setStatus("Smooth Traffic");
-            }
-            else if (predicted < 4500) {
-                setCongestion("🟠 Medium");
-                setStatus("Moderate Traffic");
-            }
-            else {
-                setCongestion("🔴 High");
-                setStatus("Heavy Traffic");
-            }
+            setCongestion(congestionLevel);
+            setStatus(trafficStatus);
+
+            setRoute(`Route ${recommendedRoute.id}`);
+
+            setSavedTime(saved);
+
+            setReason(
+
+                `Route ${recommendedRoute.id} is recommended because it has the lowest estimated travel time (${recommendedRoute.duration} minutes).`
+
+            );
+
+            // Create traffic alert
+            await createAlert({
+
+                source: form.source,
+
+                destination: form.destination,
+
+                congestion: congestionLevel,
+
+                delay: (travelTimeMinutes - idealTime).toFixed(1),
+
+                recommended_route: `Route ${recommendedRoute.id}`,
+
+                severity: congestionLevel,
+
+                message:
+
+                    congestionLevel === "Low"
+
+                        ? "Traffic is smooth."
+
+                        : congestionLevel === "Medium"
+
+                        ? "Moderate congestion detected."
+
+                        : "Heavy congestion detected. Choose the recommended route."
+
+            });
+
+            await loadHeatmap();
 
             toast.success("Prediction completed.");
 
         } catch (error) {
 
-            console.log(error);
-            toast.error("Prediction failed.");
+            console.error(error);
+
+            toast.error(
+
+                error.response?.data?.detail ||
+
+                error.message ||
+
+                "Prediction failed."
+
+            );
 
         } finally {
 
@@ -188,7 +349,7 @@ function Prediction() {
         doc.text(`Congestion Level : ${congestion}`, 20, 130);
         doc.text(`Traffic Status : ${status}`, 20, 140);
 
-        doc.text(`Distance : ${form.distance} km`,20,155);
+        doc.text(`Distance : ${actualDistance} km`,20,155);
 
         doc.text(`Average Speed : ${avgSpeed} km/h`,20,165);
 
@@ -197,11 +358,10 @@ function Prediction() {
         doc.text(`Delay : ${delay} minutes`,20,185);
 
         doc.text(`Recommended Route : ${route}`,20,195);
-        
 
-        doc.text(`Time Saved : ${savedTime} minutes`,20,205);
+        doc.text(`Estimated Time Saved : ${savedTime} minutes`,20,205);
 
-        doc.text(`Reason : ${reason}`,20,215);
+        doc.text(`Recommendation Reason : ${reason}`,20,215);
 
         let recommendation = "";
 
@@ -253,6 +413,15 @@ function Prediction() {
         fontSize: "15px",
         outline: "none",
         boxSizing: "border-box"
+    };
+
+    const statCard = {
+        background: "linear-gradient(135deg,#2563eb,#1e40af)",
+        color: "white",
+        borderRadius: "18px",
+        padding: "25px",
+        textAlign: "center",
+        boxShadow: "0 10px 25px rgba(0,0,0,.15)"
     };
 
     return (
@@ -361,18 +530,6 @@ function Prediction() {
                                 value={form.destination}
                                 onChange={handleChange}
                                 placeholder="e.g. Secunderabad"
-                                style={inputStyle}
-                            />
-                        </div>
-
-                        <div>
-                            <label>Distance (km)</label>
-
-                            <input
-                                type="number"
-                                name="distance"
-                                value={form.distance}
-                                onChange={handleChange}
                                 style={inputStyle}
                             />
                         </div>
@@ -841,6 +998,7 @@ function Prediction() {
                             source={sourceCoords}
                             destination={destinationCoords}
                             congestion={congestion}
+                            heatmap={heatmap}
                             onRouteLoaded={(summary) => {
 
                                 setTravelTime(
@@ -853,6 +1011,233 @@ function Prediction() {
 
                             }}
                         />
+
+                        {prediction && (
+                            <div
+                                style={{
+                                    marginTop: "25px",
+                                    padding: "20px",
+                                    borderRadius: "15px",
+                                    background: "#eef6ff",
+                                    border: "1px solid #bfdbfe"
+                                }}
+                            >
+                                <h2>📋 Route Summary</h2>
+
+                                <p>
+                                    <b>Recommended Route:</b> {route}
+                                </p>
+
+                                <p>
+                                    <b>Distance:</b> {actualDistance} km
+                                </p>
+
+                                <p>
+                                    <b>Estimated Travel Time:</b> {travelTime} min
+                                </p>
+
+                                <p>
+                                    <b>Average Speed:</b> {avgSpeed} km/h
+                                </p>
+
+                                <p>
+                                    <b>Expected Delay:</b> {delay} min
+                                </p>
+
+                                <p>
+                                    <b>Time Saved:</b> {savedTime} min
+                                </p>
+
+                                <p>
+                                    <b>Reason:</b> {reason}
+                                </p>
+                            </div>
+                        )}
+
+                        {routes.length > 0 && (
+                            <div
+                                style={{
+                                    marginTop: "30px",
+                                    background: "#fff",
+                                    padding: "25px",
+                                    borderRadius: "18px",
+                                    boxShadow: "0 8px 20px rgba(0,0,0,.08)"
+                                }}
+                            >
+                                <h2
+                                    style={{
+                                        color: "#1e3a8a",
+                                        marginBottom: "20px"
+                                    }}
+                                >
+                                    🛣 Route Comparison
+                                </h2>
+
+                                <div
+                                    style={{
+                                        display: "grid",
+                                        gap: "15px"
+                                    }}
+                                >
+                                    {routes.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                padding: "18px",
+                                                borderRadius: "15px",
+                                                background:
+                                                    bestRoute?.id === item.id
+                                                        ? "#dbeafe"
+                                                        : "#f8fafc",
+                                                border:
+                                                    bestRoute?.id === item.id
+                                                        ? "2px solid #2563eb"
+                                                        : "1px solid #e5e7eb"
+                                            }}
+                                        >
+                                            <div>
+                                                <h3 style={{ margin: 0 }}>
+                                                    Route {item.id}
+                                                    {bestRoute?.id === item.id && " ⭐"}
+                                                </h3>
+
+                                                <p style={{ margin: "8px 0" }}>
+                                                    📏 Distance :
+                                                    <b> {item.distance} km</b>
+                                                </p>
+
+                                                <p style={{ margin: 0 }}>
+                                                    ⏱ Time :
+                                                    <b> {item.duration} min</b>
+                                                </p>
+                                            </div>
+
+                                            {bestRoute?.id === item.id && (
+                                                <div
+                                                    style={{
+                                                        background: "#2563eb",
+                                                        color: "white",
+                                                        padding: "8px 14px",
+                                                        borderRadius: "25px",
+                                                        fontWeight: "bold"
+                                                    }}
+                                                >
+                                                    Recommended
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {prediction && (
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+                                    gap: "20px",
+                                    marginTop: "30px"
+                                }}
+                            >
+                                <div className="statCard">
+                                    <h3>🚗 Traffic</h3>
+                                    <h1>{prediction}</h1>
+                                    <p>vehicles/hour</p>
+                                </div>
+
+                                <div className="statCard">
+                                    <h3>⚡ Speed</h3>
+                                    <h1>{avgSpeed}</h1>
+                                    <p>km/h</p>
+                                </div>
+
+                                <div className="statCard">
+                                    <h3>⏱ Delay</h3>
+                                    <h1>{delay}</h1>
+                                    <p>minutes</p>
+                                </div>
+
+                                <div className="statCard">
+                                    <h3>🛣 Best Route</h3>
+                                    <h1>{route}</h1>
+                                    <p>{savedTime} min saved</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                )}
+
+                {routes.length > 0 && (
+
+                    <div
+                        style={{
+                            marginTop: "35px",
+                            background: "#ffffff",
+                            borderRadius: "15px",
+                            padding: "25px",
+                            boxShadow: "0 10px 25px rgba(0,0,0,.08)"
+                        }}
+                    >
+
+                        <h2
+                            style={{
+                                color: "#1e3a8a",
+                                marginBottom: "20px"
+                            }}
+                        >
+                            🚗 Available Routes
+                        </h2>
+
+                        {routes.map((r) => (
+
+                            <div
+                                key={r.id}
+                                style={{
+                                    padding: "18px",
+                                    marginBottom: "15px",
+                                    borderRadius: "12px",
+                                    border:
+                                        route === `Route ${r.id}`
+                                            ? "3px solid #16a34a"
+                                            : "1px solid #ddd",
+                                    background:
+                                        route === `Route ${r.id}`
+                                            ? "#ecfdf5"
+                                            : "#fafafa"
+                                }}
+                            >
+
+                                <h3>
+
+                                    {route === `Route ${r.id}`
+                                        ? "⭐ Recommended Route"
+                                        : `Route ${r.id}`}
+
+                                </h3>
+
+                                <p>
+
+                                    Distance :
+                                    <b> {r.distance} km</b>
+
+                                </p>
+
+                                <p>
+
+                                    Estimated Time :
+                                    <b> {r.duration} min</b>
+
+                                </p>
+
+                            </div>
+
+                        ))}
+
                     </div>
 
                 )}

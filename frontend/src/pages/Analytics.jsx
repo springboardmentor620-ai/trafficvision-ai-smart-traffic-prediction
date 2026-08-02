@@ -39,6 +39,7 @@ function Analytics() {
         }
     });
 
+
     useEffect(() => {
 
         loadSummary();
@@ -95,7 +96,6 @@ function Analytics() {
     if (!summary)
         return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
 
-
     const cardStyle = {
         background: "linear-gradient(135deg,#2563eb,#1e40af)",
         color: "white",
@@ -105,6 +105,13 @@ function Analytics() {
         boxShadow: "0 10px 25px rgba(0,0,0,.15)",
         transition: "0.3s"
     };
+
+    const peakHour =
+        hourly.length > 0
+            ? hourly.reduce((a, b) =>
+                a.average_traffic > b.average_traffic ? a : b
+            )
+            : null;
 
     return (
         <>
@@ -139,6 +146,7 @@ function Analytics() {
                     >
                         Visual insights of traffic patterns based on weather, holidays and time.
                     </p>
+
                 </>
 
                 <div
@@ -169,6 +177,95 @@ function Analytics() {
                         <h3>📉 Minimum Traffic</h3>
                         <h1>{summary.minimum_traffic}</h1>
                     </div>
+
+                    <div style={cardStyle}>
+                        <h3>🔥 Peak Hour</h3>
+                        <h1>
+                            {peakHour ? `${peakHour.hour}:00` : "-"}
+                        </h1>
+                    </div>
+
+                </div>
+
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))",
+                        gap: "20px",
+                        marginBottom: "35px"
+                    }}
+                >
+
+                    <div
+                        style={{
+                            background: "#ecfeff",
+                            padding: "20px",
+                            borderRadius: "15px",
+                            borderLeft: "6px solid #06b6d4"
+                        }}
+                    >
+                        <h3>🚗 Current Traffic Status</h3>
+
+                        <h2
+                            style={{
+                                color:
+                                    summary.average_traffic > 4500
+                                        ? "#dc2626"
+                                        : summary.average_traffic > 2500
+                                        ? "#f59e0b"
+                                        : "#16a34a"
+                            }}
+                        >
+                            {summary.average_traffic > 4500
+                                ? "Heavy"
+                                : summary.average_traffic > 2500
+                                ? "Moderate"
+                                : "Smooth"}
+                        </h2>
+                    </div>
+
+                    <div
+                        style={{
+                            background: "#f0fdf4",
+                            padding: "20px",
+                            borderRadius: "15px",
+                            borderLeft: "6px solid #22c55e"
+                        }}
+                    >
+                        <h3>⚡ Recommendation</h3>
+
+                        <p>
+                            {summary.average_traffic > 4500
+                                ? "Avoid peak hours."
+                                : "Traffic conditions are good."}
+                        </p>
+                    </div>
+
+                </div>
+
+                <div
+                    style={{
+                        background: "#fff7ed",
+                        padding: "20px",
+                        borderRadius: "15px",
+                        marginBottom: "35px",
+                        borderLeft: "6px solid #f97316"
+                    }}
+                >
+
+                    <h2>🚦 Traffic Insight</h2>
+
+                    <p>
+
+                        Peak traffic occurs around
+
+                        <b> {peakHour ? `${peakHour.hour}:00` : "-"} </b>
+
+                        with an average of
+
+                        <b> {peakHour ? Math.round(peakHour.average_traffic) : 0} vehicles/hour.</b>
+
+                    </p>
 
                 </div>
 

@@ -1,15 +1,19 @@
-import { useMap } from "react-leaflet";
 import { useEffect, useState } from "react";
-import { getRoute } from "../services/routeService";
+import { getRoutes } from "../services/routeService";
 import {
     MapContainer,
     TileLayer,
     Marker,
     Popup,
-    Polyline
+    Polyline,
+    CircleMarker,
+    useMap
 } from "react-leaflet";
 
 import L from "leaflet";
+
+import HeatmapLayer from "./HeatmapLayer";
+import api from "../services/api";
 
 import "leaflet/dist/leaflet.css";
 
@@ -36,20 +40,73 @@ function ChangeMapCenter({ center }) {
     return null;
 }
 
+function FitRoute({ routePoints }) {
+
+    const map = useMap();
+
+    useEffect(() => {
+
+        if (routePoints.length > 0) {
+
+            map.fitBounds(routePoints, {
+                padding: [50, 50]
+            });
+
+        }
+
+    }, [routePoints]);
+
+    return null;
+
+}
+
 function TrafficMap({
     source,
     destination,
     congestion,
+    heatmap = [],
     onRouteLoaded
 }) {
     const [routePoints, setRoutePoints] = useState([]);
+    const [heatPoints, setHeatPoints] = useState([]);
+
+    useEffect(() => {
+
+        async function loadHeatmap() {
+
+            try {
+
+                const response = await api.get(
+                    "/analytics/heatmap",
+                    {
+                        headers: {
+                            Authorization:
+                                `Bearer ${localStorage.getItem("access_token")}`
+                        }
+                    }
+                );
+
+                setHeatPoints(response.data);
+
+            } catch (err) {
+
+                console.error("Heatmap Error:", err);
+
+            }
+
+        }
+
+        loadHeatmap();
+
+    }, []);
+
     useEffect(() => {
 
         async function loadRoute() {
 
             if (!source || !destination) return;
 
-            const data = await getRoute(source, destination);
+            const data = await getRoutes(source, destination);
 
             const coords =
                 data.features[0].geometry.coordinates.map(
@@ -89,7 +146,7 @@ function TrafficMap({
                 zoom={12}
 
                 style={{
-                    height: "450px",
+                    height: "550px",
                     width: "100%"
                 }}
 
@@ -100,7 +157,7 @@ function TrafficMap({
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                <ChangeMapCenter center={center} />
+                <FitRoute routePoints={routePoints} />
 
                 {source && (
 
@@ -141,13 +198,55 @@ function TrafficMap({
                         positions={routePoints}
                         color={
                             congestion.includes("Low")
-                                ? "green"
+                                ? "#16a34a"
                                 : congestion.includes("Medium")
-                                ? "orange"
-                                : "red"
+                                ? "#f59e0b"
+                                : "#dc2626"
                         }
-                        weight={6}
-                    />
+                        weight={7}
+                        opacity={0.9}
+                    >
+
+                        {heatmap.map((point, index) => (
+
+                            <CircleMarker
+                                key={index}
+                                center={[point.lat, point.lng]}
+                                radius={6 + point.intensity * 12}
+                                color={
+                                    point.intensity > 0.7
+                                        ? "#dc2626"
+                                        : point.intensity > 0.4
+                                        ? "#f59e0b"
+                                        : "#22c55e"
+                                }
+                                fillOpacity={0.8}
+                            >
+                                <Popup>
+                                    <b>Traffic Hotspot</b>
+                                    <br />
+                                    Intensity: {(point.intensity * 100).toFixed(0)}%
+                                </Popup>
+                            </CircleMarker>
+
+                        ))}
+                        <Popup>
+
+                            <b>Recommended Route</b>
+
+                            <br />
+
+                            Traffic :
+                            {" "}
+                            {congestion}
+
+                        </Popup>
+
+                    </Polyline>
+                )}
+
+                {heatPoints.length > 0 && (
+                    <HeatmapLayer points={heatPoints} />
                 )}
 
 

@@ -1,1 +1,2 @@
 from .prediction_history import PredictionHistory
+from .traffic_alert import TrafficAlert

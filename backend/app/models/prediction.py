@@ -21,3 +21,9 @@ class Prediction(Base):
     congestion = Column(String)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    source_lat = Column(Float)
+    source_lng = Column(Float)
+
+    destination_lat = Column(Float)
+    destination_lng = Column(Float)
