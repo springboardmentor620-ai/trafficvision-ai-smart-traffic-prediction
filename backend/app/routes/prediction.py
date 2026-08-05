@@ -1,23 +1,21 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from app.schemas.prediction import (
     PredictionRequest,
-    PredictionResponse
+    PredictionResponse,
+    PredictionHistoryItem,
 )
 
 from app.services.prediction_service import predict_traffic
 
 from app.dependencies import get_current_user
 from app.models.user import User
-
-from sqlalchemy.orm import Session
-from app.database import get_db
-
-from sqlalchemy.orm import Session
-
-from app.database import get_db
-
 from app.models.prediction_history import PredictionHistory
+
+from app.database import get_db
 
 router = APIRouter(
     prefix="/prediction",
@@ -40,7 +38,8 @@ def predict(
         current_user
     )
 
-@router.get("/history")
+
+@router.get("/history", response_model=List[PredictionHistoryItem])
 def get_prediction_history(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)

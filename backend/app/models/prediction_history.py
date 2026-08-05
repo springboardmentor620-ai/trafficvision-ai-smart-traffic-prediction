@@ -45,8 +45,19 @@ class PredictionHistory(Base):
 
     predicted_traffic = Column(Integer)
 
+    confidence = Column(Float)
+
     congestion = Column(String(20))
+
     recommended_route = Column(String(100))
+
+    travel_time = Column(Float)
+
+    delay = Column(Float)
+
+    average_speed = Column(Float)
+
+    ai_recommendation = Column(String(500))
 
     created_at = Column(DateTime, default=datetime.utcnow)
     user = relationship(

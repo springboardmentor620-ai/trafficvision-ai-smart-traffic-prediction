@@ -11,8 +11,7 @@ function Register() {
     const [user, setUser] = useState({
         name: "",
         email: "",
-        password: "",
-        role: "operator"
+        password: ""
     });
 
     const [loading, setLoading] = useState(false);
@@ -114,14 +113,11 @@ function Register() {
 
                     <label>Role</label>
 
-                    <select
-                        name="role"
-                        value={user.role}
-                        onChange={handleChange}
-                    >
-                        <option value="operator">Operator</option>
-                        <option value="admin">Admin</option>
-                    </select>
+                    <input
+                        value="Operator"
+                        disabled
+                        title="New accounts are created as Operator. Admin accounts are provisioned separately."
+                    />
 
                 </div>
 

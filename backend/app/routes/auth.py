@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.security import get_current_user
 
 from app.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, Token
+from app.schemas.user import UserCreate, UserResponse, UserUpdate, Token
+from app.dependencies import get_current_user
 from app.security import (
     hash_password,
     verify_password,
@@ -88,4 +88,22 @@ def login(
 def get_me(
     current_user: User = Depends(get_current_user)
 ):
+    return current_user
+
+
+@router.put("/me", response_model=UserResponse)
+def update_me(
+    payload: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Only name is editable here by design. Email is the login identifier
+    # (changing it safely needs re-verification, out of scope for this
+    # pass) and role is intentionally never client-editable - see the
+    # privilege-escalation note on UserCreate.role.
+    current_user.name = payload.name
+
+    db.commit()
+    db.refresh(current_user)
+
     return current_user

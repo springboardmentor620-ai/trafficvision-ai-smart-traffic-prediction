@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import NotificationPanel from "./NotificationPanel";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -56,6 +57,7 @@ function Navbar() {
                 display: "flex",
                 alignItems: "center",
                 gap: "12px",
+                flexWrap: "wrap",
                 position: "sticky",
                 top: 0,
                 zIndex: 999,
@@ -101,7 +103,9 @@ function Navbar() {
             {[
                 { name: "Dashboard", path: "/dashboard" },
                 { name: "Analytics", path: "/analytics" },
+                { name: "Trends", path: "/trends" },
                 { name: "Prediction", path: "/prediction" },
+                { name: "History", path: "/prediction/history" },
                 ...(role === "admin"
                     ? [{ name: "Add Traffic", path: "/traffic/add" }]
                     : []),
@@ -131,8 +135,11 @@ function Navbar() {
                     gap: "18px"
                 }}
             >
+                <NotificationPanel />
+
                 {user && (
-                    <div
+                    <Link
+                        to="/profile"
                         style={{
                             background:
                                 "rgba(255,255,255,.18)",
@@ -140,7 +147,9 @@ function Navbar() {
                             borderRadius: "14px",
                             color: "white",
                             textAlign: "center",
-                            minWidth: "150px"
+                            minWidth: "150px",
+                            textDecoration: "none",
+                            cursor: "pointer"
                         }}
                     >
                         <div
@@ -160,7 +169,7 @@ function Navbar() {
                         >
                             {user.role.toUpperCase()}
                         </div>
-                    </div>
+                    </Link>
                 )}
 
                 <button

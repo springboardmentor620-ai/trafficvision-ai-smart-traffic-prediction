@@ -1,111 +1,144 @@
-    import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-    import Login from "./pages/Login";
-    import Dashboard from "./pages/Dashboard";
-    import TrafficForm from "./pages/TrafficForm";
-    import TrafficList from "./pages/TrafficList";
-    import EditTraffic from "./pages/EditTraffic";
-    import Analytics from "./pages/Analytics";
-    import Prediction from "./pages/Prediction";
-    import Register from "./pages/Register";
-    import NotFound from "./pages/NotFound";
-    import PredictionHistory from "./pages/PredictionHistory";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import TrafficForm from "./pages/TrafficForm";
+import TrafficList from "./pages/TrafficList";
+import EditTraffic from "./pages/EditTraffic";
+import Analytics from "./pages/Analytics";
+import Prediction from "./pages/Prediction";
+import PredictionHistory from "./pages/PredictionHistory";
+import Alerts from "./pages/Alerts";
+import Heatmap from "./pages/Heatmap";
+import Trends from "./pages/Trends";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
 
-    import Alerts from "./pages/Alerts";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-    import ProtectedRoute from "./components/ProtectedRoute";
-    import Heatmap from "./pages/Heatmap";
+function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
 
-    function App() {
-        return (
-            <BrowserRouter>
-                <Routes>
+                <Route
+                    path="/"
+                    element={<Login />}
+                />
 
-                    <Route path="/alerts" element={<Alerts />} />
+                <Route
+                    path="/register"
+                    element={<Register />}
+                />
 
-                    <Route
-                        path="/"
-                        element={<Login />}
-                    />
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/register"
-                        element={<Register />}
-                    />
+                <Route
+                    path="/prediction"
+                    element={
+                        <ProtectedRoute>
+                            <Prediction />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/dashboard"
-                        element={
-                            <ProtectedRoute>
-                                <Dashboard />
-                            </ProtectedRoute>
-                        }
-                    />
+                <Route
+                    path="/prediction/history"
+                    element={
+                        <ProtectedRoute>
+                            <PredictionHistory />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/traffic/add"
-                        element={
-                            <ProtectedRoute allowedRoles={["admin"]}>
-                                <TrafficForm />
-                            </ProtectedRoute>
-                        }
-                    />
+                <Route
+                    path="/analytics"
+                    element={
+                        <ProtectedRoute>
+                            <Analytics />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/traffic/list"
-                        element={
-                            <ProtectedRoute>
-                                <TrafficList />
-                            </ProtectedRoute>
-                        }
-                    />
+                <Route
+                    path="/heatmap"
+                    element={
+                        <ProtectedRoute>
+                            <Heatmap />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/traffic/edit/:id"
-                        element={
-                            <ProtectedRoute allowedRoles={["admin"]}>
-                                <EditTraffic />
-                            </ProtectedRoute>
-                        }
-                    />
+                <Route
+                    path="/trends"
+                    element={
+                        <ProtectedRoute>
+                            <Trends />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/analytics"
-                        element={
-                            <ProtectedRoute>
-                                <Analytics />
-                            </ProtectedRoute>
-                        }
-                    />
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <Profile />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/prediction"
-                        element={
-                            <ProtectedRoute>
-                                <Prediction />
-                            </ProtectedRoute>
-                        }
-                    />
+                <Route
+                    path="/alerts"
+                    element={
+                        <ProtectedRoute>
+                            <Alerts />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="/prediction/history"
-                        element={
-                            <ProtectedRoute>
-                                <PredictionHistory />
-                            </ProtectedRoute>
-                        }
-                    />
+                <Route
+                    path="/traffic/add"
+                    element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                            <TrafficForm />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route
-                        path="*"
-                        element={<NotFound />}
-                    />
+                <Route
+                    path="/traffic/list"
+                    element={
+                        <ProtectedRoute>
+                            <TrafficList />
+                        </ProtectedRoute>
+                    }
+                />
 
-                    <Route path="/heatmap" element={<Heatmap />} />
+                <Route
+                    path="/traffic/edit/:id"
+                    element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                            <EditTraffic />
+                        </ProtectedRoute>
+                    }
+                />
 
-                </Routes>
-            </BrowserRouter>
-        );
-    }
+                <Route
+                    path="*"
+                    element={<NotFound />}
+                />
 
-    export default App;
+            </Routes>
+        </BrowserRouter>
+    );
+}
+
+export default App;

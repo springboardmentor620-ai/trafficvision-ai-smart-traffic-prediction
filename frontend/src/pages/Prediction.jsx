@@ -4,11 +4,13 @@ import api from "../services/api";
 import { toast } from "react-toastify";
 import { jsPDF } from "jspdf";
 import TrafficMap from "../components/TrafficMap";
+import NotificationCard from "../components/NotificationCard";
+import AIRecommendationCard from "../components/AIRecommendationCard";
 import {
     getCoordinates,
     getRoutes
 } from "../services/routeService";
-import { createAlert } from "../services/alertService";
+
 
 function Prediction() {
 
@@ -45,6 +47,9 @@ function Prediction() {
     const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(false);
     const [heatmap, setHeatmap] = useState([]);
+    const [confidence, setConfidence] = useState(null);
+    const [alertData, setAlertData] = useState(null);
+    const [aiRecommendation, setAiRecommendation] = useState(null);
 
     const handleChange = (e) => {
         setForm({
@@ -174,6 +179,9 @@ function Prediction() {
             const predicted = response.data.predicted_traffic;
 
             setPrediction(predicted);
+            setConfidence(response.data.confidence);
+            setAlertData(response.data.alert);
+            setAiRecommendation(response.data.ai_recommendation);
 
             // Calculate travel speed
             let speed;
@@ -195,7 +203,7 @@ function Prediction() {
             }
 
             // Travel statistics
-            const distanceKm = Number(recommendedRoute.duration);
+            const distanceKm = Number(recommendedRoute.distance);
 
             const travelTimeMinutes =
                 (distanceKm / speed) * 60;
@@ -272,38 +280,30 @@ function Prediction() {
 
             );
 
-            // Create traffic alert
-            await createAlert({
-
-                source: form.source,
-
-                destination: form.destination,
-
-                congestion: congestionLevel,
-
-                delay: (travelTimeMinutes - idealTime).toFixed(1),
-
-                recommended_route: `Route ${recommendedRoute.id}`,
-
-                severity: congestionLevel,
-
-                message:
-
-                    congestionLevel === "Low"
-
-                        ? "Traffic is smooth."
-
-                        : congestionLevel === "Medium"
-
-                        ? "Moderate congestion detected."
-
-                        : "Heavy congestion detected. Choose the recommended route."
-
-            });
-
             await loadHeatmap();
 
             toast.success("Prediction completed.");
+
+            // The backend automatically generates a traffic alert for
+            // every prediction - surface it as a toast notification.
+            const generatedAlert = response.data.alert;
+
+            if (generatedAlert) {
+
+                const toastBySeverity = {
+                    High: toast.error,
+                    Medium: toast.warning,
+                    Low: toast.info
+                };
+
+                const notify =
+                    toastBySeverity[generatedAlert.severity] || toast.info;
+
+                notify(
+                    `${generatedAlert.category} Alert: ${generatedAlert.message}`
+                );
+
+            }
 
         } catch (error) {
 
@@ -329,6 +329,21 @@ function Prediction() {
     const downloadReport = () => {
 
         const doc = new jsPDF();
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const maxTextWidth = pageWidth - 20 - 15; // left margin (20) + right buffer
+
+        // jsPDF's doc.text() does not wrap long strings on its own - it just
+        // runs off the page edge. This wraps text to the page width and
+        // returns the Y position after the last line, so anything printed
+        // after a long field (e.g. reason / suggested_departure, which can
+        // now include an appended confidence or distance note) never
+        // overlaps the line below it.
+        function writeWrapped(text, x, y, lineHeight = 7) {
+            const lines = doc.splitTextToSize(text, maxTextWidth);
+            doc.text(lines, x, y);
+            return y + lines.length * lineHeight;
+        }
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
@@ -361,7 +376,8 @@ function Prediction() {
 
         doc.text(`Estimated Time Saved : ${savedTime} minutes`,20,205);
 
-        doc.text(`Recommendation Reason : ${reason}`,20,215);
+        doc.text(`Recommendation Reason : `,20,215);
+        const afterReasonY = writeWrapped(reason, 20, 222);
 
         let recommendation = "";
 
@@ -373,32 +389,134 @@ function Prediction() {
             recommendation = "Heavy traffic. Consider an alternate route.";
         }
 
-        doc.text(`Recommendation :`,20,235);
-        doc.text(recommendation,20,245);
+        const recommendationLabelY = Math.max(235, afterReasonY + 8);
+
+        doc.text(`Recommendation :`,20,recommendationLabelY);
+        doc.text(recommendation,20,recommendationLabelY + 10);
+
+        let sourceY = recommendationLabelY + 25;
+
+        // Guard against a long, wrapped reason pushing this block past the
+        // bottom of an A4 page (297mm) - start a fresh page instead of
+        // printing off the edge.
+        if (sourceY + 30 > 280) {
+            doc.addPage();
+            sourceY = 20;
+        }
 
         doc.text(
             `Source : ${form.source}`,
             20,
-            260
+            sourceY
         );
 
         doc.text(
             `Destination : ${form.destination}`,
             20,
-            270
+            sourceY + 10
         );
 
         doc.text(
             `Actual Distance : ${actualDistance} km`,
             20,
-            280
+            sourceY + 20
         );
 
         doc.text(
             `Actual Travel Time : ${travelTime} min`,
             20,
-            290
+            sourceY + 30
         );
+
+        // AI Insights section (Feature 3) - continues on a fresh page so
+        // it never overlaps the existing report content above.
+        if (aiRecommendation) {
+
+            doc.addPage();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(20);
+            doc.text("AI Insights", 20, 20);
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+
+            doc.text(
+                `Traffic Status : ${aiRecommendation.traffic_status}`,
+                20,
+                40
+            );
+
+            doc.text(
+                `Congestion Level : ${aiRecommendation.congestion_level}`,
+                20,
+                50
+            );
+
+            doc.text(
+                `Recommended Route : ${aiRecommendation.recommended_route}`,
+                20,
+                60
+            );
+
+            let cursorY = writeWrapped(
+                `Reason : ${aiRecommendation.reason}`, 20, 70
+            ) + 3;
+
+            doc.text(
+                `Estimated Delay : ${aiRecommendation.estimated_delay} minutes`,
+                20,
+                cursorY
+            );
+            cursorY += 10;
+
+            doc.text(
+                `Travel Time : ${travelTime} minutes`,
+                20,
+                cursorY
+            );
+            cursorY += 10;
+
+            cursorY = writeWrapped(
+                `Suggested Departure Time : ${aiRecommendation.suggested_departure}`,
+                20,
+                cursorY
+            ) + 3;
+
+            doc.text(
+                `AI Confidence : ${aiRecommendation.confidence != null ? aiRecommendation.confidence + "%" : "N/A"}`,
+                20,
+                cursorY
+            );
+            cursorY += 20;
+
+            // Long wrapped Reason/Suggested Departure text can push the
+            // tips sections toward or past the bottom of the page.
+            if (cursorY > 270) {
+                doc.addPage();
+                cursorY = 20;
+            }
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Fuel Saving Tips :", 20, cursorY);
+            doc.setFont("helvetica", "normal");
+            cursorY += 10;
+
+            aiRecommendation.fuel_tips.forEach((tip, index) => {
+                doc.text(`- ${tip}`, 25, cursorY + index * 10);
+            });
+
+            const safetyStartY = cursorY + aiRecommendation.fuel_tips.length * 10 + 15;
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Safety Recommendation :", 20, safetyStartY);
+            doc.setFont("helvetica", "normal");
+
+            aiRecommendation.safety_tips.forEach((tip, index) => {
+                doc.text(`- ${tip}`, 25, safetyStartY + 10 + index * 10);
+            });
+
+        }
 
         doc.save("Traffic_Prediction_Report.pdf");
     };
@@ -789,7 +907,7 @@ function Prediction() {
 
                             <p style={{ marginTop: "18px", fontSize: "18px" }}>
                                 Prediction Confidence :
-                                <b> 94%</b>
+                                <b> {confidence != null ? `${confidence}%` : "N/A"}</b>
                             </p>
 
                             <hr
@@ -835,6 +953,22 @@ function Prediction() {
                                 Generated on: {new Date().toLocaleString()}
                             </p>
 
+                        </div>
+
+                    )}
+
+                    {prediction !== null && alertData && (
+
+                        <div style={{ marginTop: "25px" }}>
+                            <NotificationCard alert={alertData} route={route} />
+                        </div>
+
+                    )}
+
+                    {prediction !== null && aiRecommendation && (
+
+                        <div style={{ marginTop: "25px" }}>
+                            <AIRecommendationCard data={aiRecommendation} />
                         </div>
 
                     )}

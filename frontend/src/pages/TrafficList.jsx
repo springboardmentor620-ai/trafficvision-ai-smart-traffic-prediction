@@ -5,6 +5,23 @@ import { useNavigate } from "react-router-dom";
 import { CSVLink } from "react-csv";
 import { toast } from "react-toastify";
 
+// Road condition monitoring: derived client-side from data the /traffic
+// list endpoint already returns, using the same thresholds as the old
+// (now removed) route-analysis service - just re-derived here instead of
+// round-tripping to a second endpoint for a label built from fields we
+// already have.
+function roadConditionOf(record) {
+    if (record.average_speed > 60 && record.congestion_level === "Low") {
+        return { label: "Good", color: "#16a34a" };
+    }
+
+    if (record.average_speed >= 30 && record.congestion_level === "Medium") {
+        return { label: "Moderate", color: "#f59e0b" };
+    }
+
+    return { label: "Poor", color: "#dc2626" };
+}
+
 function TrafficList() {
     const [records, setRecords] = useState([]);
     const [search, setSearch] = useState("");
@@ -99,7 +116,8 @@ function TrafficList() {
         Road: record.road_name,
         Vehicle_Count: record.vehicle_count,
         Average_Speed: record.average_speed,
-        Congestion: record.congestion_level
+        Congestion: record.congestion_level,
+        Road_Condition: roadConditionOf(record).label
     }));
 
     return (
@@ -160,7 +178,9 @@ function TrafficList() {
                             setCurrentPage(1);
                         }}
                         style={{
-                            width: "380px",
+                            width: "100%",
+                            maxWidth: "380px",
+                            flex: "1 1 260px",
                             padding: "14px 18px",
                             borderRadius: "12px",
                             border: "1px solid #d1d5db",
@@ -250,6 +270,10 @@ function TrafficList() {
                             </th>
 
                             <th style={{ padding: "18px" }}>
+                                Road Condition
+                            </th>
+
+                            <th style={{ padding: "18px" }}>
                                 Actions
                             </th>
                         </tr>
@@ -318,6 +342,20 @@ function TrafficList() {
                                         }}
                                     >
                                         {record.congestion_level}
+                                    </span>
+                                </td>
+
+                                <td style={{ padding: "18px" }}>
+                                    <span
+                                        style={{
+                                            padding: "6px 14px",
+                                            borderRadius: "20px",
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            background: roadConditionOf(record).color
+                                        }}
+                                    >
+                                        {roadConditionOf(record).label}
                                     </span>
                                 </td>
 
