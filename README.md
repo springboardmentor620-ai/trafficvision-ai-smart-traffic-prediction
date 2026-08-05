@@ -2,7 +2,7 @@
 
 > Infosys Springboard Internship Project
 
-An AI-powered Smart Traffic Prediction and Congestion Management System that predicts future traffic volume using Machine Learning, estimates travel time, recommends optimized routes, visualizes routes on an interactive map, and maintains prediction history for future analysis.
+An AI-powered Smart Traffic Prediction and Congestion Management System that predicts future traffic volume using Machine Learning, estimates travel time, recommends optimized routes, visualizes traffic on an interactive heatmap, provides AI-based route recommendations, sends smart traffic alerts, and offers detailed analytics dashboards for traffic trend analysis.
 
 ---
 
@@ -35,15 +35,26 @@ The system integrates Machine Learning, OpenRouteService APIs, OpenStreetMap, an
 
 ---
 
+## 🚨 Smart Traffic Alerts
+
+- Automatic Traffic Alert Generation
+- Delay Notifications
+- High Congestion Detection
+- Alert History
+- Read / Unread Notifications
+
+---
+
 ## 🤖 AI Traffic Prediction
 
-- Machine Learning based Traffic Prediction
+- Machine Learning Traffic Prediction
 - Congestion Forecasting
 - Traffic Status Classification
 - Confidence Indicator
 - Average Speed Estimation
 - Delay Estimation
 - Travel Time Estimation
+- AI Route Recommendations
 
 ---
 
@@ -55,15 +66,26 @@ The system integrates Machine Learning, OpenRouteService APIs, OpenStreetMap, an
 - Interactive Route Visualization
 - Dynamic Route Recommendation Workflow
 - Geocoding using OpenStreetMap Nominatim
+- Alternative Route Suggestions
 
 ---
 
-## 📊 Analytics
+## 📊 Analytics & Insights
 
-- Traffic Analytics Dashboard
-- Charts & Graphs
-- Traffic Distribution
-- Congestion Analysis
+- Interactive Analytics Dashboard
+- KPI Cards
+- Daily Traffic Trends
+- Weekly Traffic Trends
+- Monthly Traffic Trends
+- Peak Hour Analysis
+- Congestion Distribution
+- Weather Distribution
+- Source-wise Analysis
+- Destination-wise Analysis
+- Route Statistics
+- Top Congested Routes
+- Traffic Heatmap
+- Dashboard Summary
 
 ---
 
@@ -76,9 +98,10 @@ The system integrates Machine Learning, OpenRouteService APIs, OpenStreetMap, an
 
 ## 📚 Prediction History
 
-- Stores every prediction
-- Displays previous predictions
-- User-wise prediction history
+- Stores Every Prediction
+- User-wise Prediction History
+- Search Previous Predictions
+- Historical Traffic Analysis
 
 ---
 
@@ -92,15 +115,17 @@ The system integrates Machine Learning, OpenRouteService APIs, OpenStreetMap, an
 - React Toastify
 - Leaflet
 - React Leaflet
+- Recharts
 - jsPDF
 
 ## Backend
 
-- Spring Boot
-- Spring Security
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
 - JWT Authentication
 - REST APIs
-- Maven
+- Uvicorn
 
 ## Machine Learning
 
@@ -113,7 +138,7 @@ The system integrates Machine Learning, OpenRouteService APIs, OpenStreetMap, an
 
 ## Database
 
-- MySQL
+- PostgreSQL
 
 ## APIs
 
@@ -125,42 +150,38 @@ The system integrates Machine Learning, OpenRouteService APIs, OpenStreetMap, an
 
 # 🏗 Project Architecture
 
-```
                     User
 
                       │
 
                       ▼
 
-            React Frontend
+              React Frontend
 
                       │
 
-          REST API (Spring Boot)
+               FastAPI Backend
 
-                      │
+        ┌─────────────┼─────────────┐
 
-     ┌────────────────────────┐
-     │                        │
-     ▼                        ▼
+        ▼             ▼             ▼
 
-Machine Learning         MySQL Database
+ Machine Learning   PostgreSQL   OpenRouteService
 
-     │
+        │                           │
 
-Traffic Prediction
+        ▼                           ▼
 
-     │
+ Traffic Prediction        Route Optimization
 
-Route Recommendation
+        │
 
-     │
+        ▼
 
-OpenRouteService API
-
-     │
+ Analytics • Alerts • Heatmap • AI Recommendation
 
 OpenStreetMap
+
 ```
 
 ---
@@ -186,19 +207,21 @@ trafficvision-ai-smart-traffic-prediction/
 
 ├── backend/
 
-│     ├── controller/
+    app/
 
-│     ├── service/
+        models/
 
-│     ├── repository/
+        routes/
 
-│     ├── security/
+        services/
 
-│     ├── entity/
+        schemas/
 
-│     ├── dto/
+        security/
 
-│     └── ml/
+        database.py
+
+        main.py
 
 │
 
@@ -253,6 +276,33 @@ Status:
 
 ---
 
+## ✅ Milestone 3
+
+### Smart Analytics & Traffic Intelligence
+
+Completed Features
+
+- Traffic Analytics Dashboard
+- Daily, Weekly & Monthly Traffic Trends
+- Interactive Traffic Heatmap
+- Peak Hour Analysis
+- Congestion Distribution
+- Weather Distribution
+- Source-wise Traffic Analysis
+- Destination-wise Traffic Analysis
+- Route Statistics
+- Top Congested Routes
+- AI Route Recommendation Card
+- Smart Traffic Alerts
+- Notification Panel
+- Dashboard Summary APIs
+- Optimized SQLAlchemy Analytics
+- Real-time Prediction History Analytics
+
+Status:
+
+**Completed ✅**
+
 
 ## Login
 
@@ -292,6 +342,7 @@ Status:
 ```bash
 git clone https://github.com/<deekshithagilla>/trafficvision-ai-smart-traffic-prediction.git
 ```
+
 
 ## Frontend
 
