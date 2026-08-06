@@ -6,6 +6,8 @@ from app.modules.user_management.routes import router as user_management_router
 from app.modules.traffic_prediction.routes import router as traffic_prediction_router
 from app.modules.traffic_monitoring.routes import router as traffic_monitoring_router
 from app.modules.route_analysis.routes import router as route_analysis_router
+from app.modules.alerts.routes import router as alerts_router
+from app.modules.analytics.routes import router as analytics_router
 
 # Creates tables automatically on startup if they don't exist yet.
 # (For production, use Alembic migrations instead of this.)
@@ -38,6 +40,8 @@ app.include_router(user_management_router, tags=["User Management"])
 app.include_router(traffic_monitoring_router, prefix="/traffic", tags=["Traffic Monitoring"])
 app.include_router(traffic_prediction_router, prefix="/traffic", tags=["Traffic Prediction"])
 app.include_router(route_analysis_router, prefix="/traffic", tags=["Route Analysis"])
+app.include_router(alerts_router, prefix="/traffic", tags=["Alerts"])
+app.include_router(analytics_router, prefix="/traffic", tags=["Analytics"])
 
 @app.get("/health")
 def health_check():
