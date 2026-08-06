@@ -45,22 +45,20 @@ def get_road_by_id(db: Session, road_id: int) -> Road | None:
     return db.query(Road).filter(Road.id == road_id).first()
 
 
-def record_traffic_reading(db: Session, road_id: int, vehicle_count: int,
-                            avg_speed_kmph: float | None) -> TrafficReading:
+def record_traffic_reading(db: Session, road_id: int, vehicle_count: int, avg_speed_kmph=None) -> TrafficReading:
     road = get_road_by_id(db, road_id)
     if not road:
         raise ValueError("Road not found")
-
     level = calculate_congestion_level(vehicle_count, road.capacity)
-    reading = TrafficReading(
-        road_id=road_id,
-        vehicle_count=vehicle_count,
-        avg_speed_kmph=avg_speed_kmph,
-        congestion_level=level,
-    )
+    reading = TrafficReading(road_id=road_id, vehicle_count=vehicle_count, avg_speed_kmph=avg_speed_kmph, congestion_level=level)
     db.add(reading)
     db.commit()
     db.refresh(reading)
+
+    # Auto-raise a congestion alert if this reading is severe.
+    from app.modules.alerts.services import maybe_create_congestion_alert
+    maybe_create_congestion_alert(db, road, reading)
+
     return reading
 
 
