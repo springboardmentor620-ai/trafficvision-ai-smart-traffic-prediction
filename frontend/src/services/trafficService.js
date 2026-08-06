@@ -1,8 +1,17 @@
 const API_URL = "http://127.0.0.1:8000";
 
 async function requestJson(path, options) {
-  const response = await fetch(`${API_URL}${path}`, options);
-  return response.json();
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, options);
+  } catch {
+    throw new Error("Unable to reach the TrafficVision API.");
+  }
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(typeof payload?.detail === "string" ? payload.detail : "The request could not be completed.");
+  }
+  return payload;
 }
 
 export async function getTrafficStatistics() {
@@ -11,6 +20,30 @@ export async function getTrafficStatistics() {
 
 export async function getTrafficRecords() {
   return requestJson("/traffic/");
+}
+
+export async function getAlerts() {
+  return requestJson("/alerts");
+}
+
+export async function getAnalytics() {
+  return requestJson("/analytics");
+}
+
+export async function getHeatmap() {
+  return requestJson("/heatmap");
+}
+
+export async function getAiRecommendations() {
+  return requestJson("/ai/recommendations");
+}
+
+export async function predictTrafficCondition(payload) {
+  return requestJson("/predict", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+}
+
+export async function getReport(period) {
+  return requestJson(`/reports?period=${encodeURIComponent(period)}`);
 }
 
 export async function searchTraffic(weather, condition) {
@@ -33,6 +66,14 @@ export async function getRoads(area) {
   return requestJson(
     `/traffic/roads?area=${encodeURIComponent(area)}`
   );
+}
+
+export async function getPredictionOptions() {
+  return requestJson("/traffic/prediction-options");
+}
+
+export async function authenticate(payload, signup = false) {
+  return requestJson(`/auth/${signup ? "signup" : "login"}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
 }
 
 export async function recommendRoute(

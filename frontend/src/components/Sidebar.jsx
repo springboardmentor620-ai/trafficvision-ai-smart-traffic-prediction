@@ -1,5 +1,9 @@
 import {
   MdDashboard,
+  MdAutoAwesome,
+  MdAutoGraph,
+  MdNotifications,
+  MdPlace,
   MdTraffic,
 } from "react-icons/md";
 
@@ -14,7 +18,7 @@ import { HiChartBar } from "react-icons/hi";
 
 import { FiLogOut } from "react-icons/fi";
 
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import "../styles/Sidebar.css";
 
@@ -22,6 +26,10 @@ const navigationItems = [
   { to: "/dashboard", icon: MdDashboard, label: "Dashboard" },
   { to: "/traffic-records", icon: MdTraffic, label: "Traffic Records" },
   { to: "/live-map", icon: FaMapMarkedAlt, label: "Live Map" },
+  { to: "/alerts", icon: MdNotifications, label: "Traffic Alerts" },
+  { to: "/heatmap", icon: MdPlace, label: "Traffic Heatmap" },
+  { to: "/ai-insights", icon: MdAutoAwesome, label: "AI Insights" },
+  { to: "/prediction", icon: MdAutoGraph, label: "Traffic Prediction" },
   { to: "/navigation", icon: FaRoute, label: "Smart Navigation" },
   { to: "/analytics", icon: HiChartBar, label: "Analytics" },
   { to: "/reports", icon: FaFileAlt, label: "Reports" },
@@ -29,6 +37,8 @@ const navigationItems = [
 ];
 
 function Sidebar() {
+  const navigate = useNavigate();
+  const logout = () => { localStorage.removeItem("role"); navigate("/"); };
   return (
     <div className="sidebar">
 
@@ -64,7 +74,7 @@ function Sidebar() {
 
         </div>
 
-        <button className="logout">
+        <button className="logout" onClick={logout}>
 
           <FiLogOut />
 

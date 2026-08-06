@@ -1,35 +1,25 @@
-from contextlib import closing
+"""Small development authentication store used when PostgreSQL is not configured.
 
-from database.database import get_connection
+It preserves the existing API contract and lets the application run locally; replace
+with hashed database credentials before production deployment.
+"""
+_users = {
+    "admin@trafficvision.com": {"password": "admin123", "role": "Admin"},
+    "user@trafficvision.com": {"password": "user123", "role": "Public User"},
+    "operator@trafficvision.com": {"password": "operator123", "role": "Traffic Operator"},
+}
 
 
 def authenticate(email, password):
-    try:
-        query = """
-        SELECT email, role
-        FROM users
-        WHERE email = %s AND password = %s
-        """
+    user = _users.get(email.lower())
+    if user and user["password"] == password:
+        return {"status": "success", "message": "Login successful", "email": email.lower(), "role": user["role"]}
+    return {"status": "failed", "message": "Invalid email or password"}
 
-        with closing(get_connection()) as conn:
-            with closing(conn.cursor()) as cursor:
-                cursor.execute(query, (email, password))
-                user = cursor.fetchone()
 
-        if user:
-            return {
-                "status": "success",
-                "message": "Login Successful",
-                "role": user[1]
-            }
-
-        return {
-            "status": "failed",
-            "message": "Invalid Email or Password"
-        }
-
-    except Exception as error:
-        return {
-            "status": "error",
-            "message": str(error)
-        }
+def register(email, password, role):
+    email = email.lower()
+    if email in _users:
+        return {"status": "failed", "message": "An account with this email already exists."}
+    _users[email] = {"password": password, "role": role}
+    return {"status": "success", "message": "Account created", "email": email, "role": role}

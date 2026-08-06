@@ -1,11 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getTrafficStatistics } from "../services/trafficService";
+import { getAlerts, getTrafficStatistics } from "../services/trafficService";
 import "../styles/Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
-
   const [stats, setStats] = useState({
     total_records: 0,
     average_vehicle_count: 0,
@@ -14,12 +13,13 @@ function Dashboard() {
     weather: "Loading...",
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
     async function loadStatistics() {
       try {
-        const data = await getTrafficStatistics();
-        setStats(data);
+        const [data, currentAlerts] = await Promise.all([getTrafficStatistics(), getAlerts()]);
+        setStats(data); setAlerts(currentAlerts.slice(0, 3));
       } catch (error) {
         console.error("Error fetching statistics:", error);
       } finally {
@@ -28,6 +28,8 @@ function Dashboard() {
     }
 
     loadStatistics();
+    const interval = setInterval(loadStatistics, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const today = new Date();
@@ -65,7 +67,7 @@ function Dashboard() {
 
       {/* Welcome Section */}
       <section className="welcome">
-        <h1> Bengaluru Smart Traffic Dashboard</h1>
+        <h1>Smart Traffic Dashboard</h1>
 
         <p>
           AI-Based Traffic Monitoring & Congestion Management System
@@ -75,12 +77,12 @@ function Dashboard() {
 
           <div className="city-card">
             <h3> City</h3>
-            <p>Bengaluru</p>
+            <p>{stats.areas || 0} areas</p>
           </div>
 
           <div className="city-card">
-            <h3> Country</h3>
-            <p>India</p>
+            <h3> Traffic status</h3>
+            <p>{stats.traffic_condition}</p>
           </div>
 
           <div className="city-card">
@@ -90,7 +92,7 @@ function Dashboard() {
 
           <div className="city-card">
             <h3> Coverage</h3>
-            <p>Metropolitan Region</p>
+            <p>{stats.total_records.toLocaleString()} records</p>
           </div>
 
         </div>
@@ -100,6 +102,11 @@ function Dashboard() {
           <p>{currentTime}</p>
         </div>
 
+      </section>
+
+      <section className="cards">
+        <div className="card health"><h3>Recent Alerts</h3><h2>{alerts.length}</h2><p>{alerts[0]?.alert_type || "No active alerts"}</p></div>
+        <div className="card speed"><h3>Latest Prediction</h3><h2>{stats.traffic_condition}</h2><p>Based on latest dataset conditions</p></div>
       </section>
 
       {/* Navigation Buttons */}

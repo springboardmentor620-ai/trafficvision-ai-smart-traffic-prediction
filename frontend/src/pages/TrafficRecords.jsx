@@ -39,7 +39,7 @@ function TrafficRecords() {
 
   // Search
   const filteredRecords = records.filter((item) =>
-    item.Weather_Condition.toLowerCase().includes(search.toLowerCase())
+    String(item.Weather_Condition || "").toLowerCase().includes(search.toLowerCase())
   );
 
   // Pagination Logic

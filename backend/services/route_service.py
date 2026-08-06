@@ -102,4 +102,7 @@ def recommend_route(source_area, source_road, destination_area, destination_road
     labels = [("Recommended Route", "Recommended", "#22c55e"), ("Alternate Route 1", "Alternative", "#f59e0b"), ("Alternate Route 2", "Backup", "#94a3b8")]
     for index, option in enumerate(options):
         option.update(zip(("route_name", "status", "color"), labels[index]))
-    return {"source_area": source_area, "source_road": source_road, "destination_area": destination_area, "destination_road": destination_road, "vehicle_type": vehicle_type, "source_location": source_location, "destination_location": destination_location, "routes": options, "best_route": options[0], "alternate_route": options[1] if len(options) > 1 else None, "warnings": [warning for warning in (source_warning, destination_warning) if warning]}
+    warnings = [warning for warning in (source_warning, destination_warning) if warning]
+    if len(options) == 1:
+        warnings.append("OSRM did not return alternative routes for this journey. Showing the best available route.")
+    return {"source_area": source_area, "source_road": source_road, "destination_area": destination_area, "destination_road": destination_road, "vehicle_type": vehicle_type, "source_location": source_location, "destination_location": destination_location, "routes": options, "best_route": options[0], "alternate_route": options[1] if len(options) > 1 else None, "warnings": warnings}

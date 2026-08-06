@@ -6,6 +6,8 @@ from services.traffic_service import (
     search_traffic,
     get_all_areas,
     get_roads_by_area,
+    get_map_data,
+    get_prediction_options,
 )
 
 router = APIRouter(
@@ -59,3 +61,13 @@ def roads(
     area: str = Query(...)
 ):
     return get_roads_by_area(area)
+
+
+@router.get("/map")
+def map_data():
+    return get_map_data()
+
+
+@router.get("/prediction-options")
+def prediction_options():
+    return get_prediction_options()
