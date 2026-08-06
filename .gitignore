@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+env/
+venv/
+.venv/
+
+# Local dev database (regenerated automatically on startup)
+*.db
+*.sqlite3
+
+# Environment / secrets
+.env
+.env.local
+
+# OS/editor cruft
+.DS_Store
+.vscode/
+.idea/
+
+# Node (if any frontend tooling is added later)
+node_modules/

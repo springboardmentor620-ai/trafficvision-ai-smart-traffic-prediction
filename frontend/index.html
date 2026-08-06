@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>TrafficVision AI — Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <h1>TrafficVision AI</h1>
+    </div>
+    <p class="subtitle">Smart Traffic Prediction &amp; Congestion Management</p>
+
+    <form id="loginForm">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="admin" required autocomplete="username" />
+
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" />
+
+      <button type="submit">Sign in</button>
+      <p id="errorMsg" class="error"></p>
+    </form>
+
+    <div class="demo-creds">
+      <strong>Demo accounts</strong>
+      <div>admin / Admin@123 — Traffic Authority</div>
+      <div>operator1 / Operator@123 — Traffic Operator</div>
+      <div style="margin-top:8px;">New commuter? <a href="signup.html" class="link">Create a public account</a></div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.textContent = '';
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const body = new URLSearchParams();
+        body.set('username', username);
+        body.set('password', password);
+
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body,
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || 'Login failed');
+        }
+
+        const data = await res.json();
+        localStorage.setItem('tv_token', data.access_token);
+        localStorage.setItem('tv_role', data.role);
+        localStorage.setItem('tv_username', data.username);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        errorMsg.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>

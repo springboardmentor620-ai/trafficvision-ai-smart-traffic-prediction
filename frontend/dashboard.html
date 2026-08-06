@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>TrafficVision AI — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-dot"></span>
+        <h1>TrafficVision AI</h1>
+      </div>
+
+      <div class="sidebar-section-label">Main</div>
+      <ul class="nav-list">
+        <li class="nav-item active" data-page="page-dashboard">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          <span class="nav-label">Dashboard</span>
+        </li>
+        <li class="nav-item" data-page="page-monitoring">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          <span class="nav-label">Traffic Monitoring</span>
+        </li>
+        <li class="nav-item" data-page="page-map">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          <span class="nav-label">Live Map</span>
+        </li>
+        <li class="nav-item" data-page="page-roads">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          <span class="nav-label">Road Management</span>
+        </li>
+        <li class="nav-item" data-page="page-navigation">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          <span class="nav-label">Navigation</span>
+        </li>
+        <li class="nav-item" data-page="page-forecasting">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span class="nav-label">Forecasting</span>
+        </li>
+        <li class="nav-item" data-page="page-reports">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+          <span class="nav-label">Reports</span>
+        </li>
+        <li class="nav-item" data-page="page-alerts">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="nav-label">Alerts</span>
+          <span class="nav-badge" id="alertBadge" style="display:none;">0</span>
+        </li>
+        <li class="nav-item" data-page="page-analytics">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="4" width="3" height="14"/></svg>
+          <span class="nav-label">Analytics</span>
+        </li>
+        <li class="nav-item" data-page="page-trends">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/></svg>
+          <span class="nav-label">Traffic Trends</span>
+        </li>
+        <li class="nav-item" data-page="page-ai-insights">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 00-7 7c0 2.4 1.2 4.1 2.5 5.3.7.6 1 1 1.1 1.7V18h6.8v-2c.1-.7.4-1.1 1.1-1.7A7 7 0 0012 2z"/><line x1="9.5" y1="21" x2="14.5" y2="21"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+          <span class="nav-label">AI Insights</span>
+        </li>
+      </ul>
+
+      <div class="sidebar-section-label" id="adminNavLabel" style="display:none;">Admin</div>
+      <ul class="nav-list">
+        <li class="nav-item" data-page="page-users" id="userMgmtNavItem" style="display:none;">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          <span class="nav-label">User Management</span>
+        </li>
+        <li class="nav-item" data-page="page-profile">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="nav-label">Profile</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ================= MAIN AREA ================= -->
+    <div class="main-area">
+      <div class="topbar">
+        <div class="brand"><h1 id="pageHeaderTitle">Dashboard</h1></div>
+        <div class="topbar-right">
+          <span id="usernameLabel" class="mono" style="font-size:13px;color:var(--muted);"></span>
+          <span id="roleBadge" class="role-badge"></span>
+          <button class="logout-btn" id="logoutBtn">Sign out</button>
+        </div>
+      </div>
+
+      <div class="container">
+
+        <!-- ---------- PAGE: Dashboard (overview) ---------- -->
+        <section id="page-dashboard" class="page active">
+          <p class="page-title">Overview</p>
+          <p class="page-subtitle">Quick summary across all monitored roads</p>
+          <div class="stat-grid" id="statGrid">
+            <div class="stat-card"><div class="stat-value" id="statTotalRoads">—</div><div class="stat-label">Monitored roads</div></div>
+            <div class="stat-card"><div class="stat-value" id="statHigh" style="color:var(--red);">—</div><div class="stat-label">High congestion</div></div>
+            <div class="stat-card"><div class="stat-value" id="statMedium" style="color:var(--amber);">—</div><div class="stat-label">Medium congestion</div></div>
+            <div class="stat-card"><div class="stat-value" id="statLow" style="color:var(--cyan);">—</div><div class="stat-label">Low congestion</div></div>
+          </div>
+          <div class="section-header">
+            <h2>Live Traffic Monitoring</h2>
+            <span class="live-tag"><span class="live-dot"></span>refreshing every 5s</span>
+          </div>
+          <div id="roadGridPreview" class="road-grid"><div class="empty-state">Loading…</div></div>
+        </section>
+
+        <!-- ---------- PAGE: Traffic Monitoring ---------- -->
+        <section id="page-monitoring" class="page">
+          <p class="page-title">Traffic Monitoring</p>
+          <p class="page-subtitle">Vehicle density &amp; congestion tracking across all monitored roads</p>
+          <div class="section-header">
+            <h2>Live Traffic Monitoring</h2>
+            <span class="live-tag"><span class="live-dot"></span>refreshing every 5s</span>
+          </div>
+          <div id="roadGrid" class="road-grid"><div class="empty-state">Loading live road data…</div></div>
+        </section>
+
+        <!-- ---------- PAGE: Live Map ---------- -->
+        <section id="page-map" class="page">
+          <p class="page-title">Live GIS Traffic Map</p>
+          <p class="page-subtitle">Visualizing real-time road congestion by location (OpenStreetMap)</p>
+          <div id="leafletMap"></div>
+        </section>
+
+        <!-- ---------- PAGE: Road Management ---------- -->
+        <section id="page-roads" class="page">
+          <p class="page-title">Road Management</p>
+          <p class="page-subtitle">Add, edit, and remove monitored roads</p>
+
+          <div id="operatorPanel" class="panel" style="display:none;">
+            <h3>Add a monitored road</h3>
+            <form id="roadForm" class="form-row">
+              <div class="field"><label>Road name</label><input type="text" id="roadName" placeholder="e.g. Church Street" required /></div>
+              <div class="field"><label>Location</label><input type="text" id="roadLocation" placeholder="e.g. Sector 6" /></div>
+              <div class="field"><label>Lane capacity</label><input type="number" id="roadCapacity" value="100" min="1" required /></div>
+              <div class="field"><label>Latitude (optional)</label><input type="number" step="any" id="roadLat" placeholder="e.g. 17.3850" /></div>
+              <div class="field"><label>Longitude (optional)</label><input type="number" step="any" id="roadLon" placeholder="e.g. 78.4867" /></div>
+              <button type="submit">Add road</button>
+            </form>
+            <p class="hint">Add coordinates to enable Live Map and Navigation for this road.</p>
+          </div>
+
+          <div class="panel">
+            <h3>All monitored roads</h3>
+            <table id="roadsTable">
+              <thead><tr><th>Name</th><th>Location</th><th>Lane capacity</th><th>Coordinates</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---------- PAGE: Navigation (Route Analysis) ---------- -->
+        <section id="page-navigation" class="page">
+          <p class="page-title">Navigation</p>
+          <p class="page-subtitle">Alternate route suggestions, route optimization &amp; travel time estimation</p>
+
+          <div class="panel">
+            <div class="form-row">
+              <div class="field"><label>Origin road</label><select id="originRoadSelect"></select></div>
+              <div class="field"><label>Destination road</label><select id="destRoadSelect"></select></div>
+              <button type="button" id="planRouteBtn">Find route</button>
+            </div>
+            <p id="routeMsg" class="hint">Uses live OpenStreetMap routing (OSRM) — requires the machine running this to have internet access.</p>
+            <div id="routeResults" style="display:none; margin-top:16px;">
+              <div id="routeMap"></div>
+              <table id="routesTable">
+                <thead><tr><th>Route</th><th>Distance</th><th>Free-flow time</th><th>Traffic-adjusted time</th><th>Congestion factor</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- PAGE: Forecasting (Traffic Prediction) ---------- -->
+        <section id="page-forecasting" class="page">
+          <p class="page-title">Forecasting</p>
+          <p class="page-subtitle">Train congestion-prediction models and view hour-by-hour forecasts</p>
+
+          <div class="panel">
+            <div class="form-row">
+              <div class="field"><label>Road</label><select id="predictionRoadSelect"></select></div>
+              <div class="field"><label>Forecast until (date)</label><input type="date" id="forecastDate" /></div>
+              <div class="field"><label>Time</label><input type="time" id="forecastTime" value="00:00" /></div>
+              <button type="button" id="trainModelBtn">Train model</button>
+              <button type="button" id="forecastBtn">View forecast</button>
+            </div>
+            <p id="predictionMsg" class="hint"></p>
+            <div id="predictionSummary" style="display:none; margin-top:16px;">
+              <div class="metric-row"><span>Peak hour</span><span class="metric-value" id="peakHourText"></span></div>
+              <div class="metric-row"><span>Quietest hour</span><span class="metric-value" id="quietHourText"></span></div>
+            </div>
+            <table id="forecastTable" style="display:none; margin-top:16px;">
+              <thead><tr><th>Forecast time</th><th>Predicted vehicle count</th><th>Predicted congestion</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---------- PAGE: Reports ---------- -->
+        <section id="page-reports" class="page">
+          <p class="page-title">Reports</p>
+          <p class="page-subtitle">Download traffic prediction reports</p>
+          <div class="panel">
+            <div class="form-row">
+              <div class="field"><label>Road</label><select id="reportRoadSelect"></select></div>
+              <div class="field"><label>Forecast window (hours)</label><input type="number" id="reportHours" value="24" min="1" max="168" /></div>
+              <button type="button" id="downloadReportBtn">Download PDF report</button>
+            </div>
+            <p class="hint">Requires a trained model for the selected road (see Forecasting).</p>
+          </div>
+        </section>
+
+        <!-- ---------- PAGE: Alerts & Notifications ---------- -->
+        <section id="page-alerts" class="page">
+          <p class="page-title">Alerts &amp; Notifications</p>
+          <p class="page-subtitle">Congestion alerts and accident notifications across all monitored roads</p>
+
+          <div id="accidentPanel" class="panel" style="display:none;">
+            <h3>Report an accident</h3>
+            <form id="accidentForm" class="form-row">
+              <div class="field"><label>Road</label><select id="accidentRoadSelect"></select></div>
+              <div class="field">
+                <label>Severity</label>
+                <select id="accidentSeverity">
+                  <option value="high" selected>High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div class="field" style="flex:1; min-width:240px;"><label>Description</label><input type="text" id="accidentDescription" placeholder="e.g. two-vehicle collision, lane blocked" required /></div>
+              <button type="submit">Report accident</button>
+            </form>
+            <p id="accidentMsg" class="hint"></p>
+          </div>
+
+          <div id="emergencyPanel" class="panel" style="display:none;">
+            <h3>Broadcast an emergency alert</h3>
+            <form id="emergencyForm" class="form-row">
+              <div class="field">
+                <label>Road (optional — leave blank for citywide)</label>
+                <select id="emergencyRoadSelect"><option value="">Citywide / general</option></select>
+              </div>
+              <div class="field">
+                <label>Severity</label>
+                <select id="emergencySeverity">
+                  <option value="high" selected>High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div class="field" style="flex:1; min-width:240px;"><label>Message</label><input type="text" id="emergencyMessage" placeholder="e.g. road closure, flooding, VIP movement, evacuation" required /></div>
+              <button type="submit">Broadcast emergency alert</button>
+            </form>
+            <p id="emergencyMsg" class="hint"></p>
+          </div>
+
+          <div class="section-header">
+            <h2>Active &amp; recent alerts</h2>
+            <select id="alertFilter">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="acknowledged">Acknowledged</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+          <div id="alertsList" class="alerts-list"><div class="empty-state">Loading alerts…</div></div>
+        </section>
+
+        <!-- ---------- PAGE: Analytics Dashboard ---------- -->
+        <section id="page-analytics" class="page">
+          <p class="page-title">Analytics Dashboard</p>
+          <p class="page-subtitle">Traffic analytics reports, congestion heatmaps &amp; road performance tracking</p>
+
+          <div class="stat-grid">
+            <div class="stat-card"><div class="stat-value" id="anTotalRoads">—</div><div class="stat-label">Monitored roads</div></div>
+            <div class="stat-card"><div class="stat-value" id="anTotalReadings">—</div><div class="stat-label">Readings analyzed</div></div>
+            <div class="stat-card"><div class="stat-value" id="anAvgSpeed">—</div><div class="stat-label">Avg. speed (km/h)</div></div>
+            <div class="stat-card"><div class="stat-value" id="anActiveAlerts">—</div><div class="stat-label">Active alerts</div></div>
+          </div>
+
+          <div class="section-header"><h2>Congestion Heatmap</h2></div>
+          <div class="panel">
+            <div id="heatmapWrap" class="heatmap-wrap"><div class="empty-state">Loading heatmap…</div></div>
+            <p class="hint">Each row is a road; each cell is a recent time window (oldest → newest, left → right) — redder means more sustained congestion.</p>
+          </div>
+
+          <div class="section-header"><h2>Road Performance</h2></div>
+          <div class="panel">
+            <table id="performanceTable">
+              <thead><tr><th>Road</th><th>Avg vehicles</th><th>Avg speed</th><th>% time high congestion</th><th>Performance score</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---------- PAGE: Traffic Trends ---------- -->
+        <section id="page-trends" class="page">
+          <p class="page-title">Traffic Trends</p>
+          <p class="page-subtitle">Day-of-week &amp; month-of-year congestion patterns, and which roads are trending up or down</p>
+
+          <div class="stat-grid">
+            <div class="stat-card"><div class="stat-value" id="trBusiestDay">—</div><div class="stat-label">Busiest day (avg)</div></div>
+            <div class="stat-card"><div class="stat-value" id="trQuietestDay">—</div><div class="stat-label">Quietest day (avg)</div></div>
+            <div class="stat-card"><div class="stat-value" id="trWorsening">—</div><div class="stat-label">Roads worsening</div></div>
+            <div class="stat-card"><div class="stat-value" id="trImproving">—</div><div class="stat-label">Roads improving</div></div>
+          </div>
+
+          <div class="section-header"><h2>Congestion by Day of Week</h2></div>
+          <div class="panel">
+            <div id="dailyTrendChart" class="bar-chart bar-chart-7"><div class="empty-state">Loading…</div></div>
+            <p class="hint">Average congestion score (0 = low, 2 = high) across all roads, for each day of week.</p>
+          </div>
+
+          <div class="section-header"><h2>Congestion by Month</h2></div>
+          <div class="panel">
+            <div id="monthlyTrendChart" class="bar-chart bar-chart-12"><div class="empty-state">Loading…</div></div>
+            <p class="hint" id="monthlyTrendHint">Average congestion score (0 = low, 2 = high) across all roads, for each month.</p>
+          </div>
+
+          <div class="section-header"><h2>Road Trend Comparison</h2></div>
+          <div class="panel">
+            <table id="trendTable">
+              <thead><tr><th>Road</th><th>Prior avg score</th><th>Recent avg score</th><th>Change</th><th>Trend</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---------- PAGE: AI Insights ---------- -->
+        <section id="page-ai-insights" class="page">
+          <p class="page-title">AI Insights</p>
+          <p class="page-subtitle">Smart traffic recommendations and per-road pattern analysis, powered by the trained forecasting models</p>
+
+          <div class="section-header">
+            <h2>Smart Recommendations</h2>
+            <button type="button" id="downloadRecommendationsReportBtn">Download PDF report</button>
+          </div>
+          <div id="recommendationsList" class="alerts-list"><div class="empty-state">Loading recommendations…</div></div>
+
+          <div class="section-header"><h2>Pattern Analysis</h2></div>
+          <div class="panel">
+            <div class="form-row">
+              <div class="field"><label>Road</label><select id="patternRoadSelect"></select></div>
+              <button type="button" id="analyzePatternBtn">Analyze</button>
+            </div>
+            <div id="patternResult" style="margin-top:18px; display:none;">
+              <div class="stat-grid">
+                <div class="stat-card"><div class="stat-value" id="ptBusiestDay">—</div><div class="stat-label">Busiest day</div></div>
+                <div class="stat-card"><div class="stat-value" id="ptWeekday">—</div><div class="stat-label">Avg weekday score</div></div>
+                <div class="stat-card"><div class="stat-value" id="ptWeekend">—</div><div class="stat-label">Avg weekend score</div></div>
+                <div class="stat-card"><div class="stat-value" id="ptReadings">—</div><div class="stat-label">Readings analyzed</div></div>
+              </div>
+              <div id="patternChart" class="bar-chart bar-chart-7"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- PAGE: User Management (admin only) ---------- -->
+        <section id="page-users" class="page">
+          <p class="page-title">User Management</p>
+          <p class="page-subtitle">Onboard Traffic Operators / Admins and view registered users</p>
+
+          <div class="panel">
+            <h3>Onboard a user</h3>
+            <form id="createUserForm" class="form-row">
+              <div class="field"><label>Username</label><input type="text" id="newUsername" placeholder="e.g. operator2" required /></div>
+              <div class="field"><label>Password</label><input type="password" id="newPassword" placeholder="••••••••" required minlength="6" /></div>
+              <div class="field">
+                <label>Role</label>
+                <select id="newRole">
+                  <option value="operator">Traffic Operator</option>
+                  <option value="admin">Traffic Authority (Admin)</option>
+                  <option value="viewer">Public / Commuter</option>
+                </select>
+              </div>
+              <button type="submit">Create account</button>
+            </form>
+            <p id="createUserMsg" class="hint"></p>
+          </div>
+
+          <div class="panel">
+            <h3>Registered users</h3>
+            <table id="usersTable">
+              <thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---------- PAGE: Profile ---------- -->
+        <section id="page-profile" class="page">
+          <p class="page-title">Profile</p>
+          <p class="page-subtitle">Your account details</p>
+          <div class="panel" style="max-width:420px;">
+            <form id="profileForm" class="form-row" style="flex-direction:column; align-items:stretch;">
+              <div class="field"><label>Username</label><input type="text" id="profileUsername" disabled /></div>
+              <div class="field"><label>Role</label><input type="text" id="profileRole" disabled /></div>
+              <div class="field"><label>Email</label><input type="email" id="profileEmail" /></div>
+              <button type="submit" style="margin-top:8px;">Save changes</button>
+            </form>
+            <p id="profileMsg" class="hint"></p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
