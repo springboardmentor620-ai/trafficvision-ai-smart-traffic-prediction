@@ -1,0 +1,35 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #f4f7fb;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+}
+
+.card-shadow {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, .08);
+}
+
+.primary-btn {
+    background: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    transition: .3s;
+}
+
+.primary-btn:hover {
+    background: #1D4ED8;
+}
+
+.form-control {
+    border-radius: 10px !important;
+}

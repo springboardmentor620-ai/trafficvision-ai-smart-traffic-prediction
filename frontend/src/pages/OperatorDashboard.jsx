@@ -1,373 +1,193 @@
-import React, { useState, useEffect } from 'react';
-import { DashboardLayout } from '../layouts/DashboardLayout';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { StatusBadge } from '../components/common/StatusBadge';
-import { SkeletonMetric, SkeletonTable } from '../components/ui/Skeleton';
-import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../contexts/ToastContext';
-import apiClient from '../services/api';
-import { 
-  FaRoad, 
-  FaCar, 
-  FaTachometerAlt, 
-  FaCheckCircle, 
-  FaSync, 
-  FaExclamationTriangle,
-  FaClock,
-  FaShieldAlt,
-  FaExclamationCircle
-} from 'react-icons/fa';
+import { useCallback, useEffect, useState } from "react";
+import Layout from "../components/Layout";
+import { useNavigate } from "react-router-dom";
+import {
+  TrafficCone, Car, AlertTriangle, Siren, Activity, Construction,
+  MapPin, Flame, Radio, TrafficCone as SignalIcon, RefreshCw,
+  ShieldAlert, MessageSquareWarning, PencilLine, PhoneCall,
+  Thermometer, Route,
+} from "lucide-react";
 
-export const OperatorDashboard = () => {
-  const { user } = useAuth();
-  const { showSuccess, showError } = useToast();
-  const [stats, setStats] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState(null);
+const API = "http://localhost:8000";
 
-  const fetchOperatorStats = async (isManual = false) => {
-    setIsLoading(true);
-    try {
-      const res = await apiClient.get('/operator/dashboard-stats');
-      setStats(res);
-      if (isManual) {
-        showSuccess('Assigned corridor feeds refreshed from Supabase', 'Telemetry Updated');
-      }
-    } catch (err) {
-      showError(err.message || 'Failed to fetch assigned corridor telemetry');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOperatorStats();
-
-    // Auto-refresh every 5 seconds
-    const timer = setInterval(() => {
-      fetchOperatorStats();
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleStatusUpdate = async (roadId, newStatus, roadName) => {
-    setUpdatingId(roadId);
-    try {
-      await apiClient.put(`/operator/roads/${roadId}/status`, { status: newStatus });
-      showSuccess(`Status for '${roadName}' updated to ${newStatus}`, 'Corridor Status Updated');
-      fetchOperatorStats();
-    } catch (err) {
-      showError(err.message || 'Failed to update road status');
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const getBadgeType = (level) => {
-    switch (level?.toUpperCase()) {
-      case 'LOW': return 'green';
-      case 'MODERATE': return 'amber';
-      case 'HIGH':
-      case 'CRITICAL': return 'red';
-      default: return 'green';
-    }
-  };
-
-  const hasAssignedRoads = stats && stats.metrics && stats.metrics.assigned_roads > 0;
+function StatCard({ title, value, icon: Icon, color = "blue", sub }) {
+  const colors = {
+    blue: { bg: "bg-blue-500/10 border-blue-500/30", icon: "bg-blue-500/20 text-blue-400" },
+    red: { bg: "bg-red-500/10 border-red-500/30", icon: "bg-red-500/20 text-red-400" },
+    orange: { bg: "bg-orange-500/10 border-orange-500/30", icon: "bg-orange-500/20 text-orange-400" },
+    purple: { bg: "bg-purple-500/10 border-purple-500/30", icon: "bg-purple-500/20 text-purple-400" },
+    amber: { bg: "bg-amber-500/10 border-amber-500/30", icon: "bg-amber-500/20 text-amber-400" },
+    green: { bg: "bg-emerald-500/10 border-emerald-500/30", icon: "bg-emerald-500/20 text-emerald-400" },
+  }[color] || {};
 
   return (
-    <DashboardLayout role="Operator">
-      <div className="space-y-6 animate-fade-in">
+    <div className={`glass-panel p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${colors.bg}`}>
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{title}</span>
+        <div className={`p-2.5 rounded-xl ${colors.icon}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      <h3 className="mt-3 text-2xl font-extrabold text-white">{value}</h3>
+      <p className="mt-1 text-xs text-slate-400">{sub}</p>
+    </div>
+  );
+}
 
-        {/* Operator Control Desk Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 glass-panel p-4 rounded-xl border border-slate-800">
-          <div>
-            <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2.5">
-              <FaShieldAlt className="text-teal-400" />
-              <span>Operator Telemetry Control Desk</span>
-              <StatusBadge 
-                status={stats?.metrics?.current_shift || 'Duty Shift Active'} 
-                type="cyan" 
-              />
-            </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Duty Operator: <span className="text-teal-400 font-bold">{user?.name}</span> ({user?.email}) • Scoped strictly to your assigned road corridors.
+function ActionButton({ label, icon: Icon, onClick, color = "blue" }) {
+  const colors = {
+    blue: "bg-blue-600 hover:bg-blue-500",
+    red: "bg-red-600 hover:bg-red-500",
+    orange: "bg-orange-600 hover:bg-orange-500",
+    purple: "bg-purple-600 hover:bg-purple-500",
+    slate: "bg-slate-700 hover:bg-slate-600",
+    emerald: "bg-emerald-600 hover:bg-emerald-500",
+  }[color];
+
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl text-white text-xs font-semibold shadow transition-all hover:-translate-y-0.5 ${colors}`}
+    >
+      <Icon className="h-5 w-5" />
+      {label}
+    </button>
+  );
+}
+
+const LAYERS = [
+  { key: "heatmap", label: "Heatmap", icon: Thermometer },
+  { key: "traffic", label: "Current Traffic", icon: Car },
+  { key: "roads", label: "Road Status", icon: Route },
+  { key: "signals", label: "Signals", icon: SignalIcon },
+];
+
+function OperatorDashboard() {
+  const name = localStorage.getItem("name") || "Operator";
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    vehicles: null, alerts: 0, emergencies: 0, avgSpeed: null,
+    congestedRoads: 0, assignedJunction: null,
+  });
+  const [activeLayer, setActiveLayer] = useState("heatmap");
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [ovRes, altRes, emRes] = await Promise.all([
+        fetch(`${API}/analytics/overview`).catch(() => null),
+        fetch(`${API}/alerts/?limit=1`).catch(() => null),
+        fetch(`${API}/emergency/active`).catch(() => null),
+      ]);
+      const overview = ovRes && ovRes.ok ? await ovRes.json() : null;
+      const alertsData = altRes && altRes.ok ? await altRes.json() : null;
+      const emData = emRes && emRes.ok ? await emRes.json() : null;
+
+      setStats({
+        vehicles: overview?.total_vehicles ?? null,
+        alerts: Array.isArray(alertsData) ? alertsData.length : (alertsData?.count ?? 0),
+        emergencies: emData?.count ?? 0,
+        avgSpeed: overview?.avg_speed_kmh ?? null,
+        congestedRoads: overview?.high_congestion ?? 0,
+        assignedJunction: localStorage.getItem("assigned_junction") || overview?.most_congested_location || "Junction 3",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchStats(); }, [fetchStats]);
+
+  return (
+    <Layout>
+      <div className="space-y-8 py-4 animate-fade-in">
+
+        {/* Welcome Section */}
+        <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <TrafficCone className="h-6 w-6 text-blue-500 animate-pulse" />
+              Welcome back, Operator {name}
+            </h2>
+            <p className="text-slate-400 text-xs">
+              TrafficVision AI operator console synced. Active monitoring loops operational.
             </p>
           </div>
-
-          <Button variant="secondary" size="sm" onClick={() => fetchOperatorStats(true)} className="space-x-1.5 w-fit">
-            <FaSync className={isLoading ? 'animate-spin' : ''} />
-            <span>Sync Assigned Feeds</span>
-          </Button>
+          <button onClick={fetchStats}
+            className="px-4 py-2.5 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-all flex items-center gap-2 self-start md:self-auto">
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
+          </button>
         </div>
 
-        {/* 1. OPERATOR SCOPED METRIC CARDS (6 Cards Grid) */}
-        {isLoading && !stats ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <SkeletonMetric />
-            <SkeletonMetric />
-            <SkeletonMetric />
-            <SkeletonMetric />
-            <SkeletonMetric />
-            <SkeletonMetric />
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            
-            {/* Metric 1: Assigned Roads */}
-            <Card className="p-4">
-              <div className="flex flex-col justify-between h-full">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Assigned Roads</p>
-                  <div className="p-2 bg-teal-500/10 text-teal-400 rounded-lg">
-                    <FaRoad className="text-lg" />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <h3 className="text-2xl font-extrabold text-slate-100 font-mono">
-                    {stats?.metrics?.assigned_roads ?? 0}
-                  </h3>
-                  <p className="text-[10px] text-teal-400 mt-0.5 font-medium">Duty Corridors</p>
-                </div>
-              </div>
-            </Card>
+        {/* Stat Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <StatCard title="Current Vehicles" value={stats.vehicles?.toLocaleString() ?? "—"} icon={Car} color="blue" sub="Live recorded count" />
+          <StatCard title="Today's Alerts" value={stats.alerts} icon={AlertTriangle} color="amber" sub="Raised in the last 24h" />
+          <StatCard title="Emergency Calls" value={stats.emergencies} icon={Siren} color="red" sub="Ambulance & Fire" />
+          <StatCard title="Average Speed" value={stats.avgSpeed ? `${stats.avgSpeed} km/h` : "—"} icon={Activity} color="purple" sub="Citywide speed index" />
+          <StatCard title="Congested Roads" value={stats.congestedRoads} icon={Construction} color="orange" sub="Above threshold now" />
+          <StatCard title="Assigned Junction" value={stats.assignedJunction ?? "—"} icon={MapPin} color="green" sub="Your monitoring zone" />
+        </div>
 
-            {/* Metric 2: Vehicle Count */}
-            <Card className="p-4">
-              <div className="flex flex-col justify-between h-full">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Vehicle Count</p>
-                  <div className="p-2 bg-cyan-500/10 text-cyan-400 rounded-lg">
-                    <FaCar className="text-lg" />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <h3 className="text-2xl font-extrabold text-cyan-400 font-mono">
-                    {stats?.metrics?.total_vehicle_count ?? 0}
-                  </h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Assigned Volume</p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Metric 3: Active Alerts */}
-            <Card className="p-4">
-              <div className="flex flex-col justify-between h-full">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Active Alerts</p>
-                  <div className={`p-2 rounded-lg ${(stats?.metrics?.active_alerts_count || 0) > 0 ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
-                    <FaExclamationTriangle className="text-lg" />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <h3 className={`text-2xl font-extrabold font-mono ${(stats?.metrics?.active_alerts_count || 0) > 0 ? 'text-rose-400' : 'text-slate-100'}`}>
-                    {stats?.metrics?.active_alerts_count ?? 0}
-                  </h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Duty Incidents</p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Metric 4: Road Status */}
-            <Card className="p-4">
-              <div className="flex flex-col justify-between h-full">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Road Status</p>
-                  <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
-                    <FaCheckCircle className="text-lg" />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <h3 className="text-xs font-bold text-slate-100 font-mono truncate" title={stats?.metrics?.road_status || 'Operational'}>
-                    {stats?.metrics?.road_status || 'Operational'}
-                  </h3>
-                  <p className="text-[10px] text-emerald-400 mt-0.5 font-medium">Perimeter Overview</p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Metric 5: Current Congestion */}
-            <Card className="p-4">
-              <div className="flex flex-col justify-between h-full">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Congestion</p>
-                  <div className="p-2 bg-amber-500/10 text-amber-400 rounded-lg">
-                    <FaTachometerAlt className="text-lg" />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <StatusBadge 
-                    status={stats?.metrics?.congestion_status || 'Low'} 
-                    type={getBadgeType(stats?.metrics?.congestion_status)} 
-                  />
-                  <p className="text-[10px] text-slate-400 mt-1 font-medium">Peak Severity</p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Metric 6: Current Shift */}
-            <Card className="p-4">
-              <div className="flex flex-col justify-between h-full">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Current Shift</p>
-                  <div className="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
-                    <FaClock className="text-lg" />
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <span className="text-[11px] font-bold text-purple-300 block truncate" title={stats?.metrics?.current_shift || 'Duty Shift'}>
-                    {stats?.metrics?.current_shift || 'Duty Shift'}
-                  </span>
-                  <p className="text-[10px] text-slate-400 mt-0.5 font-medium">Duty Window</p>
-                </div>
-              </div>
-            </Card>
-
-          </div>
-        )}
-
-        {/* EMPTY STATE OR TELEMETRY TABLE */}
-        {!isLoading && !hasAssignedRoads ? (
-          <div className="glass-panel p-12 rounded-2xl border border-amber-500/30 text-center space-y-4 animate-fade-in">
-            <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl mx-auto">
-              <FaExclamationCircle />
+        {/* Live Map */}
+        <div className="glass-panel p-6 rounded-2xl space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Radio className="h-5 w-5 text-emerald-400" /> Live Map
+            </h3>
+            <div className="flex gap-2 flex-wrap">
+              {LAYERS.map((l) => (
+                <button
+                  key={l.key}
+                  onClick={() => setActiveLayer(l.key)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all ${activeLayer === l.key
+                    ? "bg-blue-600 border-blue-500 text-white"
+                    : "bg-slate-800/60 border-slate-700 text-slate-300 hover:bg-slate-700/60"
+                    }`}
+                >
+                  <l.icon className="h-3.5 w-3.5" /> {l.label}
+                </button>
+              ))}
             </div>
-            <div className="space-y-1">
-              <h2 className="text-xl font-bold text-slate-100">No roads assigned.</h2>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
-                No road corridors have been assigned to your operator account (<span className="text-teal-400 font-mono">{user?.email}</span>) in Supabase.
+          </div>
+
+          <div
+            onClick={() => navigate("/map", { state: { layer: activeLayer } })}
+            className="relative h-72 rounded-xl border border-slate-700/60 bg-gradient-to-br from-slate-800/60 via-slate-900 to-slate-900 flex items-center justify-center cursor-pointer overflow-hidden group"
+          >
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_40%,#f87171_0,transparent_35%),radial-gradient(circle_at_70%_60%,#fb923c_0,transparent_30%),radial-gradient(circle_at_50%_80%,#facc15_0,transparent_25%)]" />
+            <div className="relative text-center space-y-2">
+              <MapPin className="h-8 w-8 text-blue-400 mx-auto" />
+              <p className="text-sm font-semibold text-slate-200">
+                {LAYERS.find((l) => l.key === activeLayer)?.label} preview
+              </p>
+              <p className="text-xs text-slate-500 group-hover:text-blue-400 transition-colors">
+                Click to open full live monitoring map
               </p>
             </div>
-            <div className="p-3 bg-slate-900/80 max-w-lg mx-auto rounded-xl border border-slate-800 text-[11px] text-slate-300">
-              <p>Please contact an Administrator to assign road corridors and zones to your profile using the <strong>Assignment Management</strong> console.</p>
-            </div>
           </div>
-        ) : (
-          <div className="space-y-6">
-            
-            {/* 2. ASSIGNED ROADS TELEMETRY TABLE */}
-            <Card title="Assigned Corridors Traffic Desk" subtitle={`Displaying ONLY roads assigned to ${user?.name}`}>
-              {isLoading && !stats ? (
-                <SkeletonTable rows={4} />
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-300">
-                    <thead className="text-[11px] uppercase bg-slate-900/90 text-slate-400 border-b border-slate-800">
-                      <tr>
-                        <th className="py-3.5 px-4">Assigned Road Corridor</th>
-                        <th className="py-3.5 px-4">Road ID Code</th>
-                        <th className="py-3.5 px-4">Zone</th>
-                        <th className="py-3.5 px-4">Live Vehicle Count</th>
-                        <th className="py-3.5 px-4">Congestion Level</th>
-                        <th className="py-3.5 px-4">AI Status</th>
-                        <th className="py-3.5 px-4">Updated Time</th>
-                        <th className="py-3.5 px-4 text-right">Update Status Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/60 font-mono">
-                      {stats?.assigned_roads_list?.map((road) => (
-                        <tr key={road.id} className="hover:bg-slate-900/40 transition-colors">
-                          <td className="py-3.5 px-4 font-bold text-slate-100 font-sans flex items-center space-x-2">
-                            <FaRoad className="text-teal-400" />
-                            <span>{road.road_name}</span>
-                          </td>
+        </div>
 
-                          <td className="py-3.5 px-4 text-teal-300 font-bold">
-                            <span className="bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-[11px]">
-                              {road.road_code || `RD-${road.id.toString().padStart(3, '0')}`}
-                            </span>
-                          </td>
-
-                          <td className="py-3.5 px-4 text-slate-400 font-sans">
-                            <span className="bg-slate-900 px-2 py-0.5 rounded border border-slate-800 text-[11px]">
-                              {road.zone}
-                            </span>
-                          </td>
-
-                          <td className="py-3.5 px-4 text-teal-400 font-bold">{road.current_vehicle_count} veh</td>
-                          <td className="py-3.5 px-4 font-sans">
-                            <StatusBadge 
-                              status={road.congestion_level} 
-                              type={getBadgeType(road.congestion_level)} 
-                            />
-                          </td>
-
-                          <td className="py-3.5 px-4 font-sans">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                              road.ai_status === 'ACTIVE' 
-                                ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' 
-                                : 'bg-slate-800/80 text-slate-400 border-slate-700'
-                            }`}>
-                              {road.ai_status || 'SEEDED'}
-                            </span>
-                          </td>
-
-                          <td className="py-3.5 px-4 text-slate-300">
-                            {road.timestamp ? new Date(road.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A'}
-                          </td>
-
-                          <td className="py-3.5 px-4 text-right">
-                            <select
-                              disabled={updatingId === road.id}
-                              value={road.congestion_level}
-                              onChange={(e) => handleStatusUpdate(road.id, e.target.value, road.road_name)}
-                              className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-teal-500 cursor-pointer disabled:opacity-50 font-sans"
-                            >
-                              <option value="Low">Set Status: Low</option>
-                              <option value="Moderate">Set Status: Moderate</option>
-                              <option value="High">Set Status: High</option>
-                              <option value="Critical">Set Status: Critical</option>
-                            </select>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </Card>
-
-            {/* 3. ACTIVE ALERTS FEED STRICTLY FOR ASSIGNED ROADS */}
-            {stats?.active_alerts_list && stats.active_alerts_list.length > 0 && (
-              <Card title="Active Duty Incidents & Alerts" subtitle="Alerts on your assigned road corridors">
-                <div className="space-y-2">
-                  {stats.active_alerts_list.map((alert) => (
-                    <div 
-                      key={alert.id} 
-                      className="p-3 bg-slate-900/80 rounded-xl border border-rose-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-rose-500/10 text-rose-400 rounded-lg shrink-0">
-                          <FaExclamationTriangle className="text-base" />
-                        </div>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <span className="font-bold text-slate-100">{alert.road_name}</span>
-                            <span className="bg-rose-500/10 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold">
-                              {alert.alert_type}
-                            </span>
-                          </div>
-                          <span className="text-[11px] text-slate-400 font-mono">
-                            Severity: {alert.severity} • {alert.created_at ? new Date(alert.created_at).toLocaleString() : 'Recent'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded text-[11px] font-semibold w-fit">
-                        Status: {alert.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
-
+        {/* Quick Actions */}
+        <div className="glass-panel p-6 rounded-2xl space-y-4">
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5 text-orange-400" /> Quick Actions
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <ActionButton label="Report Accident" icon={ShieldAlert} color="red" onClick={() => navigate("/accidents/report")} />
+            <ActionButton label="Report Congestion" icon={MessageSquareWarning} color="orange" onClick={() => navigate("/congestion/report")} />
+            <ActionButton label="Update Traffic" icon={PencilLine} color="blue" onClick={() => navigate("/traffic-records")} />
+            <ActionButton label="Emergency" icon={PhoneCall} color="red" onClick={() => navigate("/emergency")} />
+            <ActionButton label="Heatmap" icon={Flame} color="purple" onClick={() => navigate("/heatmap")} />
+            <ActionButton label="Route Prediction" icon={Route} color="emerald" onClick={() => navigate("/route-prediction")} />
           </div>
-        )}
+        </div>
 
       </div>
-    </DashboardLayout>
+    </Layout>
   );
-};
+}
+
+export default OperatorDashboard;
