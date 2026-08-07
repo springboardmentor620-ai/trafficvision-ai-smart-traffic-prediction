@@ -1,37 +1,425 @@
-.analytics{
-    padding:60px 8%;
-    background:#f5f8ff;
+/* ===========================
+   Analytics Page
+=========================== */
+
+.analytics-page{
+    width:100%;
     min-height:100vh;
+    padding:30px;
+    background:#f4f7fc;
 }
 
-.analytics h1{
-    text-align:center;
-    color:#1e3a8a;
-    margin-bottom:40px;
+.analytics-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
 }
+
+.analytics-header h1{
+    font-size:34px;
+    color:#0f172a;
+    font-weight:700;
+}
+
+.analytics-header p{
+    margin-top:8px;
+    color:#64748b;
+    font-size:16px;
+}
+
+.live-status{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 20px;
+    background:#fff;
+    border-radius:50px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    font-weight:600;
+}
+
+.live-dot{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:#22c55e;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+
+0%{
+transform:scale(.9);
+opacity:.7;
+}
+
+50%{
+transform:scale(1.3);
+opacity:1;
+}
+
+100%{
+transform:scale(.9);
+opacity:.7;
+}
+
+}
+
+/* ===========================
+   Grid
+=========================== */
 
 .analytics-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
+width:100%;
+}
+
+.analytics-bottom{
     display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:30px;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
 }
 
-.chart-card{
-    background:white;
-    padding:25px;
+.analytics-left,
+.analytics-right{
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+}
+
+/* ===========================
+   Cards
+=========================== */
+
+.analytics-card{
+    background:#fff;
     border-radius:20px;
-    box-shadow:0 12px 30px rgba(0,0,0,.08);
+    padding:25px;
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+    transition:.3s;
 }
 
-.chart-card h2{
+.analytics-card:hover{
+    transform:translateY(-5px);
+}
+
+.analytics-card h2{
+    color:#0f172a;
     margin-bottom:20px;
-    color:#1e3a8a;
+    font-size:22px;
+}
+/* ===================================
+   Road Performance Table
+=================================== */
+
+.road-table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
 }
 
-@media(max-width:900px){
+.road-table th{
+background:#2563eb;
+color:#fff;
+padding:15px;
+font-size:15px;
+text-align:left;
+}
+
+.road-table td{
+padding:15px;
+border-bottom:1px solid #e5e7eb;
+font-size:15px;
+}
+
+.road-table tr:hover{
+background:#f8fbff;
+}
+
+.success{
+color:#16a34a;
+font-weight:700;
+}
+
+.warning{
+color:#f59e0b;
+font-weight:700;
+}
+
+.danger{
+color:#ef4444;
+font-weight:700;
+}
+
+/* ===================================
+   Historical Insights
+=================================== */
+
+.history-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+}
+
+.history-card{
+padding:25px;
+border-radius:18px;
+color:#fff;
+text-align:center;
+transition:.3s;
+box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.history-card:hover{
+transform:translateY(-6px);
+}
+
+.history-icon{
+font-size:38px;
+margin-bottom:12px;
+}
+
+.history-value{
+font-size:30px;
+font-weight:700;
+margin-bottom:10px;
+}
+
+.history-title{
+font-size:16px;
+font-weight:600;
+margin-bottom:8px;
+}
+
+.history-card small{
+font-size:14px;
+opacity:.9;
+}
+
+.blue{
+background:linear-gradient(135deg,#2563eb,#2563eb);
+}
+
+.orange{
+background:linear-gradient(135deg,#f59e0b,#ea580c);
+}
+
+.green{
+background:linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+.white{
+background:linear-gradient(135deg,#2563eb,#2563eb);
+}
+
+/* ===================================
+   System Health
+=================================== */
+
+.system-health{
+display:flex;
+flex-direction:column;
+gap:18px;
+}
+
+.system-item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:18px 20px;
+background:#f8fafc;
+border-radius:14px;
+font-weight:600;
+transition:.3s;
+}
+
+.system-item:hover{
+background:#eef5ff;
+}
+
+.online{
+color:#16a34a;
+font-weight:700;
+}
+/* ===================================
+   AI Recommendation Cards
+=================================== */
+
+.recommend-grid{
+display:flex;
+flex-direction:column;
+gap:18px;
+}
+
+.recommend-card{
+padding:22px;
+border-radius:18px;
+color:#fff;
+box-shadow:0 10px 25px rgba(0,0,0,.12);
+transition:.3s;
+}
+
+.recommend-card:hover{
+transform:translateY(-5px) scale(1.01);
+}
+
+.recommend-card h3{
+font-size:20px;
+margin-bottom:12px;
+}
+
+.recommend-card p{
+font-size:15px;
+line-height:1.6;
+margin-bottom:12px;
+opacity:.95;
+}
+
+.recommend-card strong{
+display:inline-block;
+margin-top:8px;
+padding:8px 14px;
+background:rgba(255,255,255,.18);
+border-radius:25px;
+font-size:14px;
+}
+
+.green-bg{
+background:linear-gradient(135deg,#2563eb,#2563eb);
+}
+
+.orange-bg{
+background:linear-gradient(135deg,#ea580c,#f59e0b);
+}
+
+.blue-bg{
+background:linear-gradient(135deg,#2563eb,#3b82f6);
+}
+
+/* ===================================
+   Live Analytics
+=================================== */
+
+.live-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:18px;
+}
+
+.live-box{
+background:#f8fbff;
+border-radius:16px;
+padding:22px;
+text-align:center;
+transition:.3s;
+border:1px solid #e5e7eb;
+}
+
+.live-box:hover{
+transform:translateY(-5px);
+box-shadow:0 12px 25px rgba(37,99,235,.15);
+}
+
+.live-box h3{
+font-size:16px;
+color:#64748b;
+margin-bottom:10px;
+}
+
+.live-box h1{
+font-size:34px;
+color:#2563eb;
+margin-bottom:10px;
+}
+
+.live-box p{
+font-size:14px;
+color:#6b7280;
+}
+
+/* ===================================
+   Scrollbar
+=================================== */
+
+::-webkit-scrollbar{
+width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+background:#2563eb;
+border-radius:20px;
+}
+
+::-webkit-scrollbar-track{
+background:#edf2f7;
+}
+
+/* ===================================
+   Responsive Design
+=================================== */
+
+@media(max-width:1100px){
 
 .analytics-grid{
 grid-template-columns:1fr;
+}
+
+.analytics-bottom{
+grid-template-columns:1fr;
+}
+
+.history-grid{
+grid-template-columns:1fr;
+}
+
+.live-grid{
+grid-template-columns:1fr;
+}
+
+.analytics-header{
+flex-direction:column;
+align-items:flex-start;
+gap:20px;
+}
+
+}
+
+@media(max-width:768px){
+
+.analytics-page{
+width:100%;
+max-width:1700px;
+margin:auto;
+padding:30px;
+}
+
+.analytics-card{
+padding:18px;
+}
+
+.analytics-header h1{
+font-size:28px;
+}
+
+.analytics-card h2{
+font-size:20px;
+}
+
+.road-table th,
+.road-table td{
+padding:10px;
+font-size:14px;
+}
+
+.history-value{
+font-size:24px;
+}
+
+.live-box h1{
+font-size:28px;
 }
 
 }

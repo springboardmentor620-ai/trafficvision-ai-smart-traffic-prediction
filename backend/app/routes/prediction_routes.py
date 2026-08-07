@@ -10,10 +10,6 @@ router = APIRouter(
 
 
 @router.post("/")
-def predict(request: PredictionRequest):
+async def predict(request: PredictionRequest):
 
-    result = predict_congestion(request)
-
-    return {
-        "predicted_congestion_level": result
-    }
+    return await predict_congestion(request)

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-
+import { getNotifications } from "../services/adminNotifications";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 
 import TrafficMap from "../components/TrafficMap";
 import TravelTime from "../components/TravelTime";
 
-import TrafficAlerts from "../components/TrafficAlerts";
+
 import RouteComparison from "../components/RouteComparison";
 
 import { predictTraffic } from "../services/predictionService";
@@ -31,19 +31,8 @@ function UserDashboard() {
   const [prediction, setPrediction] = useState("");
 
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-
-    const userName = localStorage.getItem("name");
-
-    if (userName) {
-      setName(userName);
-    }
-
-    loadAreas();
-
-  }, []);
-    const loadAreas = async () => {
+  const [notifications, setNotifications] = useState([]);
+  const loadAreas = async () => {
 
     try {
 
@@ -60,6 +49,37 @@ function UserDashboard() {
     }
 
   };
+  useEffect(() => {
+
+    const initializeDashboard = async () => {
+
+        const userName = localStorage.getItem("name");
+
+        if (userName) {
+            setName(userName);
+        }
+
+        await loadAreas();
+
+        try {
+
+            const data = await getNotifications();
+
+            setNotifications(data);
+
+        }
+
+        catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
+
+    initializeDashboard();
+
+}, []);
 
   const fetchAreaDetails = async () => {
 
@@ -156,23 +176,23 @@ function UserDashboard() {
 
       setPrediction(result.predicted_congestion_level);
 
-    } catch (error) {
+      } catch (error) {
 
-      console.log(error);
+        console.log(error);
 
-      alert("Prediction failed.");
+        alert("Prediction failed.");
 
-    }
+      }
 
-    setLoading(false);
+      setLoading(false);
 
-  };
+    };
 
-  return (
-    <>
-      <Navbar />
+    return (
+      <>
+        <Navbar />
 
-      <div className="dashboard">
+        <div className="dashboard">
 
         <div className="dashboard-header">
 
@@ -234,6 +254,7 @@ function UserDashboard() {
               and generate AI-powered predictions for Bengaluru traffic.
             </p>
 
+          </div>
             <select
               value={selectedArea}
               onChange={(e) => setSelectedArea(e.target.value)}
@@ -274,28 +295,28 @@ function UserDashboard() {
           </div>
           {trafficData && (
 
-  <div className="dashboard-panel">
+            <div className="dashboard-panel">
 
-    <h2>📊 Traffic Information</h2>
+            <h2>📊 Traffic Information</h2>
 
-    <table>
+            <table>
 
-      <tbody>
+            <tbody>
 
-        <tr>
-          <td><strong>Area</strong></td>
-          <td>{trafficData["Area Name"]}</td>
-        </tr>
+              <tr>
+                <td><strong>Area</strong></td>
+                <td>{trafficData["Area Name"]}</td>
+              </tr>
 
-        <tr>
-          <td><strong>Road</strong></td>
-          <td>{trafficData["Road/Intersection Name"]}</td>
-        </tr>
+              <tr>
+                <td><strong>Road</strong></td>
+                <td>{trafficData["Road/Intersection Name"]}</td>
+              </tr>
 
-        <tr>
-          <td><strong>Date</strong></td>
-          <td>{trafficData["Date"]}</td>
-        </tr>
+              <tr>
+                <td><strong>Date</strong></td>
+                <td>{trafficData["Date"]}</td>
+              </tr>
 
         <tr>
           <td><strong>Traffic Volume</strong></td>
@@ -369,7 +390,8 @@ function UserDashboard() {
   </div>
 
 )}
-{prediction !== "" && (
+{
+  prediction !== "" && (
 
   <div className="prediction-box">
 
@@ -403,26 +425,76 @@ function UserDashboard() {
   </div>
 
 )}
+<div className="dashboard-panel">
+
+    <h2>🔔 Latest Notifications</h2>
+
+    {
+
+        notifications.length === 0 ?
+
+        (
+
+            <p>No notifications available.</p>
+
+        )
+
+        :
+
+        (
+
+            notifications.map((item) => (
+
+                <div
+                    key={item._id}
+                    className="notification-card"
+                >
+
+                    <h3>{item.title}</h3>
+
+                    <p>{item.message}</p>
+
+                    <span
+                        className={`priority ${item.priority.toLowerCase()}`}
+                    >
+                        {item.priority}
+                    </span>
+
+                    <p>
+
+                        {new Date(item.created_at).toLocaleString()}
+
+                    </p>
+
+                </div>
+
+            ))
+
+        )
+
+    }
+
+</div>
         
 
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "30px",
-            color: "#6b7280",
-            fontSize: "16px",
-          }}
-        >
-          Monitor live traffic conditions, analyze congestion, and generate AI-powered predictions for Bengaluru traffic.
-        </div>
+<div
+  style={{
+    textAlign: "center",
+    marginBottom: "30px",
+    color: "#6b7280",
+    fontSize: "16px",
+    }}
+>
+  Monitor live traffic conditions, analyze congestion, and generate AI-powered predictions for Bengaluru traffic.
+</div>
 
         
 
-      </div>
 
-      <Footer />
 
-    </>
+<Footer />
+
+</>
   );
 }
 

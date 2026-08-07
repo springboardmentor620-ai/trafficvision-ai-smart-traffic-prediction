@@ -1,195 +1,572 @@
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
+import "../styles/Analytics.css";
 
 import {
-  BarChart,
-  Bar,
+  ResponsiveContainer,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
+  CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Legend
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend,
 } from "recharts";
 
-import "../styles/analytics.css";
+/* ===========================
+   Traffic Trend Data
+=========================== */
 
-const trafficData = [
-
-  { area: "Indiranagar", volume: 5600 },
-  { area: "Whitefield", volume: 8300 },
-  { area: "Jayanagar", volume: 4700 },
-  { area: "MG Road", volume: 9200 },
-  { area: "Electronic City", volume: 10800 }
-
+const trafficTrend = [
+  { day: "Mon", traffic: 420 },
+  { day: "Tue", traffic: 510 },
+  { day: "Wed", traffic: 610 },
+  { day: "Thu", traffic: 575 },
+  { day: "Fri", traffic: 760 },
+  { day: "Sat", traffic: 690 },
+  { day: "Sun", traffic: 430 },
 ];
+
+/* ===========================
+   Peak Hour Data
+=========================== */
+
+const peakHours = [
+  { hour: "6 AM", vehicles: 120 },
+  { hour: "9 AM", vehicles: 430 },
+  { hour: "12 PM", vehicles: 260 },
+  { hour: "3 PM", vehicles: 340 },
+  { hour: "6 PM", vehicles: 540 },
+  { hour: "9 PM", vehicles: 180 },
+];
+
+/* ===========================
+   Congestion Data
+=========================== */
 
 const congestionData = [
-
-  { day: "Mon", congestion: 52 },
-  { day: "Tue", congestion: 63 },
-  { day: "Wed", congestion: 70 },
-  { day: "Thu", congestion: 61 },
-  { day: "Fri", congestion: 88 },
-  { day: "Sat", congestion: 74 },
-  { day: "Sun", congestion: 48 }
-
-];
-
-const pieData = [
-
   { name: "Low", value: 30 },
   { name: "Medium", value: 45 },
-  { name: "High", value: 25 }
-
+  { name: "High", value: 25 },
 ];
 
-const speedData = [
-
-  { area: "Indiranagar", speed: 42 },
-  { area: "Whitefield", speed: 33 },
-  { area: "Jayanagar", speed: 38 },
-  { area: "MG Road", speed: 29 },
-  { area: "Electronic City", speed: 31 }
-
+const COLORS = [
+  "#22c55e",
+  "#f59e0b",
+  "#ef4444",
 ];
 
-const COLORS = ["#22c55e", "#f59e0b", "#ef4444"];
+/* ===========================
+   Road Performance
+=========================== */
+
+const roads = [
+  {
+    area: "Silk Board",
+    speed: "18 km/h",
+    status: "Heavy",
+    color: "danger",
+  },
+  {
+    area: "Whitefield",
+    speed: "34 km/h",
+    status: "Moderate",
+    color: "warning",
+  },
+  {
+    area: "MG Road",
+    speed: "47 km/h",
+    status: "Smooth",
+    color: "success",
+  },
+  {
+    area: "Hebbal",
+    speed: "29 km/h",
+    status: "Moderate",
+    color: "warning",
+  },
+];
 
 function Analytics() {
 
   return (
 
-    <>
-      <Navbar />
+    <div className="analytics-page">
 
-      <div className="analytics">
+      {/* ================= HEADER ================= */}
 
-        <h1>Traffic Analytics Dashboard</h1>
+      <div className="analytics-header">
 
-        <div className="analytics-grid">
+        <div>
 
-          <div className="chart-card">
+          <h1>
+            📊 Analytics Dashboard
+          </h1>
 
-            <h2>Traffic Volume by Area</h2>
+          <p>
+            AI-powered Traffic Analytics & Congestion Insights
+          </p>
 
-            <ResponsiveContainer width="100%" height={300}>
+        </div>
 
-              <BarChart data={trafficData}>
+        <div className="live-status">
 
-                <CartesianGrid strokeDasharray="3 3"/>
+          <div className="live-dot"></div>
 
-                <XAxis dataKey="area"/>
+          Live Monitoring
 
-                <YAxis/>
+        </div>
 
-                <Tooltip/>
+      </div>
 
-                <Bar
-                  dataKey="volume"
-                  fill="#2563eb"
-                />
+      {/* ================= FIRST ROW ================= */}
 
-              </BarChart>
+      <div className="analytics-grid">
 
-            </ResponsiveContainer>
+        {/* Traffic Trend */}
+
+        <div className="analytics-card">
+
+          <h2>📈 Traffic Trend</h2>
+
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
+
+            <LineChart
+              data={trafficTrend}
+            >
+
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis dataKey="day" />
+
+              <YAxis />
+
+              <Tooltip />
+
+              <Line
+                type="monotone"
+                dataKey="traffic"
+                stroke="#2563eb"
+                strokeWidth={4}
+              />
+
+            </LineChart>
+
+          </ResponsiveContainer>
+
+        </div>
+
+        {/* Peak Hour */}
+
+        <div className="analytics-card">
+
+          <h2>📊 Peak Hour Analysis</h2>
+
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
+
+            <BarChart
+              data={peakHours}
+            >
+
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis dataKey="hour" />
+
+              <YAxis />
+
+              <Tooltip />
+
+              <Legend />
+
+              <Bar
+                dataKey="vehicles"
+                fill="#16a34a"
+                radius={[8, 8, 0, 0]}
+              />
+
+            </BarChart>
+
+          </ResponsiveContainer>
+
+        </div>
+
+      </div>
+
+      {/* ================= SECOND ROW ================= */}
+
+      <div className="analytics-grid">
+
+        {/* Congestion Distribution */}
+
+        <div className="analytics-card">
+
+          <h2>🥧 Congestion Distribution</h2>
+
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
+
+            <PieChart>
+
+              <Pie
+                data={congestionData}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={110}
+                label
+              >
+
+                {
+                  congestionData.map((item, index) => (
+
+                    <Cell
+                      key={index}
+                      fill={COLORS[index]}
+                    />
+
+                  ))
+                }
+
+              </Pie>
+
+              <Tooltip />
+
+              <Legend />
+
+            </PieChart>
+
+          </ResponsiveContainer>
+
+        </div>
+
+        {/* Road Performance */}
+
+        <div className="analytics-card">
+
+          <h2>🚦 Road Performance</h2>
+
+          <table className="road-table">
+
+            <thead>
+
+              <tr>
+
+                <th>Area</th>
+
+                <th>Speed</th>
+
+                <th>Status</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {roads.map((road, index) => (
+
+                <tr key={index}>
+
+                  <td>{road.area}</td>
+
+                  <td>{road.speed}</td>
+
+                  <td>
+
+                    <span className={road.color}>
+                      {road.status}
+                    </span>
+
+                  </td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+            {/* ================= THIRD ROW ================= */}
+
+      <div className="analytics-bottom">
+
+        {/* LEFT SIDE */}
+
+        <div className="analytics-left">
+
+          {/* Historical Insights */}
+
+          <div className="analytics-card">
+
+            <h2>📅 Historical Insights</h2>
+
+            <div className="history-grid">
+
+              <div className="history-card blue">
+
+                <div className="history-icon">🚦</div>
+
+                <div className="history-value">64%</div>
+
+                <div className="history-title">
+                  Average Congestion
+                </div>
+
+                <small>↑ 8% This Week</small>
+
+              </div>
+
+              <div className="history-card orange">
+
+                <div className="history-icon">📅</div>
+
+                <div className="history-value">
+                  Friday
+                </div>
+
+                <div className="history-title">
+                  Peak Day
+                </div>
+
+                <small>5 PM - 8 PM</small>
+
+              </div>
+
+              <div className="history-card green">
+
+                <div className="history-icon">🌙</div>
+
+                <div className="history-value">
+                  Sunday
+                </div>
+
+                <div className="history-title">
+                  Lowest Traffic
+                </div>
+
+                <small>Early Morning</small>
+
+              </div>
+
+              <div className="history-card purple">
+
+                <div className="history-icon">🚗</div>
+
+                <div className="history-value">
+                  41 km/h
+                </div>
+
+                <div className="history-title">
+                  Avg Speed
+                </div>
+
+                <small>↑ Better Flow</small>
+
+              </div>
+
+            </div>
 
           </div>
 
-          <div className="chart-card">
+          {/* System Health */}
 
-            <h2>Weekly Congestion Trend</h2>
+          <div className="analytics-card">
 
-            <ResponsiveContainer width="100%" height={300}>
+            <h2>🟢 System Health</h2>
 
-              <LineChart data={congestionData}>
+            <div className="system-health">
 
-                <CartesianGrid strokeDasharray="3 3"/>
+              <div className="system-item">
 
-                <XAxis dataKey="day"/>
+                <span>Backend API</span>
 
-                <YAxis/>
+                <span className="online">
+                  ● Running
+                </span>
 
-                <Tooltip/>
+              </div>
 
-                <Line
-                  type="monotone"
-                  dataKey="congestion"
-                  stroke="#ef4444"
-                  strokeWidth={3}
-                />
+              <div className="system-item">
 
-              </LineChart>
+                <span>Machine Learning</span>
 
-            </ResponsiveContainer>
+                <span className="online">
+                  ● Connected
+                </span>
 
-          </div>
+              </div>
 
-          <div className="chart-card">
+              <div className="system-item">
 
-            <h2>Traffic Distribution</h2>
+                <span>Database</span>
 
-            <ResponsiveContainer width="100%" height={300}>
+                <span className="online">
+                  ● Healthy
+                </span>
 
-              <PieChart>
+              </div>
 
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  outerRadius={100}
-                  label
-                >
+              <div className="system-item">
 
-                  {
-                    pieData.map((entry,index)=>(
+                <span>Traffic API</span>
 
-                      <Cell
-                        key={index}
-                        fill={COLORS[index]}
-                      />
+                <span className="online">
+                  ● Active
+                </span>
 
-                    ))
-                  }
+              </div>
 
-                </Pie>
-
-                <Legend/>
-
-              </PieChart>
-
-            </ResponsiveContainer>
+            </div>
 
           </div>
 
-          <div className="chart-card">
+        </div>
 
-            <h2>Average Speed by Area</h2>
+        {/* RIGHT SIDE */}
 
-            <ResponsiveContainer width="100%" height={300}>
+        <div className="analytics-right">
 
-              <BarChart data={speedData}>
+          {/* AI Recommendations */}
 
-                <CartesianGrid strokeDasharray="3 3"/>
+          <div className="analytics-card">
 
-                <XAxis dataKey="area"/>
+            <h2>🤖 AI Recommendations</h2>
 
-                <YAxis/>
+            <div className="recommend-grid">
 
-                <Tooltip/>
+              <div className="recommend-card green-bg">
 
-                <Bar
-                  dataKey="speed"
-                  fill="#10b981"
-                />
+                <h3>
+                  🚗 Alternate Route
+                </h3>
 
-              </BarChart>
+                <p>
 
-            </ResponsiveContainer>
+                  Use NICE Road to bypass
+                  Silk Board traffic.
+
+                </p>
+
+                <strong>
+
+                  Save 12 Minutes
+
+                </strong>
+
+              </div>
+
+              <div className="recommend-card orange-bg">
+
+                <h3>
+
+                  🚦 Congestion Alert
+
+                </h3>
+
+                <p>
+
+                  Heavy traffic expected
+                  near Hebbal.
+
+                </p>
+
+                <strong>
+
+                  5 PM - 8 PM
+
+                </strong>
+
+              </div>
+
+              <div className="recommend-card blue-bg">
+
+                <h3>
+
+                  🤖 AI Optimization
+
+                </h3>
+
+                <p>
+
+                  Increase signal timing
+                  at MG Road Junction.
+
+                </p>
+
+                <strong>
+
+                  +15% Better Flow
+
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+                    {/* Live Analytics */}
+
+          <div className="analytics-card">
+
+            <h2>📡 Live Analytics Status</h2>
+
+            <div className="live-grid">
+
+              <div className="live-box">
+
+                <h3>Last Prediction</h3>
+
+                <h1>2 sec</h1>
+
+                <p>Latest AI Prediction</p>
+
+              </div>
+
+              <div className="live-box">
+
+                <h3>Traffic Alerts</h3>
+
+                <h1>5</h1>
+
+                <p>Currently Active</p>
+
+              </div>
+
+              <div className="live-box">
+
+                <h3>Active Roads</h3>
+
+                <h1>28</h1>
+
+                <p>Being Monitored</p>
+
+              </div>
+
+              <div className="live-box">
+
+                <h3>Auto Refresh</h3>
+
+                <h1>30s</h1>
+
+                <p>Real-Time Updates</p>
+
+              </div>
+
+            </div>
 
           </div>
 
@@ -197,9 +574,7 @@ function Analytics() {
 
       </div>
 
-      <Footer />
-
-    </>
+    </div>
 
   );
 

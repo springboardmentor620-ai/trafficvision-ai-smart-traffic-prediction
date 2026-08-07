@@ -1,215 +1,292 @@
-import { useState } from "react";
-import { getAreaReport } from "../services/reportService";
+import { useEffect, useState } from "react";
 import "../styles/Reports.css";
 
-const areas = [
-  "Electronic City",
-  "Hebbal",
-  "Indiranagar",
-  "Jayanagar",
-  "Koramangala",
-  "M.G. Road",
-  "Whitefield",
-  "Yeshwanthpur",
-];
-
 function Reports() {
-  const [selectedArea, setSelectedArea] = useState("");
+
   const [report, setReport] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  const generateReport = async () => {
-    if (selectedArea === "") {
-      alert("Please select an area.");
-      return;
-    }
+  useEffect(() => {
 
-    try {
-      setLoading(true);
+    const data = JSON.parse(
+      localStorage.getItem("reportData")
+    );
 
-      const response = await getAreaReport(selectedArea);
+    setReport(data);
 
-      setReport(response.data);
-    } catch (error) {
-      console.log(error);
-      alert("Unable to generate report.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, []);
 
   const downloadPDF = () => {
     window.print();
   };
 
-  const downloadPPT = () => {
-    alert("PPT Download will be added next.");
-  };
+  if (!report) {
+    return (
+      <div className="report-container">
+        <h2 style={{ textAlign: "center" }}>
+          No report available.
+        </h2>
+        <p style={{ textAlign: "center" }}>
+          Please generate a prediction first.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="reports-page">
 
-      <div className="report-container">
+    <div className="report-container">
 
-        <h1 className="report-title">
-          📊 Traffic Report Generator
-        </h1>
+      <h1 className="report-title">
+        📊 Smart Traffic Report
+      </h1>
 
-        <hr />
+      <hr />
 
-        <div className="report-selection">
+      {/* Journey Information */}
 
-          <label>Select Area</label>
+      <div className="journey-card">
 
-          <select
-            value={selectedArea}
-            onChange={(e) => setSelectedArea(e.target.value)}
-          >
-            <option value="">Select Area</option>
+        <h2>📍 Journey Information</h2>
 
-            {areas.map((area) => (
-              <option
-                key={area}
-                value={area}
-              >
-                {area}
-              </option>
-            ))}
-          </select>
+        <div className="journey-grid">
 
-          <button
-            className="generate-btn"
-            onClick={generateReport}
-          >
-            Generate Report
-          </button>
+          <div className="route-box">
+            <h3>📍 Source</h3>
+            <h2>{report.source}</h2>
+          </div>
+
+          <div className="route-box">
+            <h3>🎯 Destination</h3>
+            <h2>{report.destination}</h2>
+          </div>
 
         </div>
 
-        {loading && (
-          <h2 style={{ textAlign: "center" }}>
-            Loading Report...
-          </h2>
+      </div>
+
+      <hr />
+
+      {/* Recommended Route */}
+
+      <div className="route-box">
+
+        <h2>🟢 Recommended Route</h2>
+
+        <h3>🛣 Route Timeline</h3>
+
+        <div className="timeline-box">
+
+          {report.route.timeline.map((road, index) => (
+
+            <div key={index} className="timeline-item">
+
+              {index === 0
+                ? "📍 "
+                : index === report.route.timeline.length - 1
+                ? "🎯 "
+                : "🚦 "
+              }
+
+              {road}
+
+            </div>
+
+          ))}
+
+        </div>
+
+        <h3>📊 Route Details</h3>
+
+        <div className="report-table">
+
+          <div className="table-row">
+            <span>Distance</span>
+            <span>{report.route.distance} km</span>
+          </div>
+
+          <div className="table-row">
+            <span>Time</span>
+            <span>{report.route.duration} mins</span>
+          </div>
+
+          <div className="table-row">
+            <span>Traffic</span>
+            <span>{report.route.traffic}</span>
+          </div>
+
+          <div className="table-row">
+            <span>Congestion</span>
+            <span>{report.predicted_congestion.toFixed(1)}%</span>
+          </div>
+
+          <div className="table-row">
+            <span>Fuel</span>
+            <span>{report.route.fuel} L</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <hr />
+
+      {/* Alternate Route */}
+
+      {report.alternate_route && (
+
+        <div className="route-box">
+
+          <h2>🔴 Alternate Route</h2>
+
+          <h3>🛣 Route Timeline</h3>
+
+          <div className="timeline-box">
+
+            {report.alternate_route.timeline.map((road, index) => (
+
+              <div key={index} className="timeline-item">
+
+                {index === 0
+                  ? "📍 "
+                  : index === report.alternate_route.timeline.length - 1
+                  ? "🎯 "
+                  : "🚦 "
+                }
+
+                {road}
+
+              </div>
+
+            ))}
+
+          </div>
+
+          <h3>📊 Route Details</h3>
+
+          <div className="report-table">
+
+            <div className="table-row">
+              <span>Distance</span>
+              <span>{report.alternate_route.distance} km</span>
+            </div>
+
+            <div className="table-row">
+              <span>Time</span>
+              <span>{report.alternate_route.duration} mins</span>
+            </div>
+
+            <div className="table-row">
+              <span>Traffic</span>
+              <span>{report.alternate_route.traffic}</span>
+            </div>
+
+            <div className="table-row">
+              <span>Congestion</span>
+              <span>
+                {report.alternate_route.predicted_congestion.toFixed(1)}%
+              </span>
+            </div>
+
+            <div className="table-row">
+              <span>Fuel</span>
+              <span>{report.alternate_route.fuel} L</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+
+      <hr />
+
+      {/* Traffic Alerts */}
+
+      <div className="report-section">
+
+        <h2>🚨 Traffic Alerts</h2>
+
+        <ul className="roads-list">
+
+          {report.alerts.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+
+        </ul>
+
+      </div>
+
+      <hr />
+
+      {/* AI Recommendations */}
+
+      <div className="report-section">
+
+        <h2>💡 AI Recommendations</h2>
+
+        <ul className="roads-list">
+
+          {report.recommendations.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+
+        </ul>
+
+      </div>
+
+      <hr />
+
+      {/* AI Summary */}
+
+      <div className="summary-box">
+
+        <h2>🤖 AI Summary</h2>
+
+        <p>
+          The recommended route from
+          <b> {report.source}</b>
+          to
+          <b> {report.destination}</b>
+          covers
+          <b> {report.route.distance} km</b>
+          with an estimated travel time of
+          <b> {report.route.duration} minutes</b>.
+        </p>
+
+        <p>
+          Traffic is
+          <b> {report.route.traffic}</b>
+          with
+          <b> {report.predicted_congestion.toFixed(1)}%</b>
+          congestion.
+        </p>
+
+        <p>
+          Estimated fuel consumption is
+          <b> {report.route.fuel} L</b>.
+        </p>
+
+        {report.alternate_route && (
+          <p>
+            An alternate route is available with a travel time of
+            <b> {report.alternate_route.duration} minutes</b>.
+          </p>
         )}
 
-        {report && (
+      </div>
 
-          <>
+      <hr />
 
-            <hr />
+      {/* Download */}
 
-            <h2>
-              Area : {report.area}
-            </h2>
+      <div className="download-buttons">
 
-            <div className="report-table">
-
-              <div className="table-row">
-                <span>Average Speed</span>
-                <span>{report.average_speed} km/h</span>
-              </div>
-
-              <div className="table-row">
-                <span>Traffic Volume</span>
-                <span>{report.traffic_volume}</span>
-              </div>
-
-              <div className="table-row">
-                <span>Travel Time Index</span>
-                <span>{report.travel_time_index}</span>
-              </div>
-
-              <div className="table-row">
-                <span>Road Capacity</span>
-                <span>{report.road_capacity}%</span>
-              </div>
-
-              <div className="table-row">
-                <span>Incident Reports</span>
-                <span>{report.incident_reports}</span>
-              </div>
-
-              <div className="table-row">
-                <span>Environmental Impact</span>
-                <span>{report.environmental_impact}</span>
-              </div>
-
-              <div className="table-row">
-                <span>Signal Compliance</span>
-                <span>{report.signal_compliance}%</span>
-              </div>
-
-              <div className="table-row">
-                <span>Pedestrian Count</span>
-                <span>{report.pedestrian_count}</span>
-              </div>
-
-              <div className="table-row">
-                <span>Weather</span>
-                <span>{report.weather}</span>
-              </div>
-
-              <div className="table-row">
-                <span>Roadwork</span>
-                <span>{report.roadwork}</span>
-              </div>
-
-            </div>
-
-            <hr />
-
-            <h2>
-              🛣 Available Roads
-            </h2>
-
-            <ul className="roads-list">
-
-              {report.roads.map((road) => (
-
-                <li key={road}>
-                  {road}
-                </li>
-
-              ))}
-
-            </ul>
-
-            <hr />
-
-            <div className="summary-box">
-
-              <h2>
-                🤖 AI Summary
-              </h2>
-
-              <p>{report.summary.traffic}</p>
-
-              <p>{report.summary.travel}</p>
-
-              <p>{report.summary.roadwork}</p>
-
-              <p>{report.summary.peak}</p>
-
-            </div>
-
-            <hr />
-
-            <div className="download-buttons">
-
-              <button
-                className="pdf-btn"
-                onClick={downloadPDF}
-              >
-                ⬇ Download PDF
-              </button>
-
-              
-
-            </div>
-
-          </>
-
-        )}
+        <button
+          className="pdf-btn"
+          onClick={downloadPDF}
+        >
+          ⬇ Download PDF
+        </button>
 
       </div>
 

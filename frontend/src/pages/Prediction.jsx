@@ -1,147 +1,153 @@
 import { useState } from "react";
 import { predictTraffic } from "../services/predictionService";
 import "../styles/Prediction.css";
-
-const roadOptions = {
-  "Electronic City": [
-    "Hosur Road",
-    "Silk Board Junction",
-  ],
-
-  Hebbal: [
-    "Hebbal Flyover",
-    "Ballari Road",
-  ],
-
-  Indiranagar: [
-    "100 Feet Road",
-    "CMH Road",
-  ],
-
-  Jayanagar: [
-    "Jayanagar 4th Block",
-    "South End Circle",
-  ],
-
-  Koramangala: [
-    "Sony World Junction",
-    "Sarjapur Road",
-  ],
-
-  "M.G. Road": [
-    "Trinity Circle",
-    "Anil Kumble Circle",
-  ],
-
-  Whitefield: [
-    "ITPL Main Road",
-    "Marathahalli Bridge",
-  ],
-
-  Yeshwanthpur: [
-    "Tumkur Road",
-    "Yeshwanthpur Circle",
-  ],
-};
+import { useNavigate } from "react-router-dom";
+const AREAS = [
+  "Electronic City",
+  "Hebbal",
+  "Indiranagar",
+  "Jayanagar",
+  "Koramangala",
+  "M.G. Road",
+  "Whitefield",
+  "Yeshwanthpur",
+];
 
 function Prediction() {
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
 
-  const [prediction, setPrediction] = useState(null);
-
-  const [status, setStatus] = useState("");
-
-  const [recommendation, setRecommendation] = useState("");
+  const [result, setResult] = useState(null);
 
   const [formData, setFormData] = useState({
-    area_name: "",
-    road_name: "",
+    source: "",
+    destination: "",
   });
 
   const handleChange = (e) => {
+
     const { name, value } = e.target;
 
-    if (name === "area_name") {
-      setFormData({
-        area_name: value,
-        road_name: "",
-      });
-
-      return;
-    }
-
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
+
+  };
+
+  const swapLocations = () => {
+
+    setFormData((prev) => ({
+      source: prev.destination,
+      destination: prev.source,
+    }));
+
   };
 
   const handlePrediction = async () => {
-    if (!formData.area_name || !formData.road_name) {
-      alert("Please select Area and Road.");
-      return;
+
+    if (!formData.source || !formData.destination) {
+
+        alert("Please select Source and Destination");
+
+        return;
+
     }
 
     try {
-      setLoading(true);
 
-      const payload = {
-        area_name: formData.area_name,
-        road_name: formData.road_name,
+        setLoading(true);
 
-        traffic_volume: 35000,
-        average_speed: 35,
-        travel_time_index: 1.5,
-        road_capacity_utilization: 80,
-        incident_reports: 1,
-        environmental_impact: 70,
-        public_transport_usage: 60,
-        traffic_signal_compliance: 85,
-        parking_usage: 75,
-        pedestrian_count: 120,
-        weather_conditions: "Clear",
-        roadwork_activity: "No",
-        year: 2022,
-        month: 1,
-        day: 15,
-      };
+        const response = await predictTraffic({
 
-      const result = await predictTraffic(payload);
+            source: formData.source,
 
-      const value = Number(result.predicted_congestion_level);
+            destination: formData.destination
 
-      setPrediction(value);
+        });
 
-      if (value < 35) {
-        setStatus("🟢 Smooth Traffic");
-        setRecommendation(
-          "Traffic is flowing smoothly. No congestion is expected."
+        console.log(response);
+
+        setResult(response);
+
+        localStorage.setItem(
+
+            "latestPrediction",
+
+            JSON.stringify(response)
+
         );
-      } else if (value < 65) {
-        setStatus("🟡 Moderate Traffic");
-        setRecommendation(
-          "Moderate traffic expected. Start your journey a little earlier."
+        localStorage.setItem(
+          "reportData",
+          JSON.stringify(response)
         );
-      } else if (value < 85) {
-        setStatus("🟠 Heavy Traffic");
-        setRecommendation(
-          "Heavy congestion expected. Use an alternate route if possible."
+
+        const previous = JSON.parse(
+
+            localStorage.getItem("trafficAlerts")
+
+        ) || [];
+
+        previous.push(response);
+
+        localStorage.setItem(
+
+            "trafficAlerts",
+
+            JSON.stringify(previous)
+
         );
-      } else {
-        setStatus("🔴 Severe Congestion");
-        setRecommendation(
-          "Avoid this route during peak hours."
-        );
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Prediction Failed");
-    } finally {
-      setLoading(false);
+
+        setTimeout(() => {
+
+            navigate("/recommendations");
+
+        }, 2000);
+
     }
+
+    catch (err) {
+
+        console.log(err);
+
+        alert("Prediction Failed");
+
+    }
+
+    finally {
+
+        setLoading(false);
+
+    }
+
+};
+
+  const getStatusColor = (severity) => {
+
+    switch (severity) {
+
+      case "Severe":
+        return "#dc2626";
+
+      case "High":
+        return "#ef4444";
+
+      case "Medium":
+        return "#f59e0b";
+
+      case "Low":
+        return "#22c55e";
+
+      default:
+        return "#3b82f6";
+
+    }
+
   };
 
   return (
+
     <div className="prediction-page">
 
       <h1 className="prediction-title">
@@ -149,7 +155,7 @@ function Prediction() {
       </h1>
 
       <p className="prediction-subtitle">
-        Select a Bengaluru area and road to predict traffic congestion.
+        Select a source and destination to predict traffic congestion.
       </p>
 
       <div className="prediction-form">
@@ -157,41 +163,75 @@ function Prediction() {
         <div className="form-grid">
 
           <div className="form-group">
-            <label>Area</label>
+
+            <label>📍 Source</label>
 
             <select
-              name="area_name"
-              value={formData.area_name}
+              name="source"
+              value={formData.source}
               onChange={handleChange}
             >
-              <option value="">Select Area</option>
 
-              {Object.keys(roadOptions).map((area) => (
-                <option key={area} value={area}>
+              <option value="">
+                Select Source
+              </option>
+
+              {AREAS.map((area) => (
+
+                <option
+                  key={area}
+                  value={area}
+                >
                   {area}
                 </option>
+
               ))}
+
             </select>
+
+          </div>
+
+          <div className="swap-container">
+
+            <button
+              type="button"
+              className="swap-btn"
+              onClick={swapLocations}
+            >
+              ⇄
+            </button>
+
           </div>
 
           <div className="form-group">
-            <label>Road</label>
+
+            <label>🎯 Destination</label>
 
             <select
-              name="road_name"
-              value={formData.road_name}
+              name="destination"
+              value={formData.destination}
               onChange={handleChange}
-              disabled={!formData.area_name}
             >
-              <option value="">Select Road</option>
 
-              {formData.area_name &&
-                roadOptions[formData.area_name].map((road) => (
-                  <option key={road} value={road}>
-                    {road}
-                  </option>
-                ))}
+              <option value="">
+                Select Destination
+              </option>
+
+              {AREAS.filter(
+                (a) => a !== formData.source
+              ).map((area) => (
+
+                <option
+                  key={area}
+                  value={area}
+                >
+                  {area}
+                </option>
+
+              ))}
+
             </select>
+
           </div>
 
         </div>
@@ -200,10 +240,16 @@ function Prediction() {
           className="predict-btn"
           onClick={handlePrediction}
         >
-          {loading ? "Predicting..." : "🚀 Predict Congestion"}
+
+          {loading
+            ? "Predicting..."
+            : "🚀 Predict Congestion"}
+
         </button>
 
-        {prediction !== null && (
+        
+                {result && (
+
           <div className="result-card">
 
             <h2>📊 Prediction Result</h2>
@@ -211,42 +257,205 @@ function Prediction() {
             <div className="result-grid">
 
               <div className="result-box">
-                <h4>📍 Area</h4>
-                <h3>{formData.area_name}</h3>
+                <h4>📍 Source</h4>
+                <h3>{result.source}</h3>
               </div>
 
               <div className="result-box">
-                <h4>🛣 Road</h4>
-                <h3>{formData.road_name}</h3>
+                <h4>🎯 Destination</h4>
+                <h3>{result.destination}</h3>
               </div>
 
               <div className="result-box">
-                <h4>🤖 Congestion</h4>
-                <h3>{prediction.toFixed(2)}</h3>
+                <h4>📏 Distance</h4>
+                <h3>{result.distance} km</h3>
               </div>
 
               <div className="result-box">
-                <h4>Status</h4>
-                <h3>{status}</h3>
+                <h4>⏱ Estimated Time</h4>
+                <h3>{result.duration} mins</h3>
+              </div>
+
+              <div className="result-box">
+                <h4>🚦 Congestion</h4>
+                <h3>
+                  {Number(result.predicted_congestion).toFixed(1)}%
+                </h3>
+              </div>
+
+              <div className="result-box">
+                <h4>🚨 Severity</h4>
+
+                <h3
+                  style={{
+                    color: getStatusColor(result.severity)
+                  }}
+                >
+                  {result.severity}
+                </h3>
+
+              </div>
+
+              <div className="result-box">
+                <h4>🚗 Traffic Level</h4>
+                <h3>{result.traffic_level}</h3>
+              </div>
+
+              <div className="result-box">
+                <h4>⛽ Fuel</h4>
+                <h3>{result.fuel} L</h3>
               </div>
 
             </div>
 
             <div className="ai-box">
 
-              <h3>💡 AI Recommendation</h3>
+              <div className="alert-header">
 
-              <p>{recommendation}</p>
+                <h3>
+                  🚨 Traffic Alerts
+                </h3>
+
+                <div
+                  className={`priority-badge ${result.alert_priority.toLowerCase()}`}
+                >
+                  {result.alert_priority}
+                </div>
+
+              </div>
+
+              <p className="alert-time">
+                🕒 {result.alert_time}
+              </p>
+
+              <ul>
+
+                {result.alerts &&
+                  result.alerts.map((item, index) => (
+
+                    <li key={index}>
+                      {item}
+                    </li>
+
+                  ))}
+
+              </ul>
 
             </div>
 
+            <div className="ai-box">
+
+              <h3>
+                💡 AI Recommendations
+              </h3>
+
+              <ul>
+
+                {result.recommendations &&
+                  result.recommendations.map((item, index) => (
+
+                    <li key={index}>
+                      {item}
+                    </li>
+
+                  ))}
+
+              </ul>
+
+            </div>
+
+            {result.route && (
+
+              <div className="route-summary">
+
+                <h3>
+                  🛣 Route Summary
+                </h3>
+
+                <div className="route-grid">
+
+                  <div className="route-box">
+
+                    <h4>Recommended Route</h4>
+
+                    <p>
+                      Distance :
+                      <strong>
+                        {" "}
+                        {result.route.distance} km
+                      </strong>
+                    </p>
+
+                    <p>
+                      Time :
+                      <strong>
+                        {" "}
+                        {result.route.duration} mins
+                      </strong>
+                    </p>
+
+                    <p>
+                      Traffic :
+                      <strong>
+                        {" "}
+                        {result.route.traffic}
+                      </strong>
+                    </p>
+
+                  </div>
+
+                  {result.alternate_route && (
+
+                    <div className="route-box">
+
+                      <h4>
+                        Alternate Route
+                      </h4>
+
+                      <p>
+                        Distance :
+                        <strong>
+                          {" "}
+                          {result.alternate_route.distance} km
+                        </strong>
+                      </p>
+
+                      <p>
+                        Time :
+                        <strong>
+                          {" "}
+                          {result.alternate_route.duration} mins
+                        </strong>
+                      </p>
+
+                      <p>
+                        Traffic :
+                        <strong>
+                          {" "}
+                          {result.alternate_route.traffic}
+                        </strong>
+                      </p>
+
+                    </div>
+
+                  )}
+
+                </div>
+
+              </div>
+
+            )}
+
           </div>
+
         )}
 
       </div>
 
     </div>
+
   );
+
 }
 
 export default Prediction;

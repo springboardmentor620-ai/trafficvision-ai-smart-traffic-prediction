@@ -1,0 +1,256 @@
+/* ===========================
+   Admin Sidebar
+=========================== */
+
+.admin-sidebar{
+    width:270px;
+    height:100vh;
+    position:fixed;
+    top:0;
+    left:0;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    background:linear-gradient(180deg,#0f172a,#1e293b,#111827);
+    color:#fff;
+
+    box-shadow:6px 0 25px rgba(0,0,0,.18);
+
+    overflow:hidden;
+    z-index:1000;
+}
+
+
+/* ===========================
+        Logo
+=========================== */
+
+.sidebar-logo{
+
+    display:flex;
+    align-items:center;
+    gap:16px;
+
+    padding:28px 24px;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+}
+
+.logo-circle{
+
+    width:60px;
+    height:60px;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:28px;
+
+    background:linear-gradient(135deg,#2563eb,#38bdf8);
+
+    box-shadow:0 8px 20px rgba(37,99,235,.35);
+
+}
+
+.sidebar-logo h2{
+
+    margin:0;
+    font-size:23px;
+    font-weight:700;
+
+}
+
+.sidebar-logo span{
+
+    color:#cbd5e1;
+    font-size:13px;
+
+}
+
+
+/* ===========================
+        Menu
+=========================== */
+
+.sidebar-menu{
+
+    flex:1;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:8px;
+
+    padding:25px 15px;
+
+}
+
+.sidebar-link{
+
+    display:flex;
+    align-items:center;
+
+    gap:14px;
+
+    text-decoration:none;
+
+    color:#cbd5e1;
+
+    padding:14px 18px;
+
+    border-radius:14px;
+
+    transition:.3s;
+
+    font-size:15px;
+
+    font-weight:600;
+
+}
+
+.menu-icon{
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+}
+
+.sidebar-link:hover{
+
+    background:rgba(255,255,255,.08);
+
+    color:#fff;
+
+    transform:translateX(8px);
+
+}
+
+.sidebar-link.active{
+
+    background:linear-gradient(90deg,#2563eb,#3b82f6);
+
+    color:white;
+
+    box-shadow:0 8px 20px rgba(59,130,246,.35);
+
+}
+
+
+/* ===========================
+        Footer
+=========================== */
+
+.sidebar-footer{
+
+    padding:22px;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+}
+
+.logout-btn{
+
+    width:100%;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    font-size:15px;
+    font-weight:600;
+
+    background:#ef4444;
+
+    color:white;
+
+    transition:.3s;
+
+}
+
+.logout-btn:hover{
+
+    background:#dc2626;
+
+    transform:translateY(-2px);
+
+}
+
+
+/* ===========================
+      Scrollbar
+=========================== */
+
+.admin-sidebar::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb{
+
+    background:#3b82f6;
+
+    border-radius:20px;
+
+}
+
+
+/* ===========================
+      Responsive
+=========================== */
+
+@media(max-width:992px){
+
+.admin-sidebar{
+
+    width:85px;
+
+}
+
+.sidebar-logo h2,
+.sidebar-logo span,
+.sidebar-link span:last-child,
+.logout-btn{
+
+    display:none;
+
+}
+
+.sidebar-logo{
+
+    justify-content:center;
+
+}
+
+.logo-circle{
+
+    width:50px;
+    height:50px;
+    font-size:24px;
+
+}
+
+.sidebar-link{
+
+    justify-content:center;
+    padding:16px;
+
+}
+
+}
