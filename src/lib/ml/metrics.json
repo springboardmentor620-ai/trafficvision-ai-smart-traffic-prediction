@@ -1,0 +1,90 @@
+{
+ "mae": 4.31,
+ "rmse": 6.291,
+ "r2": 0.9088,
+ "accuracy": 91.9,
+ "precision": 92.54,
+ "recall": 81.14,
+ "f1": 85.45,
+ "rows": 89895,
+ "train_rows": 71916,
+ "test_rows": 17979,
+ "importances": [
+  {
+   "name": "hour",
+   "weight": 76.1
+  },
+  {
+   "name": "distance",
+   "weight": 8.82
+  },
+  {
+   "name": "road_idx",
+   "weight": 6.63
+  },
+  {
+   "name": "dow",
+   "weight": 2.74
+  },
+  {
+   "name": "signals",
+   "weight": 2.53
+  },
+  {
+   "name": "temp",
+   "weight": 0.96
+  },
+  {
+   "name": "width",
+   "weight": 0.94
+  },
+  {
+   "name": "lanes",
+   "weight": 0.73
+  },
+  {
+   "name": "is_weekend",
+   "weight": 0.28
+  },
+  {
+   "name": "is_peak",
+   "weight": 0.17
+  },
+  {
+   "name": "humidity",
+   "weight": 0.09
+  },
+  {
+   "name": "aqi",
+   "weight": 0.02
+  },
+  {
+   "name": "rain",
+   "weight": 0.0
+  },
+  {
+   "name": "is_holiday",
+   "weight": 0.0
+  }
+ ],
+ "confusion": [
+  {
+   "label": "Low",
+   "tp": 7537,
+   "fp": 369,
+   "fn": 934
+  },
+  {
+   "label": "Medium",
+   "tp": 8780,
+   "fp": 1073,
+   "fn": 378
+  },
+  {
+   "label": "High",
+   "tp": 205,
+   "fp": 15,
+   "fn": 145
+  }
+ ]
+}

@@ -1,134 +1,382 @@
-# 🚦 TrafficVision AI - Smart Traffic Prediction & Congestion Management System
+# 🚦 TrafficVision AI
+### AI-Powered Smart Traffic Prediction and Intelligent Route Recommendation System
 
-## 📖 Project Overview
+![Status](https://img.shields.io/badge/Status-Under%20Development-blue)
+![AI](https://img.shields.io/badge/AI-Random%20Forest-green)
+![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB)
+![Backend](https://img.shields.io/badge/Backend-Python-yellow)
+![License](https://img.shields.io/badge/License-Academic-orange)
 
-**TrafficVision AI** is an AI-powered traffic prediction and congestion management platform that helps city authorities monitor traffic conditions, predict congestion levels, and optimize traffic flow using real-time and historical traffic data.
+---
 
-### 🎯 Objectives
-- Monitor traffic conditions in real-time across various cities.
-- Predict congestion levels and vehicle density using Machine Learning.
-- Identify and visualize traffic hotspots dynamically on a live interactive map.
-- Optimize traffic flow and suggest alternate route planning.
-- Consider local factors like weather and regional festivals/holidays on traffic impact.
-- Generate and download structured, human-readable traffic reports in PDF format.
-- Provide smart alerts and notifications for operators.
+# 📌 Overview
 
-### 👥 Target Users
-- **City Traffic Authorities** - Monitor and manage city-wide traffic
-- **Traffic Operators** - Track congestion and respond to incidents
-- **Transportation Agencies** - Analyze traffic patterns and trends
-- **Urban Mobility Planners** - Plan and optimize traffic infrastructure
+TrafficVision AI is an AI-powered Smart Traffic Prediction and Intelligent Route Recommendation System developed to improve urban transportation by predicting traffic conditions, recommending optimal routes, generating congestion alerts, and providing comprehensive traffic analytics.
 
-## ✨ Key Features
- DATASET USED : https://www.kaggle.com/datasets/rauffauzanrambe/smart-city-traffic-flow-prediction-dataset
-- **Live Traffic Map:** Interactive maps (using Leaflet.js) that dynamically locate and center on high-congestion areas in real-time.
-- **AI Predictions & Forecasting:** Hourly traffic volume and congestion level predictions powered by Scikit-Learn (RandomForest).
-- **Comprehensive Analytics:** Insights into peak traffic hours, average speed, congestion indexes, and week-over-week trends.
-- **Smart Route Optimization:** Suggests alternate routes with estimated travel times factoring in current AI congestion levels.
-- **Automated Report Generation:** One-click generation of beautifully formatted, print-ready PDF traffic reports.
-- **Environmental & Cultural Context:** Dynamically adjusts traffic forecasts based on weather conditions and an integrated Indian Festival calendar.
+Unlike traditional navigation systems that rely only on live GPS data, TrafficVision AI combines Machine Learning with historical traffic data to estimate travel time, traffic congestion, average vehicle speed, and route efficiency.
 
-## 🛠️ Technology Stack
+The system provides Google Maps-style route recommendations, interactive dashboards, traffic heatmaps, predictive analytics, AI-generated reports, and intelligent traffic alerts.
 
-### Frontend
-- **Core:** HTML5, CSS3, JavaScript (ES6+)
-- **Mapping:** Leaflet.js for interactive map visualizations
-- **Export:** html2pdf.js for generating PDF reports
-- **Assets:** Font Awesome 6.0.0 (icons), Google Fonts (Montserrat/Inter)
+This project is being developed as a Bachelor of Engineering (Artificial Intelligence and Machine Learning) Final Year Project.
 
-### Backend
-- **Core:** Python 3.10+ with Flask 3.0.3
-- **Machine Learning:** Pandas, NumPy, Scikit-Learn (RandomForestRegressor)
-- **Authentication:** Flask-JWT-Extended 4.6.0 (JWT-based auth, Role-based access)
-- **Database:** SQLite3 for persistent user and session storage
-- **Security:** Hashlib for SHA-256 password hashing, Flask-CORS for cross-origin requests
+---
 
-## 🚀 Installation & Setup
+# 🎯 Objectives
 
-### Prerequisites
-- Python 3.10 or higher
-- pip (Python package manager)
-- Git (optional)
+- Predict traffic congestion using Machine Learning.
+- Recommend the best route between any two locations.
+- Estimate travel time based on historical traffic patterns.
+- Visualize traffic conditions using interactive maps.
+- Generate intelligent traffic alerts.
+- Analyze traffic trends.
+- Build a scalable Smart City traffic management solution.
 
-### Step 1: Clone the Repository
+---
+
+# 🚀 Key Features
+
+## 🤖 AI Traffic Prediction
+
+- Random Forest Machine Learning model
+- Travel time prediction
+- Vehicle density estimation
+- Average speed prediction
+- Congestion prediction
+- Traffic severity classification
+- Prediction confidence
+
+---
+
+## 🗺 Intelligent Route Recommendation
+
+The system recommends:
+
+- Fastest Route
+- Shortest Route
+- Least Congested Route
+
+Each recommendation includes:
+
+- Distance
+- Estimated travel time
+- Traffic condition
+- Congestion level
+- Average speed
+- Vehicle density
+- Route summary
+
+---
+
+## 🔍 Smart Search
+
+Users can search:
+
+- Areas
+- Roads
+- Colleges
+- Hospitals
+- Companies
+- Metro stations
+- Railway stations
+- Airports
+- Hotels
+- Restaurants
+- Shopping malls
+- Parks
+- Tourist attractions
+
+Features:
+
+- Auto suggestion
+- Fuzzy search
+- Zero-shot location matching
+- Intelligent location recommendation
+
+---
+
+## 🗺 Interactive Map
+
+The application integrates Leaflet Maps to display:
+
+- Source location
+- Destination location
+- Route visualization
+- Multiple route options
+- Route markers
+- Traffic hotspots
+- Congestion visualization
+
+---
+
+## 📊 Analytics Dashboard
+
+Interactive dashboard displaying:
+
+- Daily traffic
+- Weekly traffic
+- Monthly traffic
+- Vehicle count
+- Road utilization
+- Congestion statistics
+- Peak hour analysis
+- Average travel time
+- Speed trends
+
+---
+
+## 🔥 Heatmaps
+
+Traffic heatmaps visualize:
+
+- High congestion zones
+- Low congestion zones
+- Accident-prone regions
+- Traffic intensity
+
+---
+
+## 🚨 Traffic Alerts
+
+The system generates alerts for:
+
+- Heavy congestion
+- Road blockage
+- Accident zones
+- Slow-moving traffic
+- Peak hour congestion
+- Weather-related traffic
+
+Future enhancement:
+
+- Email alerts
+- SMS alerts
+- Push notifications
+
+---
+
+## 📄 AI Reports
+
+The system generates user-friendly reports containing:
+
+- Route Summary
+- Travel Time
+- Traffic Condition
+- Congestion Analysis
+- AI Predictions
+- Recommendations
+- Graphical Analytics
+- Generated Date & Time
+
+Reports are designed for human readability instead of raw JSON output.
+
+---
+
+# 🧠 Machine Learning
+
+TrafficVision AI uses Random Forest Regression models trained on historical Bengaluru traffic data.
+
+The trained models predict:
+
+- Travel Time
+- Average Speed
+- Vehicle Count
+
+Models are stored inside the project and loaded during prediction for real-time inference.
+
+---
+
+# 📂 Dataset
+
+The project uses the **Bangalore Traffic Analysis Dataset** from Kaggle.
+
+Dataset Link:
+
+https://www.kaggle.com/datasets/asshridattaaigal/bangalore-traffic-analysis-dataset
+
+The dataset contains:
+
+- Source
+- Destination
+- Latitude
+- Longitude
+- Distance
+- Travel Time
+- Vehicle Count
+- Traffic Volume
+- Average Speed
+- Weather Condition
+- Temperature
+- Humidity
+- Signal Timing
+- Road Capacity
+
+---
+
+# 🏗 System Architecture
+
+```
+User
+
+↓
+
+TrafficVision AI Dashboard
+
+↓
+
+Smart Search Engine
+
+↓
+
+Traffic Dataset
+
+↓
+
+Feature Engineering
+
+↓
+
+Random Forest Model
+
+↓
+
+Traffic Prediction
+
+↓
+
+Route Recommendation Engine
+
+↓
+
+Analytics Dashboard
+
+↓
+
+Interactive Maps
+
+↓
+
+Traffic Reports & Alerts
+```
+
+---
+
+# 🛠 Technology Stack
+
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- TanStack Router
+- React Query
+- Leaflet
+- Recharts
+
+## Backend
+
+- Python
+
+## Machine Learning
+
+- Scikit-Learn
+- Random Forest
+- Pandas
+- NumPy
+- Joblib
+
+## Database
+
+- Supabase
+
+---
+
+# 📁 Project Structure
+
+```
+traffic-vision-ai-main/
+
+│
+
+├── model/
+│ ├── train_route_model.py
+│ ├── export_places.py
+│ ├── route_speed_rf.pkl
+│ ├── route_travel_time_rf.pkl
+│ ├── route_vehicles_rf.pkl
+│ └── metrics.json
+│
+
+├── public/
+
+├── src/
+
+├── supabase/
+
+├── package.json
+
+├── vite.config.ts
+
+└── README.md
+```
+
+---
+
+# ⚙ Installation
+
+Clone the repository
+
 ```bash
-git clone https://github.com/yourusername/TrafficVision-AI.git
-cd TrafficVision-AI
+git clone <repository-url>
 ```
 
-### Step 2: Create Virtual Environment
+Move into the project
+
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Mac/Linux
-python3 -m venv venv
-source venv/bin/activate
+cd traffic-vision-ai-main
 ```
 
-### Step 3: Install Dependencies
+Install dependencies
+
 ```bash
-pip install -r requirements.txt
+npm install
 ```
 
-### Step 4: Run the Application
+Run the application
+
 ```bash
-python run.py
+npm run dev
 ```
 
-### Step 5: Access the Application
-Open your web browser and navigate to:
+Build production version
+
+```bash
+npm run build
 ```
-http://localhost:5500
-```
-*(Note: The server runs on port 5500 by default. You can access the dashboard directly by logging in or registering a new account.)*
 
-## 🔐 Authentication & Security
-- **JWT-based authentication** for secure API communication.
-- **Role-based access control** ensuring different permissions for Admins and Operators.
-- **Secure password hashing** via SHA-256 before database storage.
-- **Session management** persisting securely in the browser's `localStorage`.
+---
 
-## 🌤️ Environmental Context
+# 📈 Future Enhancements
 
-### Indian Festival Impact
-| Festival | Traffic Multiplier |
-|----------|-------------------|
-| Diwali | 2.0x |
-| Holi | 1.8x |
-| Dussehra | 1.7x |
-| Ganesh Chaturthi | 1.6x |
-| Christmas | 1.5x |
+- Live Traffic API integration
+- Multi-city support
+- AI Chat Assistant
+- Voice search
+- Smart traffic signal optimization
+- Email notifications
+- SMS notifications
+- Push notifications
+- CCTV integration
+- IoT traffic sensors
+- Digital Twin simulation
+- Accident prediction
+- Reinforcement Learning-based signal control
 
-### Weather Impact
-| Condition | Traffic Multiplier |
-|-----------|-------------------|
-| Rainy/Stormy | 1.4x |
-| Foggy | 1.3x |
-| Temperature > 35°C | 1.2x |
-| Temperature < 10°C | 1.3x |
+---
 
-## ⚙️ How It Works
+# 🎓 Academic Purpose
 
-1. **Data Ingestion:** Traffic sensor data (CSV) is loaded and processed.
-2. **Feature Engineering:** 50+ features are created including time-based, weather, and festival data.
-3. **Model Training:** Ensemble model (RandomForest + XGBoost + LightGBM + GradientBoosting) is trained.
-4. **Prediction:** Real-time predictions are made using the trained model.
-5. **Visualization:** Results are displayed on interactive maps and dashboards.
-6. **Reporting:** PDF reports are generated with comprehensive insights.
+This project is developed as a Final Year Bachelor of Engineering (Artificial Intelligence and Machine Learning) project.
 
-## 📂 Project Structure
-```text
-TrafficVision-AI/
-├── backend/
-│   ├── data/                 # Traffic sensor datasets
-│   ├── traffic_predictor.py  # Machine Learning model class
-│   └── traffic.db            # SQLite Database
-├── frontend/
-│   ├── index.html            # Login/Registration page
-│   ├── dashboard.html        # Main application dashboard
-│   ├── style.css             # UI styling
-│   └── script.js             # Shared utility scripts
-├── requirements.txt          # Python dependencies
-└── run.py                    # Main Flask server entrypoint
+The objective is to demonstrate the practical application of Artificial Intelligence, Machine Learning, Data Analytics, and Smart City technologies in intelligent transportation systems.
+
