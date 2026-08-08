@@ -11,17 +11,22 @@ router = APIRouter()
 
 
 @router.post("/prediction/forecast/{road_id}")
-def forecast_road(
+def forecast_single_road(
     road_id: int,
-    hours_ahead: float = Query(1.0, gt=0, le=48, description="How many hours ahead to forecast"),
+    hours_ahead: float = Query(1.0, gt=0, le=48),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    result = services.train_and_forecast(db, road_id, hours_ahead)
-    if result is None:
-        raise HTTPException(404, "Road not found")
-    return result
+    result = services.train_and_forecast(
+        db=db,
+        road_id=road_id,
+        hours_ahead=hours_ahead,
+    )
 
+    if result is None:
+        raise HTTPException(status_code=404, detail="Road not found")
+
+    return result
 
 @router.get("/prediction/report", response_model=list[PredictionReportItem])
 def get_prediction_report(

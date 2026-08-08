@@ -6,6 +6,7 @@ from app.database import Base
 from app.modules.traffic_monitoring.models import CongestionLevel
 
 
+
 class PredictionLog(Base):
     """
     Records every forecast the system generates, so we can build a

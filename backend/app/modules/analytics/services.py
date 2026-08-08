@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.modules.traffic_monitoring.models import CongestionLevel
 from app.modules.traffic_monitoring.services import get_all_roads, get_latest_reading_per_road
@@ -107,8 +108,16 @@ def _make_card(label: str, value: float, unit: str | None, yesterday_value: floa
 def get_dashboard_summary(db: Session) -> dict:
     from app.modules.traffic_monitoring.models import Road, TrafficReading
 
-    today_start, today_end = _day_bounds(0)
-    yesterday_start, yesterday_end = _day_bounds(1)
+    latest_timestamp = db.query(func.max(TrafficReading.recorded_at)).scalar()
+
+    if latest_timestamp is None:
+        latest_timestamp = datetime.utcnow()
+
+    today_start = latest_timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    yesterday_start = today_start - timedelta(days=1)
+    yesterday_end = today_start
 
     roads = get_all_roads(db)
     total_roads = len(roads)
@@ -192,7 +201,12 @@ def get_history(db: Session, period: str) -> list[dict]:
     """
     from app.modules.traffic_monitoring.models import Road, TrafficReading
 
-    now = datetime.utcnow()
+    latest_timestamp = db.query(func.max(TrafficReading.recorded_at)).scalar()
+
+    if latest_timestamp is None:
+        latest_timestamp = datetime.utcnow()
+
+    now = latest_timestamp
     if period == "24h":
         cutoff = now - timedelta(hours=24)
         bucket_fn = lambda dt: dt.strftime("%H:00")

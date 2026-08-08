@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Plus,
   Trash2,
+  Flame,
 } from "lucide-react";
 
 const TYPE_META: Record<api.AlertType, { icon: typeof AlertTriangle; label: string }> = {
@@ -36,6 +37,64 @@ function timeAgo(iso: string): string {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+interface AlertCardProps {
+  alert: api.Alert;
+  canManage: boolean;
+  isAdmin: boolean;
+  resolvingId: number | null;
+  onResolve: (id: number) => void;
+  onDelete: (id: number) => void;
+}
+
+function AlertCard({ alert, canManage, isAdmin, resolvingId, onResolve, onDelete }: AlertCardProps) {
+  const meta = TYPE_META[alert.type];
+  const style = SEVERITY_STYLES[alert.severity];
+  const Icon = meta.icon;
+
+  return (
+    <div
+      className={`flex items-start gap-3 rounded-xl border p-4 ${style.border} ${
+        alert.is_resolved ? "bg-surface opacity-60" : style.bg
+      }`}
+    >
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${style.bg} ${style.text}`}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`text-xs font-medium ${style.text}`}>{meta.label}</span>
+          {alert.road_name && <span className="text-xs text-muted">· {alert.road_name}</span>}
+          <span className="text-xs text-muted">· {timeAgo(alert.created_at)}</span>
+          {alert.is_resolved && (
+            <span className="flex items-center gap-1 text-xs text-flow">
+              <CheckCircle2 className="w-3 h-3" /> Resolved
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-ink mt-1">{alert.message}</p>
+      </div>
+      {canManage && !alert.is_resolved && (
+        <button
+          onClick={() => onResolve(alert.id)}
+          disabled={resolvingId === alert.id}
+          className="text-xs text-signal hover:underline disabled:opacity-60 shrink-0"
+        >
+          {resolvingId === alert.id ? "Resolving..." : "Resolve"}
+        </button>
+      )}
+      {isAdmin && (
+        <button
+          onClick={() => onDelete(alert.id)}
+          aria-label="Delete alert"
+          className="text-muted hover:text-congest shrink-0"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function AlertsContent() {
   const { token, user } = useAuth();
   const [alerts, setAlerts] = useState<api.Alert[]>([]);
@@ -53,6 +112,7 @@ function AlertsContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canManage = user?.role === "admin" || user?.role === "traffic_operator";
+  const isAdmin = user?.role === "admin";
 
   const fetchAlerts = useCallback(async () => {
     if (!token) return;
@@ -66,11 +126,19 @@ function AlertsContent() {
     }
   }, [token, filter]);
 
+  // Load alerts as soon as the page opens, then keep them fresh automatically
+  // by polling every 5 seconds — no manual refresh needed.
   useEffect(() => {
+    if (!token) return;
+
     fetchAlerts();
-    const interval = setInterval(fetchAlerts, 10000);
+
+    const interval = setInterval(() => {
+      fetchAlerts();
+    }, 5000);
+
     return () => clearInterval(interval);
-  }, [fetchAlerts]);
+  }, [token, fetchAlerts]);
 
   useEffect(() => {
     if (!token || !canManage) return;
@@ -123,6 +191,10 @@ function AlertsContent() {
     }
   }
 
+  // Active severe alerts get their own banner at the top of the page so they
+  // can't be missed, regardless of which tab (all/unresolved/resolved) is selected.
+  const severeAlerts = alerts.filter((a) => a.severity === "critical" && !a.is_resolved);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -159,6 +231,28 @@ function AlertsContent() {
         <p className="text-sm text-congest bg-congest/10 border border-congest/30 rounded-md px-3 py-2">
           {error}
         </p>
+      )}
+
+      {severeAlerts.length > 0 && (
+        <div className="rounded-xl border border-congest/40 bg-congest/5 p-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-congest">
+            <Flame className="w-4 h-4" />
+            Active severe alerts ({severeAlerts.length})
+          </div>
+          <div className="flex flex-col gap-2">
+            {severeAlerts.map((alert) => (
+              <AlertCard
+                key={alert.id}
+                alert={alert}
+                canManage={canManage}
+                isAdmin={isAdmin}
+                resolvingId={resolvingId}
+                onResolve={handleResolve}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        </div>
       )}
 
       {showForm && canManage && (
@@ -233,54 +327,17 @@ function AlertsContent() {
             No {filter !== "all" ? filter : ""} alerts
           </div>
         ) : (
-          alerts.map((alert) => {
-            const meta = TYPE_META[alert.type];
-            const style = SEVERITY_STYLES[alert.severity];
-            const Icon = meta.icon;
-            return (
-              <div
-                key={alert.id}
-                className={`flex items-start gap-3 rounded-xl border p-4 ${style.border} ${
-                  alert.is_resolved ? "bg-surface opacity-60" : style.bg
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${style.bg} ${style.text}`}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs font-medium ${style.text}`}>{meta.label}</span>
-                    {alert.road_name && <span className="text-xs text-muted">· {alert.road_name}</span>}
-                    <span className="text-xs text-muted">· {timeAgo(alert.created_at)}</span>
-                    {alert.is_resolved && (
-                      <span className="flex items-center gap-1 text-xs text-flow">
-                        <CheckCircle2 className="w-3 h-3" /> Resolved
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-ink mt-1">{alert.message}</p>
-                </div>
-                {canManage && !alert.is_resolved && (
-                  <button
-                    onClick={() => handleResolve(alert.id)}
-                    disabled={resolvingId === alert.id}
-                    className="text-xs text-signal hover:underline disabled:opacity-60 shrink-0"
-                  >
-                    {resolvingId === alert.id ? "Resolving..." : "Resolve"}
-                  </button>
-                )}
-                {user?.role === "admin" && (
-                  <button
-                    onClick={() => handleDelete(alert.id)}
-                    aria-label="Delete alert"
-                    className="text-muted hover:text-congest shrink-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            );
-          })
+          alerts.map((alert) => (
+            <AlertCard
+              key={alert.id}
+              alert={alert}
+              canManage={canManage}
+              isAdmin={isAdmin}
+              resolvingId={resolvingId}
+              onResolve={handleResolve}
+              onDelete={handleDelete}
+            />
+          ))
         )}
       </div>
     </div>

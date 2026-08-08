@@ -45,16 +45,32 @@ def delete_alert(db: Session, alert_id: int) -> bool:
 
 
 def maybe_create_congestion_alert(db: Session, road: Road, reading: TrafficReading):
+
     if reading.congestion_level != CongestionLevel.SEVERE:
         return None
 
     existing = (
         db.query(Alert)
-        .filter(Alert.road_id == road.id, Alert.type == AlertType.CONGESTION, Alert.is_resolved == False)  # noqa: E712
+        .filter(
+            Alert.road_id == road.id,
+            Alert.type == AlertType.CONGESTION,
+            Alert.is_resolved == False
+        )
         .first()
     )
-    if existing:
-        return None
 
-    message = f"Severe congestion detected on {road.name} ({reading.vehicle_count}/{road.capacity} vehicles)."
-    return create_alert(db, road.id, AlertType.CONGESTION, AlertSeverity.CRITICAL, message)
+    if existing:
+        return existing
+
+    message = (
+        f"🚨 Severe congestion detected on {road.name}. "
+        f"Current vehicles: {reading.vehicle_count}"
+    )
+
+    return create_alert(
+        db=db,
+        road_id=road.id,
+        type_=AlertType.CONGESTION,
+        severity=AlertSeverity.CRITICAL,
+        message=message,
+    )

@@ -20,6 +20,10 @@ import {
   Search,
   ArrowUpDown,
 } from "lucide-react";
+import LineTrafficChart from "@/components/analytics/LineTrafficChart";
+import PieCongestionChart from "@/components/analytics/PieCongestionChart";
+import ZoneBarChart from "@/components/analytics/ZoneBarChart";
+import TrafficHeatMap from "@/components/analytics/TrafficHeatMap";
 
 const LEVEL_TEXT: Record<string, string> = {
   low: "text-flow",
@@ -91,34 +95,6 @@ function SummaryCard({ card, icon: Icon, goodWhen }: { card: api.MetricCard; ico
       {card.yesterday_value === null && card.change_percent === null && card.display_value === null && (
         <div className="text-[11px] text-muted">No comparison data yet</div>
       )}
-    </div>
-  );
-}
-
-function ZoneCard({ zone }: { zone: api.ZoneAnalyticsItem }) {
-  const colors = utilizationColor(zone.avg_utilization_percent);
-  return (
-    <div className={`rounded-xl border p-4 flex flex-col gap-2 ${colors.bg} ${colors.border}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-ink">{zone.zone}</span>
-        <span className={`text-lg font-mono font-semibold ${colors.text}`}>{zone.avg_utilization_percent}%</span>
-      </div>
-      <div className="text-xs text-muted">
-        {zone.total_roads} road{zone.total_roads !== 1 ? "s" : ""} · {zone.total_vehicles.toLocaleString()} vehicles
-        {zone.avg_speed_kmph !== null && ` · ${zone.avg_speed_kmph} km/h avg`}
-      </div>
-      <div className="flex flex-col gap-1 text-xs pt-2 border-t border-border/50">
-        {zone.highest_congestion_road && (
-          <div className="text-muted">
-            Most congested: <span className="text-ink">{zone.highest_congestion_road}</span>
-          </div>
-        )}
-        {zone.lowest_congestion_road && zone.lowest_congestion_road !== zone.highest_congestion_road && (
-          <div className="text-muted">
-            Least congested: <span className="text-ink">{zone.lowest_congestion_road}</span>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -293,6 +269,40 @@ function AnalyticsContent() {
     setIsRefreshing(false);
   }
 
+  // Chart data derived from the same roads/zones state used by the table above.
+  // Note: RoadPerformanceItem doesn't currently expose a `predicted_vehicles`
+  // field, so the line chart falls back to current_vehicles until the API adds it.
+  const lineChartData = useMemo(
+    () =>
+      roads.map((road) => ({
+        road_name: road.road_name,
+        current_vehicle_count: road.current_vehicles ?? 0,
+        predicted_vehicle_count:
+          (road as { predicted_vehicles?: number }).predicted_vehicles ?? road.current_vehicles ?? 0,
+      })),
+    [roads]
+  );
+
+  const pieChartData = useMemo(
+    () => [
+      { name: "Low", value: roads.filter((r) => r.congestion_level === "low").length },
+      { name: "Moderate", value: roads.filter((r) => r.congestion_level === "moderate").length },
+      { name: "High", value: roads.filter((r) => r.congestion_level === "high").length },
+      { name: "Severe", value: roads.filter((r) => r.congestion_level === "severe").length },
+    ],
+    [roads]
+  );
+
+  const zoneChartData = useMemo(
+    () => zones.map((zone) => ({ zone: zone.zone, vehicles: zone.total_vehicles })),
+    [zones]
+  );
+
+  const heatMapData = useMemo(
+    () => zones.map((zone) => ({ zone: zone.zone, utilization: zone.avg_utilization_percent })),
+    [zones]
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -322,23 +332,14 @@ function AnalyticsContent() {
           ))}
       </div>
 
-      <div className="bg-surface border border-border rounded-xl p-4">
-        <div className="text-sm text-muted mb-4">Congestion heatmap by zone</div>
-        {zones.length === 0 ? (
-          <div className="h-32 flex items-center justify-center text-muted text-sm">No zone data yet</div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {zones.map((zone) => (
-              <ZoneCard key={zone.zone} zone={zone} />
-            ))}
-          </div>
-        )}
-        <div className="flex items-center gap-4 text-xs text-muted mt-4 pt-4 border-t border-border">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-flow/40" /> 0-40% (Low)</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-caution/50" /> 40-70% (Moderate)</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-caution/80" /> 70-90% (High)</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-congest" /> 90%+ (Severe)</span>
-        </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        <LineTrafficChart data={lineChartData} />
+        <PieCongestionChart data={pieChartData} />
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        <ZoneBarChart data={zoneChartData} />
+        <TrafficHeatMap data={heatMapData} />
       </div>
 
       <RoadPerformanceTable roads={roads} />

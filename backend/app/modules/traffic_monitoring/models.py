@@ -1,9 +1,10 @@
 import enum
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum
-from sqlalchemy.orm import relationship
+print(">>> USING UPDATED models.py <<<")
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum, Boolean
 from sqlalchemy.sql import func
-
+from sqlalchemy.orm import relationship
 from app.database import Base
+
 
 
 class CongestionLevel(str, enum.Enum):
@@ -44,5 +45,15 @@ class TrafficReading(Base):
     avg_speed_kmph = Column(Float, nullable=True)
     congestion_level = Column(Enum(CongestionLevel), nullable=False)
     recorded_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+    travel_time_index = Column(Float, nullable=True)
+    road_capacity_utilization = Column(Float, nullable=True)
+    incident_reports = Column(Integer, nullable=True)
+    environmental_impact = Column(Float, nullable=True)
+    public_transport_usage = Column(Float, nullable=True)
+    traffic_signal_compliance = Column(Float, nullable=True)
+    parking_usage = Column(Float, nullable=True)
+    pedestrian_count = Column(Integer, nullable=True)
+    weather_condition = Column(String(50), nullable=True)
+    roadwork = Column(Boolean, nullable=True)
 
     road = relationship("Road", back_populates="readings")
