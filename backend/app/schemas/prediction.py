@@ -45,3 +45,11 @@ class PredictionRequest(BaseModel):
 class PredictionResponse(BaseModel):
 
     congestion_prediction: float
+
+    prediction_level: str
+
+    confidence: float
+
+    recommended_action: str
+
+    alternate_route: str

@@ -1,52 +1,38 @@
 import TrafficCard from "../TrafficCard";
 
-function DashboardCards({ trafficData }) {
+function DashboardCards({ summary }) {
+  
+  if (!summary) {
+    return <h3>Loading Dashboard...</h3>;
+  }
+  
   return (
     <div
       style={{
         display: "flex",
         gap: "20px",
         flexWrap: "wrap",
+        marginBottom: "30px",
       }}
     >
       <TrafficCard
-        title="Vehicles Today"
-        value={trafficData.reduce(
-          (sum, road) => sum + road.vehicles,
-          0
-        )}
+        title="Total Vehicles"
+        value={summary.total_vehicles}
       />
 
       <TrafficCard
-        title="Congested Roads"
-        value={
-          trafficData.filter(
-            (road) => road.status === "Heavy"
-          ).length
-        }
+        title="Heavy Congestion"
+        value={summary.heavy_congestion}
       />
 
       <TrafficCard
         title="Average Speed"
-        value={
-          trafficData.length
-            ? (
-                trafficData.reduce(
-                  (sum, road) => sum + road.average_speed,
-                  0
-                ) / trafficData.length
-              ).toFixed(1) + " km/h"
-            : "0 km/h"
-        }
+        value={`${summary.average_speed} km/h`}
       />
 
       <TrafficCard
-        title="Active Alerts"
-        value={
-          trafficData.filter(
-            (road) => road.status === "Heavy"
-          ).length
-        }
+        title="Roads Monitored"
+        value={summary.total_roads}
       />
     </div>
   );

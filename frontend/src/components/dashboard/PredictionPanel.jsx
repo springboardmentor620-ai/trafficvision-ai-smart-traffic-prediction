@@ -3,7 +3,13 @@ import { predictCongestion } from "../../services/prediction";
 
 import "../../styles/prediction.css";
 
-function PredictionPanel() {
+function PredictionPanel({
+
+    predictionResult,
+
+    setPredictionResult
+
+}) {
 
     const areas = [
         "Indiranagar",
@@ -30,39 +36,15 @@ function PredictionPanel() {
     ];
 
     const weatherOptions = [
+
         "Clear",
-        "Cloudy",
-        "Rain",
+        "Overcast",
         "Fog",
-        "Storm"
+        "Rain",
+        "Windy"
     ];
 
     const [loading, setLoading] = useState(false);
-    const [prediction, setPrediction] = useState(null);
-
-    const getStatus = (value) => {
-
-        if (value <= 30)
-            return {
-                text: "🟢 Low",
-                color: "#28a745",
-                recommendation: "Traffic is flowing normally."
-            };
-
-        if (value <= 70)
-            return {
-                text: "🟠 Moderate",
-                color: "#ff9800",
-                recommendation: "Monitor traffic and keep current signal timing."
-            };
-
-        return {
-            text: "🔴 High",
-            color: "#dc3545",
-            recommendation: "Increase signal timing, deploy traffic personnel, and suggest alternate routes."
-        };
-
-    };
 
     const [formData, setFormData] = useState({
 
@@ -125,7 +107,21 @@ function PredictionPanel() {
 
             const result = await predictCongestion(formData);
 
-            setPrediction(result.congestion_prediction);
+            setPredictionResult({
+
+                ...result,
+
+                area: formData.Area_Name,
+
+                road: formData.Road_Intersection_Name,
+
+                trafficVolume: formData.Traffic_Volume,
+
+                averageSpeed: formData.Average_Speed,
+
+                weather: formData.Weather
+
+            });
 
         }
         catch (err) {
@@ -258,58 +254,101 @@ function PredictionPanel() {
 
             <br /><br />
 
-            {prediction !== null && (() => {
+            {predictionResult && (
 
-                const status = getStatus(prediction);
+            <div
+                className="prediction-result"
+                style={{
+                    marginTop: "30px",
+                    borderRadius: "12px",
+                    padding: "25px",
+                    background: "#ffffff",
+                    border: "2px solid #1976d2",
+                    boxShadow: "0 8px 20px rgba(0,0,0,.08)"
+                }}
+            >
 
-                return (
+                <h2 style={{marginBottom:"20px"}}>
+                    🤖 AI Prediction Result
+                </h2>
 
-                    <div
-                        className="prediction-result"
-                        style={{
-                            border: `2px solid ${status.color}`
-                        }}
-                    >
+                <div
+                    style={{
+                        display:"grid",
+                        gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
+                        gap:"15px"
+                    }}
+                >
 
-                        <h2>Prediction Result</h2>
+                    <div>
 
-                        <h3>
+                        <strong>Congestion Score</strong>
 
-                            Congestion :
+                        <h2>
 
-                            {prediction.toFixed(2)} %
+                            {predictionResult.congestion_prediction.toFixed(2)} %
 
-                        </h3>
-
-                        <h3
-                            style={{
-                                color: status.color
-                            }}
-                        >
-
-                            Status :
-
-                            {status.text}
-
-                        </h3>
-
-                        <p>
-
-                            <strong>Recommendation</strong>
-
-                        </p>
-
-                        <p>
-
-                            {status.recommendation}
-
-                        </p>
+                        </h2>
 
                     </div>
 
-                );
+                    <div>
 
-            })()}
+                        <strong>Risk Level</strong>
+
+                        <h2>
+
+                            {predictionResult.prediction_level}
+
+                        </h2>
+
+                    </div>
+
+                    <div>
+
+                        <strong>AI Confidence</strong>
+
+                        <h2>
+
+                            {predictionResult.confidence} %
+
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <hr style={{margin:"25px 0"}}/>
+
+                <h3>
+
+                    🚦 AI Recommendation
+
+                </h3>
+
+                <p>
+
+                    {predictionResult.recommended_action}
+
+                </p>
+
+                <br/>
+
+                <h3>
+
+                    🗺 Suggested Alternate Route
+
+                </h3>
+
+                <p>
+
+                    {predictionResult.alternate_route}
+
+                </p>
+
+            </div>
+
+            )}
 
         </div>
 

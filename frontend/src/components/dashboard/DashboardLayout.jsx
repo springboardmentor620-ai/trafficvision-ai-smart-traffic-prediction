@@ -6,7 +6,8 @@ function DashboardLayout({ sidebar, navbar, children }) {
       <div
         style={{
           display: "flex",
-          minHeight: "calc(100vh - 70px)",
+          background: "#f4f7fb",
+          minHeight: "100vh",
         }}
       >
         {sidebar}
@@ -14,8 +15,8 @@ function DashboardLayout({ sidebar, navbar, children }) {
         <main
           style={{
             flex: 1,
-            padding: "24px",
-            background: "#f5f7fb",
+            padding: "30px",
+            overflow: "auto",
           }}
         >
           {children}

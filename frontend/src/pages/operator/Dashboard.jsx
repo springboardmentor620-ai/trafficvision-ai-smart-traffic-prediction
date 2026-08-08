@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getTraffic } from "../../services/traffic";
-
+import { getTrafficData } from "../../services/traffic";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 
@@ -39,7 +38,7 @@ function Dashboard() {
 
     useEffect(() => {
 
-        getTraffic()
+        getTrafficData()
             .then((data) => {
 
                 setTrafficData(data);

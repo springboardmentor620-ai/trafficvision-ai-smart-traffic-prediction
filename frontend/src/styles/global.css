@@ -18,3 +18,31 @@ a {
 ul {
   list-style: none;
 }
+
+.stat-card {
+
+background:#fff;
+
+padding:20px;
+
+border-radius:12px;
+
+box-shadow:0 3px 12px rgba(0,0,0,.08);
+
+text-align:center;
+
+}
+
+.stat-card h2 {
+
+font-size:32px;
+
+margin-bottom:10px;
+
+}
+
+.stat-card p {
+
+color:#666;
+
+}

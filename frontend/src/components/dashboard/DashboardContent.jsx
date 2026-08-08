@@ -2,13 +2,23 @@ import TrafficChart from "../TrafficChart";
 import TrafficTable from "../TrafficTable";
 
 function DashboardContent({ trafficData }) {
-  return (
-    <div className="chart-container">
-      <TrafficChart />
 
-      <TrafficTable traffic={trafficData} />
-    </div>
+  return (
+
+    <>
+
+      <TrafficChart
+        trafficData={trafficData}
+      />
+
+      <TrafficTable
+        traffic={trafficData}
+      />
+
+    </>
+
   );
+
 }
 
 export default DashboardContent;

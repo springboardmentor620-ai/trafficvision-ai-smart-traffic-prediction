@@ -1,58 +1,108 @@
+import { useEffect, useState } from "react";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  PieChart,
+  Pie,
   Tooltip,
   Legend,
-} from "chart.js";
+  Cell,
+  ResponsiveContainer,
+} from "recharts";
 
-import { Line } from "react-chartjs-2";
+import { getCongestionChart } from "../services/analytics";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+const COLORS = [
+  "#ef4444",
+  "#f59e0b",
+  "#22c55e",
+  "#3b82f6",
+];
 
 function TrafficChart() {
-  const data = {
-    labels: [
-      "6 AM",
-      "8 AM",
-      "10 AM",
-      "12 PM",
-      "2 PM",
-      "4 PM",
-      "6 PM",
-    ],
-    datasets: [
-      {
-        label: "Traffic Volume",
-        data: [120, 260, 430, 520, 480, 610, 700],
-        borderColor: "#0d6efd",
-        backgroundColor: "rgba(13,110,253,0.2)",
-        tension: 0.4,
-      },
-    ],
-  };
+  const [chartData, setChartData] = useState([]);
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-    },
-  };
+  useEffect(() => {
 
-  return <Line data={data} options={options} />;
+    let mounted = true;
+
+    const fetchChart = async () => {
+      try {
+
+        const data = await getCongestionChart();
+
+        if (!mounted) return;
+
+        const formatted = data.map(item => ({
+          name: item.status,
+          value: item.count,
+        }));
+
+        setChartData(formatted);
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchChart();
+
+    const interval = setInterval(fetchChart, 5000);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+
+  }, []);
+
+  return (
+
+    <div
+      style={{
+        background: "#fff",
+        borderRadius: "12px",
+        padding: "20px",
+        marginTop: "30px",
+        boxShadow: "0 3px 12px rgba(0,0,0,.08)",
+        height: "420px",
+      }}
+    >
+
+      <h2>Traffic Congestion Distribution</h2>
+
+      <ResponsiveContainer width="100%" height="90%">
+
+        <PieChart>
+
+          <Pie
+            data={chartData}
+            dataKey="value"
+            nameKey="name"
+            outerRadius={130}
+            label
+          >
+
+            {chartData.map((entry, index) => (
+
+              <Cell
+                key={index}
+                fill={COLORS[index % COLORS.length]}
+              />
+
+            ))}
+
+          </Pie>
+
+          <Tooltip />
+
+          <Legend />
+
+        </PieChart>
+
+      </ResponsiveContainer>
+
+    </div>
+
+  );
 }
 
 export default TrafficChart;
