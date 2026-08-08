@@ -11,6 +11,7 @@ import {
   Bell,
   Users,
   TrendingUp,
+  Sparkles,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -20,6 +21,11 @@ const NAV_ITEMS = [
   { href: "/dashboard/prediction", label: "Traffic prediction", icon: TrendingUp },
   { href: "/dashboard/routes", label: "Route analysis", icon: Route },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  {
+  href: "/dashboard/ai-recommendations",
+  label: "AI Recommendations",
+  icon: Sparkles,
+  },
   { href: "/dashboard/alerts", label: "Alerts", icon: Bell },
   { href: "/dashboard/users", label: "User management", icon: Users, adminOnly: true },
 ];
