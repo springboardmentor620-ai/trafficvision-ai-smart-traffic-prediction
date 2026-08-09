@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+    FaEye,
+    FaEyeSlash,
+    FaArrowRight
+} from "react-icons/fa";
 
 import AuthService from "../../services/authService";
 import Button from "../ui/Button";
+
 
 function LoginForm() {
 
@@ -15,35 +20,31 @@ function LoginForm() {
 
     const [error, setError] = useState("");
 
+
     const [formData, setFormData] = useState({
-
         email: "",
-
         password: ""
-
     });
+
 
     function handleChange(event) {
 
         setFormData({
-
             ...formData,
-
             [event.target.name]: event.target.value
-
         });
 
     }
+
 
     async function handleSubmit(event) {
 
         event.preventDefault();
 
+        setLoading(true);
+        setError("");
+
         try {
-
-            setLoading(true);
-
-            setError("");
 
             await AuthService.login(formData);
 
@@ -55,7 +56,9 @@ function LoginForm() {
 
             console.error(err);
 
-            setError("Invalid email or password.");
+            setError(
+                "Unable to login. Please check your email and password."
+            );
 
         }
 
@@ -67,151 +70,156 @@ function LoginForm() {
 
     }
 
-    return (
 
+    return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-6"
+            className="w-full"
         >
 
-            {
+            {/* ERROR */}
 
-                error &&
+            {error && (
 
                 <div
                     className="
-                        bg-red-100
-                        text-red-700
-                        border
-                        border-red-300
+                        mb-6
                         rounded-xl
-                        p-3
+                        border
+                        border-red-200
+                        bg-red-50
+                        px-4
+                        py-3
+                        text-sm
+                        text-red-600
                     "
                 >
-
                     {error}
-
                 </div>
 
-            }
+            )}
+
+
+            {/* EMAIL */}
 
             <div>
 
-                <label className="font-medium">
-
-                    Email Address
-
+                <label
+                    htmlFor="email"
+                    className="
+                        block
+                        text-sm
+                        font-semibold
+                        text-slate-800
+                    "
+                >
+                    Email address
                 </label>
 
+
                 <input
-
-                    type="email"
-
+                    id="email"
                     name="email"
-
+                    type="email"
                     value={formData.email}
-
                     onChange={handleChange}
-
                     placeholder="Enter your email"
-
+                    autoComplete="email"
                     required
-
                     className="
                         mt-2
+                        h-12
                         w-full
-                        border
                         rounded-xl
-                        p-3
-                        focus:ring-2
-                        focus:ring-blue-600
+                        border
+                        border-slate-200
+                        bg-slate-50
+                        px-4
+                        text-sm
+                        text-slate-900
                         outline-none
+                        transition
+                        focus:border-blue-500
+                        focus:bg-white
+                        focus:ring-4
+                        focus:ring-blue-500/10
                     "
-
                 />
 
             </div>
 
-            <div>
 
-                <label className="font-medium">
+            {/* PASSWORD */}
 
+            <div className="mt-7">
+
+                <label
+                    htmlFor="password"
+                    className="
+                        block
+                        text-sm
+                        font-semibold
+                        text-slate-800
+                    "
+                >
                     Password
-
                 </label>
+
 
                 <div className="relative mt-2">
 
                     <input
-
-                        type={
-
-                            showPassword
-
-                                ? "text"
-
-                                : "password"
-
-                        }
-
+                        id="password"
                         name="password"
-
+                        type={
+                            showPassword
+                                ? "text"
+                                : "password"
+                        }
                         value={formData.password}
-
                         onChange={handleChange}
-
                         placeholder="Enter your password"
-
+                        autoComplete="current-password"
                         required
-
                         className="
+                            h-12
                             w-full
-                            border
                             rounded-xl
-                            p-3
+                            border
+                            border-slate-200
+                            bg-slate-50
+                            px-4
                             pr-12
-                            focus:ring-2
-                            focus:ring-blue-600
+                            text-sm
+                            text-slate-900
                             outline-none
+                            transition
+                            focus:border-blue-500
+                            focus:bg-white
+                            focus:ring-4
+                            focus:ring-blue-500/10
                         "
-
                     />
 
+
                     <button
-
                         type="button"
-
                         onClick={() =>
-
-                            setShowPassword(
-
-                                !showPassword
-
-                            )
-
+                            setShowPassword(!showPassword)
                         }
-
                         className="
                             absolute
                             right-4
-                            top-4
-                            text-slate-500
+                            top-1/2
+                            -translate-y-1/2
+                            text-slate-400
+                            hover:text-slate-700
                         "
-
                     >
 
-                        {
-
-                            showPassword
-
-                                ?
-
-                                <FaEyeSlash />
-
-                                :
-
-                                <FaEye />
-
+                        {showPassword
+                            ? <FaEyeSlash />
+                            : <FaEye />
                         }
 
                     </button>
@@ -220,12 +228,15 @@ function LoginForm() {
 
             </div>
 
+
+            {/* REMEMBER + FORGOT */}
+
             <div
                 className="
+                    mt-5
                     flex
-                    justify-between
                     items-center
-                    text-sm
+                    justify-between
                 "
             >
 
@@ -234,55 +245,91 @@ function LoginForm() {
                         flex
                         items-center
                         gap-2
+                        text-sm
+                        text-slate-500
                     "
                 >
 
-                    <input type="checkbox" />
+                    <input
+                        type="checkbox"
+                        className="
+                            h-4
+                            w-4
+                            accent-blue-600
+                        "
+                    />
 
-                    Remember Me
+                    Remember me
 
                 </label>
 
+
                 <button
                     type="button"
-                    className="text-blue-600"
+                    className="
+                        text-sm
+                        font-semibold
+                        text-blue-600
+                        hover:text-blue-700
+                    "
                 >
-
-                    Forgot Password?
-
+                    Forgot password?
                 </button>
 
             </div>
 
-            <Button
 
-                type="submit"
+            {/* BUTTON */}
 
-                className="w-full"
+            <div className="mt-7">
 
-                disabled={loading}
+                <Button
+                    type="submit"
+                    disabled={loading}
+                    className="
+                        h-12
+                        w-full
+                        rounded-xl
+                        bg-blue-600
+                        text-white
+                        shadow-[0_10px_25px_rgba(37,99,235,0.20)]
+                        transition
+                        hover:bg-blue-700
+                    "
+                >
 
-            >
+                    <span
+                        className="
+                            flex
+                            items-center
+                            justify-center
+                            gap-3
+                        "
+                    >
 
-                {
+                        {loading
+                            ? "Signing in..."
+                            : "Sign in"
+                        }
 
-                    loading
+                        {!loading && (
+                            <FaArrowRight className="text-xs" />
+                        )}
 
-                        ?
+                    </span>
 
-                        "Signing In..."
+                </Button>
 
-                        :
+            </div>
 
-                        "Login"
 
-                }
-
-            </Button>
+            {/* REGISTER */}
 
             <p
                 className="
+                    mt-5
                     text-center
+                    text-sm
                     text-slate-500
                 "
             >
@@ -290,27 +337,21 @@ function LoginForm() {
                 Don't have an account?
 
                 <Link
-
                     to="/register"
-
                     className="
-                        ml-2
-                        text-blue-600
+                        ml-1
                         font-semibold
+                        text-blue-600
+                        hover:text-blue-700
                     "
-
                 >
-
-                    Register
-
+                    Create an account
                 </Link>
 
             </p>
 
         </form>
-
     );
-
 }
 
 export default LoginForm;

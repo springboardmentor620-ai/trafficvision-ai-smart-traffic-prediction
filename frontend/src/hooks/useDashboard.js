@@ -19,73 +19,194 @@ function useDashboard() {
 
     const [error, setError] = useState(null);
 
+    const [endpointErrors, setEndpointErrors] = useState([]);
+
     useEffect(() => {
+
+        let mounted = true;
 
         async function loadDashboard() {
 
-            try {
+            setLoading(true);
 
-                const [
+            setError(null);
 
-                    summary,
+            const requests = [
 
-                    trend,
+                {
+                    name: "summary",
+                    request: DashboardService.getSummary
+                },
 
-                    severity,
+                {
+                    name: "monthlyTrend",
+                    request: DashboardService.getMonthlyTrend
+                },
 
-                    weather,
+                {
+                    name: "severityDistribution",
+                    request: DashboardService.getSeverityDistribution
+                },
 
-                    cities,
+                {
+                    name: "weatherDistribution",
+                    request: DashboardService.getWeatherDistribution
+                },
 
-                    heatmap
+                {
+                    name: "dangerousCities",
+                    request: DashboardService.getDangerousCities
+                },
 
-                ] = await Promise.all([
+                {
+                    name: "heatmap",
+                    request: DashboardService.getHeatmap
+                }
 
-                    DashboardService.getSummary(),
+            ];
 
-                    DashboardService.getMonthlyTrend(),
+            const results =
+                await Promise.allSettled(
 
-                    DashboardService.getSeverityDistribution(),
+                    requests.map(
+                        (item) => item.request()
+                    )
 
-                    DashboardService.getWeatherDistribution(),
+                );
 
-                    DashboardService.getDangerousCities(),
+            if (!mounted) return;
 
-                    DashboardService.getHeatmap()
+            const failedRequests = [];
 
-                ]);
+            results.forEach(
+                (result, index) => {
 
-                setSummary(summary);
+                    const requestName =
+                        requests[index].name;
 
-                setMonthlyTrend(trend);
+                    if (
+                        result.status === "fulfilled"
+                    ) {
 
-                setSeverityDistribution(severity);
+                        const data =
+                            result.value;
 
-                setWeatherDistribution(weather);
+                        switch (requestName) {
 
-                setDangerousCities(cities);
+                            case "summary":
 
-                setHeatmapData(heatmap);
+                                setSummary(data);
+
+                                break;
+
+                            case "monthlyTrend":
+
+                                setMonthlyTrend(
+                                    Array.isArray(data)
+                                        ? data
+                                        : []
+                                );
+
+                                break;
+
+                            case "severityDistribution":
+
+                                setSeverityDistribution(
+                                    Array.isArray(data)
+                                        ? data
+                                        : []
+                                );
+
+                                break;
+
+                            case "weatherDistribution":
+
+                                setWeatherDistribution(
+                                    Array.isArray(data)
+                                        ? data
+                                        : []
+                                );
+
+                                break;
+
+                            case "dangerousCities":
+
+                                setDangerousCities(
+                                    Array.isArray(data)
+                                        ? data
+                                        : []
+                                );
+
+                                break;
+
+                            case "heatmap":
+
+                                setHeatmapData(
+                                    Array.isArray(data)
+                                        ? data
+                                        : []
+                                );
+
+                                break;
+
+                            default:
+
+                                break;
+
+                        }
+
+                    }
+                    else {
+
+                        console.error(
+                            `Dashboard ${requestName} failed:`,
+                            result.reason
+                        );
+
+                        failedRequests.push(
+                            requestName
+                        );
+
+                    }
+
+                }
+            );
+
+            setEndpointErrors(
+                failedRequests
+            );
+
+            /*
+             * Only show the main error when the
+             * essential dashboard summary itself
+             * cannot be loaded.
+             */
+
+            const summaryResult =
+                results[0];
+
+            if (
+                summaryResult.status ===
+                "rejected"
+            ) {
+
+                setError(
+                    summaryResult.reason
+                );
 
             }
 
-            catch (err) {
-
-                console.error(err);
-
-                setError(err);
-
-            }
-
-            finally {
-
-                setLoading(false);
-
-            }
+            setLoading(false);
 
         }
 
         loadDashboard();
+
+        return () => {
+
+            mounted = false;
+
+        };
 
     }, []);
 
@@ -105,7 +226,9 @@ function useDashboard() {
 
         loading,
 
-        error
+        error,
+
+        endpointErrors
 
     };
 

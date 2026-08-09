@@ -12,15 +12,57 @@ const AuthService = {
 
         );
 
-        localStorage.setItem(
+        const data = response.data;
 
-            "token",
+        /*
+         * Store the authentication token.
+         */
 
-            response.data.access_token
+        if (data?.access_token) {
 
-        );
+            localStorage.setItem(
 
-        return response.data;
+                "token",
+
+                data.access_token
+
+            );
+
+        }
+
+        /*
+         * Some backend responses may include
+         * user information or role.
+         *
+         * We store it only if it actually exists.
+         * No dummy role is created.
+         */
+
+        if (data?.user) {
+
+            localStorage.setItem(
+
+                "user",
+
+                JSON.stringify(data.user)
+
+            );
+
+        }
+
+        if (data?.role) {
+
+            localStorage.setItem(
+
+                "role",
+
+                data.role
+
+            );
+
+        }
+
+        return data;
 
     },
 
@@ -42,11 +84,49 @@ const AuthService = {
 
         localStorage.removeItem("token");
 
+        localStorage.removeItem("user");
+
+        localStorage.removeItem("role");
+
     },
 
     isAuthenticated() {
 
-        return !!localStorage.getItem("token");
+        return Boolean(
+
+            localStorage.getItem("token")
+
+        );
+
+    },
+
+    getUser() {
+
+        const user =
+            localStorage.getItem("user");
+
+        if (!user) {
+
+            return null;
+
+        }
+
+        try {
+
+            return JSON.parse(user);
+
+        }
+        catch {
+
+            return null;
+
+        }
+
+    },
+
+    getRole() {
+
+        return localStorage.getItem("role");
 
     }
 

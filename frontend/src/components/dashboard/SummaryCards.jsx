@@ -10,47 +10,90 @@ import StatCard from "./StatCard";
 function SummaryCards({ summary }) {
 
     if (!summary) {
-
-        return <p>Loading...</p>;
-
+        return (
+            <div
+                className="
+                    grid
+                    grid-cols-1
+                    gap-4
+                    sm:grid-cols-2
+                    xl:grid-cols-4
+                "
+            >
+                {[1, 2, 3, 4].map((item) => (
+                    <div
+                        key={item}
+                        className="
+                            h-28
+                            animate-pulse
+                            rounded-2xl
+                            border
+                            border-slate-200
+                            bg-white
+                            dark:border-slate-800
+                            dark:bg-slate-900
+                        "
+                    />
+                ))}
+            </div>
+        );
     }
 
-    return (
+    const riskValue =
+        summary.average_risk_score !== null &&
+        summary.average_risk_score !== undefined
+            ? Number(
+                summary.average_risk_score
+            ).toFixed(2)
+            : "—";
 
-        <div className="grid xl:grid-cols-4 md:grid-cols-2 gap-6">
+    return (
+        <div
+            className="
+                grid
+                grid-cols-1
+                gap-4
+                sm:grid-cols-2
+                xl:grid-cols-4
+            "
+        >
 
             <StatCard
                 title="Total Accidents"
-                value={summary.total_accidents}
-                color="text-blue-600"
+                value={
+                    summary.total_accidents ?? 0
+                }
+                color="text-blue-600 dark:text-blue-400"
                 icon={<FaCarCrash />}
             />
 
             <StatCard
-                title="Average Risk Score"
-                value={summary.average_risk_score}
-                color="text-green-600"
+                title="Average Risk"
+                value={riskValue}
+                color="text-amber-500 dark:text-amber-400"
                 icon={<FaChartLine />}
             />
 
             <StatCard
                 title="Active Alerts"
-                value={summary.active_alerts}
-                color="text-red-500"
+                value={
+                    summary.active_alerts ?? 0
+                }
+                color="text-red-500 dark:text-red-400"
                 icon={<FaBell />}
             />
 
             <StatCard
                 title="Cities Covered"
-                value={summary.total_cities}
-                color="text-cyan-600"
+                value={
+                    summary.total_cities ?? 0
+                }
+                color="text-cyan-600 dark:text-cyan-400"
                 icon={<FaMapMarkedAlt />}
             />
 
         </div>
-
     );
-
 }
 
 export default SummaryCards;

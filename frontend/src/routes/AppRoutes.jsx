@@ -1,4 +1,8 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import {
+    Routes,
+    Route,
+    Navigate
+} from "react-router-dom";
 
 import Landing from "../pages/Landing/Landing";
 import Login from "../pages/Login/Login";
@@ -7,13 +11,12 @@ import Register from "../pages/Register/Register";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Prediction from "../pages/Prediction/Prediction";
 import Reports from "../pages/Reports/Reports";
-
-// Uncomment these when we create them
-// import Heatmap from "../pages/Heatmap/Heatmap";
-// import Alerts from "../pages/Alerts/Alerts";
-// import Profile from "../pages/Profile/Profile";
+import Maps from "../pages/Maps/Maps";
+import Analytics from "../pages/Analytics/Analytics";
+import Alerts from "../pages/Alerts/Alerts";
 
 import AuthService from "../services/authService";
+
 
 function ProtectedRoute({ children }) {
 
@@ -21,9 +24,13 @@ function ProtectedRoute({ children }) {
 
         ? children
 
-        : <Navigate to="/login" replace />;
+        : <Navigate
+            to="/login"
+            replace
+        />;
 
 }
+
 
 function AppRoutes() {
 
@@ -31,138 +38,112 @@ function AppRoutes() {
 
         <Routes>
 
-            {/* Public Routes */}
+            {/* =================================================
+                PUBLIC ROUTES
+            ================================================= */}
 
             <Route
-
                 path="/"
-
                 element={<Landing />}
-
             />
 
             <Route
-
                 path="/login"
-
                 element={<Login />}
-
             />
 
             <Route
-
                 path="/register"
-
                 element={<Register />}
-
             />
 
-            {/* Protected Routes */}
+
+            {/* =================================================
+                PROTECTED ROUTES
+            ================================================= */}
 
             <Route
-
                 path="/dashboard"
-
                 element={
-
                     <ProtectedRoute>
-
                         <Dashboard />
-
                     </ProtectedRoute>
-
                 }
-
             />
 
-            <Route
 
+            {/* MAPS & ROUTES */}
+
+            <Route
+                path="/maps"
+                element={
+                    <ProtectedRoute>
+                        <Maps />
+                    </ProtectedRoute>
+                }
+            />
+
+
+            {/* PREDICTION */}
+
+            <Route
                 path="/prediction"
-
                 element={
-
                     <ProtectedRoute>
-
                         <Prediction />
-
                     </ProtectedRoute>
-
                 }
-
             />
 
-            <Route
 
+            {/* ANALYTICS */}
+
+            <Route
+                path="/analytics"
+                element={
+                    <ProtectedRoute>
+                        <Analytics />
+                    </ProtectedRoute>
+                }
+            />
+
+
+            {/* REPORTS */}
+
+            <Route
                 path="/reports"
-
                 element={
-
                     <ProtectedRoute>
-
                         <Reports />
-
                     </ProtectedRoute>
-
                 }
-
             />
 
-            {/*
-            <Route
 
-                path="/heatmap"
-
-                element={
-
-                    <ProtectedRoute>
-
-                        <Heatmap />
-
-                    </ProtectedRoute>
-
-                }
-
-            />
+            {/* ALERTS */}
 
             <Route
-
                 path="/alerts"
-
                 element={
-
                     <ProtectedRoute>
-
                         <Alerts />
-
                     </ProtectedRoute>
-
                 }
-
             />
 
-            <Route
 
-                path="/profile"
-
-                element={
-
-                    <ProtectedRoute>
-
-                        <Profile />
-
-                    </ProtectedRoute>
-
-                }
-
-            />
-            */}
+            {/* =================================================
+                FALLBACK
+            ================================================= */}
 
             <Route
-
                 path="*"
-
-                element={<Navigate to="/" replace />}
-
+                element={
+                    <Navigate
+                        to="/"
+                        replace
+                    />
+                }
             />
 
         </Routes>
@@ -170,5 +151,6 @@ function AppRoutes() {
     );
 
 }
+
 
 export default AppRoutes;

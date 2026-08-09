@@ -1,54 +1,70 @@
 import AuthBranding from "./AuthBranding";
 
-function AuthLayout({
-
-    children
-
-}) {
-
+function AuthLayout({ children }) {
     return (
-
         <div
-            className="
-                min-h-screen
-                grid
-                lg:grid-cols-2
-                bg-slate-100
-            "
+            style={{
+                minHeight: "100vh",
+                width: "100%",
+                overflow: "hidden",
+                background: "#eef3fb"
+            }}
         >
 
-            <AuthBranding />
-
             <div
-                className="
-                    flex
-                    justify-center
-                    items-center
-                    p-8
-                "
+                style={{
+                    minHeight: "100vh",
+                    width: "100%",
+                    display: "grid",
+                    gridTemplateColumns: "44% 56%"
+                }}
             >
 
-                <div
-                    className="
-                        w-full
-                        max-w-md
-                        bg-white
-                        rounded-3xl
-                        shadow-xl
-                        p-10
-                    "
+                {/* ================= LEFT LOGIN ================= */}
+
+                <section
+                    style={{
+                        minHeight: "100vh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "70px 8%",
+                        background:
+                            "linear-gradient(135deg, #eef5ff 0%, #e8f1ff 50%, #f4f8ff 100%)"
+                    }}
                 >
 
-                    {children}
+                    <div
+                        style={{
+                            width: "100%",
+                            maxWidth: "540px"
+                        }}
+                    >
+                        {children}
+                    </div>
 
-                </div>
+                </section>
+
+
+                {/* ================= RIGHT PANEL ================= */}
+
+                <section
+                    style={{
+                        minHeight: "100vh",
+                        width: "100%",
+                        background: "#061536",
+                        overflow: "hidden"
+                    }}
+                >
+
+                    <AuthBranding />
+
+                </section>
 
             </div>
 
         </div>
-
     );
-
 }
 
 export default AuthLayout;

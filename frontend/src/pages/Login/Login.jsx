@@ -2,44 +2,68 @@ import AuthLayout from "../../components/auth/AuthLayout";
 import LoginForm from "../../components/auth/LoginForm";
 
 function Login() {
-
     return (
-
         <AuthLayout>
 
-            <div className="mb-10">
+            <div className="w-full">
 
-                <h1
-                    className="
-                        text-4xl
-                        font-bold
-                    "
-                >
+                {/* ================= PAGE INTRO ================= */}
 
-                    Welcome Back
+                <div className="mb-9">
 
-                </h1>
+                    <p
+                        className="
+                            text-sm
+                            font-semibold
+                            text-blue-600
+                            mb-3
+                            tracking-wide
+                        "
+                    >
+                        Traffic Intelligence Platform
+                    </p>
 
-                <p
-                    className="
-                        text-slate-500
-                        mt-3
-                    "
-                >
+                    <h1
+                        className="
+                            text-4xl
+                            sm:text-[42px]
+                            font-bold
+                            text-slate-950
+                            leading-[1.1]
+                            tracking-tight
+                        "
+                    >
+                        Welcome back
+                    </h1>
 
-                    Login to continue using
-                    TrafficVision AI
+                    <p
+                        className="
+                            mt-4
+                            text-base
+                            text-slate-500
+                            leading-7
+                            max-w-[440px]
+                        "
+                    >
+                        Sign in to access your traffic dashboard,
+                        predictions and route intelligence.
+                    </p>
 
-                </p>
+                </div>
+
+
+                {/* ================= LOGIN FORM ================= */}
+
+                <div className="w-full">
+
+                    <LoginForm />
+
+                </div>
 
             </div>
 
-            <LoginForm />
-
         </AuthLayout>
-
     );
-
 }
 
 export default Login;

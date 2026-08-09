@@ -1,26 +1,100 @@
 function DashboardHeader() {
 
     return (
+        <header
+            className="
+                flex
+                flex-col
+                gap-4
+                sm:flex-row
+                sm:items-end
+                sm:justify-between
+            "
+        >
 
-        <div className="mb-8">
+            <div>
 
-            <h1 className="text-4xl font-bold text-slate-900">
+                <p
+                    className="
+                        text-xs
+                        font-semibold
+                        uppercase
+                        tracking-[0.16em]
+                        text-blue-600
 
-                Traffic Dashboard
+                        dark:text-blue-400
+                    "
+                >
+                    Traffic Intelligence
+                </p>
 
-            </h1>
+                <h1
+                    className="
+                        mt-1
+                        text-3xl
+                        font-bold
+                        tracking-tight
+                        text-slate-900
 
-            <p className="mt-2 text-gray-500">
+                        dark:text-white
+                    "
+                >
+                    Dashboard
+                </h1>
 
-                Welcome to TrafficVision AI. Monitor accidents,
-                traffic trends, weather analysis and AI predictions.
+                <p
+                    className="
+                        mt-1.5
+                        text-sm
+                        text-slate-500
 
-            </p>
+                        dark:text-slate-400
+                    "
+                >
+                    Traffic intelligence overview
+                </p>
 
-        </div>
+            </div>
 
+
+            <div
+                className="
+                    inline-flex
+                    w-fit
+                    items-center
+                    gap-2
+                    rounded-full
+                    border
+                    border-slate-200
+                    bg-white
+                    px-3
+                    py-1.5
+                    text-xs
+                    font-medium
+                    text-slate-600
+                    shadow-sm
+
+                    dark:border-slate-800
+                    dark:bg-slate-900
+                    dark:text-slate-300
+                "
+            >
+
+                <span
+                    className="
+                        h-2
+                        w-2
+                        rounded-full
+                        bg-emerald-500
+                    "
+                />
+
+                System Online
+
+            </div>
+
+        </header>
     );
-
 }
 
 export default DashboardHeader;

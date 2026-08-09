@@ -1,101 +1,230 @@
 import DashboardLayout from "../../components/layout/DashboardLayout";
 
-import DashboardHeader from "../../components/dashboard/DashboardHeader";
-import SummaryCards from "../../components/dashboard/SummaryCards";
-import TrafficTrendChart from "../../components/dashboard/TrafficTrendChart";
-import SeverityChart from "../../components/dashboard/SeverityChart";
-import WeatherChart from "../../components/dashboard/WeatherChart";
-import DangerousCities from "../../components/dashboard/DangerousCities";
-import HeatmapPreview from "../../components/dashboard/HeatmapPreview";
-import RecentPredictions from "../../components/dashboard/RecentPredictions";
-import AlertPanel from "../../components/dashboard/AlertPanel";
+import DashboardHeader
+    from "../../components/dashboard/DashboardHeader";
 
-import useDashboard from "../../hooks/useDashboard";
+import SummaryCards
+    from "../../components/dashboard/SummaryCards";
+
+import TrafficTrendChart
+    from "../../components/dashboard/TrafficTrendChart";
+
+import DangerousCities
+    from "../../components/dashboard/DangerousCities";
+
+import RecentPredictions
+    from "../../components/dashboard/RecentPredictions";
+
+import AlertPanel
+    from "../../components/dashboard/AlertPanel";
+
+import useDashboard
+    from "../../hooks/useDashboard";
+
 
 function Dashboard() {
 
     const {
-
         summary,
-
         monthlyTrend,
-
-        severityDistribution,
-
-        weatherDistribution,
-
         dangerousCities,
-
-        heatmapData,
-
         loading,
-
         error
-
     } = useDashboard();
+
+
+    // =========================
+    // LOADING
+    // =========================
 
     if (loading) {
 
-        return <h2 className="text-center mt-20">Loading Dashboard...</h2>;
+        return (
+            <DashboardLayout>
 
+                <div
+                    className="
+                        flex
+                        min-h-[70vh]
+                        items-center
+                        justify-center
+                    "
+                >
+
+                    <div className="text-center">
+
+                        <div
+                            className="
+                                mx-auto
+                                h-9
+                                w-9
+                                animate-spin
+                                rounded-full
+                                border-2
+                                border-slate-200
+                                border-t-blue-600
+                                dark:border-slate-700
+                                dark:border-t-blue-500
+                            "
+                        />
+
+                        <p
+                            className="
+                                mt-4
+                                text-sm
+                                text-slate-500
+                                dark:text-slate-400
+                            "
+                        >
+                            Loading dashboard...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </DashboardLayout>
+        );
     }
+
+
+    // =========================
+    // ERROR
+    // =========================
 
     if (error) {
 
-        return <h2 className="text-center mt-20 text-red-600">Failed to load dashboard.</h2>;
+        return (
+            <DashboardLayout>
 
+                <div
+                    className="
+                        rounded-2xl
+                        border
+                        border-red-200
+                        bg-red-50
+                        p-6
+                        text-red-700
+                        dark:border-red-900/60
+                        dark:bg-red-950/30
+                        dark:text-red-400
+                    "
+                >
+
+                    <h2 className="font-semibold">
+                        Unable to load dashboard
+                    </h2>
+
+                    <p className="mt-1 text-sm">
+                        Please check that the backend is running.
+                    </p>
+
+                </div>
+
+            </DashboardLayout>
+        );
     }
+
+
+    // =========================
+    // MAIN DASHBOARD
+    // =========================
 
     return (
 
         <DashboardLayout>
 
-            <DashboardHeader />
+            <div
+                className="
+                    flex
+                    flex-col
 
-            <SummaryCards summary={summary} />
+                    gap-8
+                "
+            >
 
-            <div className="grid lg:grid-cols-2 gap-8 mt-8">
+                {/* =========================
+                    HEADER
+                ========================= */}
 
-                <TrafficTrendChart data={monthlyTrend} />
+                <DashboardHeader />
 
-                <SeverityChart data={severityDistribution} />
 
-            </div>
+                {/* =========================
+                    SUMMARY CARDS
+                ========================= */}
 
-            <div className="mt-8">
+                <section>
 
-                <WeatherChart data={weatherDistribution} />
+                    <SummaryCards
+                        summary={summary}
+                    />
 
-            </div>
+                </section>
 
-            <div className="grid lg:grid-cols-2 gap-8 mt-8">
 
-                <DangerousCities
+                {/* =========================
+                    TRAFFIC + PREDICTIONS
+                ========================= */}
 
-                    data={dangerousCities}
+                <section
+                    className="
+                        grid
+                        grid-cols-1
+                        gap-6
+                        xl:grid-cols-[1.45fr_1fr]
+                    "
+                >
 
-                />
+                    <TrafficTrendChart
+                        data={monthlyTrend}
+                    />
 
-                <HeatmapPreview
 
-                    data={heatmapData}
+                    <RecentPredictions />
 
-                />
+                </section>
 
-            </div>
 
-            <div className="grid lg:grid-cols-2 gap-8 mt-8">
+                {/* =========================
+                    HIGH RISK + ALERTS
+                ========================= */}
 
-                <RecentPredictions />
+                <section
+                    className="
+                        grid
+                        grid-cols-1
+                        gap-6
+                        xl:grid-cols-2
+                    "
+                >
 
-                <AlertPanel />
+                    <DangerousCities
+                        data={dangerousCities}
+                    />
+
+
+                    <AlertPanel
+                        activeAlerts={
+                            summary?.active_alerts ?? 0
+                        }
+                    />
+
+                </section>
+
+
+                {/* =========================
+                    BOTTOM BREATHING SPACE
+                ========================= */}
+
+                <div className="h-8" />
 
             </div>
 
         </DashboardLayout>
 
     );
-
 }
+
 
 export default Dashboard;

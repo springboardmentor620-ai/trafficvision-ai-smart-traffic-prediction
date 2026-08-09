@@ -7,6 +7,7 @@ from app.schemas.prediction import PredictionRequest
 from app.schemas.prediction import PredictionResponse
 from app.services.prediction_service import PredictionService
 
+
 router = APIRouter(
     prefix="/prediction",
     tags=["Prediction"]

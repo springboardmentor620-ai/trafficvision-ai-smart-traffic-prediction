@@ -1,112 +1,164 @@
 import {
-
     ResponsiveContainer,
-
     PieChart,
-
     Pie,
-
     Cell,
-
     Tooltip,
-
     Legend
-
 } from "recharts";
 
+
 const COLORS = [
-
-    "#10B981",
-
+    "#2563EB",
     "#F59E0B",
-
     "#EF4444"
-
 ];
 
-function SeverityChart({
 
-    data
-
-}) {
+function SeverityChart({ data = [] }) {
 
     const chartData = data.map((item) => ({
-
         name: item.accident_severity,
-
         value: item.total
-
     }));
+
 
     return (
 
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div
+            className="
+                min-w-0
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                p-5
+                shadow-sm
 
-            <h2 className="text-2xl font-bold mb-6">
+                dark:border-slate-800
+                dark:bg-slate-900
+            "
+        >
 
-                Accident Severity
-
-            </h2>
-
-            <ResponsiveContainer
-                width="100%"
-                height={320}
+            <div
+                className="
+                    flex
+                    items-start
+                    justify-between
+                "
             >
 
-                <PieChart>
+                <div>
 
-                    <Pie
+                    <h2
+                        className="
+                            text-base
+                            font-semibold
+                            text-slate-900
 
-                        data={chartData}
-
-                        dataKey="value"
-
-                        nameKey="name"
-
-                        outerRadius={110}
-
-                        label
-
+                            dark:text-white
+                        "
                     >
+                        Accident Severity
+                    </h2>
 
-                        {
+                    <p
+                        className="
+                            mt-1
+                            text-xs
+                            text-slate-400
+                        "
+                    >
+                        Distribution by severity
+                    </p>
 
-                            chartData.map((entry, index) => (
+                </div>
 
-                                <Cell
+                <span
+                    className="
+                        rounded-lg
+                        bg-slate-100
+                        px-2.5
+                        py-1
+                        text-xs
+                        text-slate-500
 
-                                    key={index}
+                        dark:bg-slate-800
+                        dark:text-slate-400
+                    "
+                >
+                    Overview
+                </span>
 
-                                    fill={
+            </div>
 
-                                        COLORS[
 
-                                            index % COLORS.length
+            <div className="h-[290px]">
 
-                                        ]
+                <ResponsiveContainer
+                    width="100%"
+                    height="100%"
+                >
 
-                                    }
+                    <PieChart>
 
-                                />
+                        <Pie
+                            data={chartData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="47%"
+                            innerRadius={65}
+                            outerRadius={95}
+                            paddingAngle={3}
+                            stroke="none"
+                        >
 
-                            ))
+                            {chartData.map(
+                                (entry, index) => (
 
-                        }
+                                    <Cell
+                                        key={index}
+                                        fill={
+                                            COLORS[
+                                                index %
+                                                COLORS.length
+                                            ]
+                                        }
+                                    />
 
-                    </Pie>
+                                )
+                            )}
 
-                    <Tooltip />
+                        </Pie>
 
-                    <Legend />
 
-                </PieChart>
+                        <Tooltip
+                            contentStyle={{
+                                borderRadius: "10px",
+                                border:
+                                    "1px solid #E2E8F0"
+                            }}
+                        />
 
-            </ResponsiveContainer>
+
+                        <Legend
+                            verticalAlign="bottom"
+                            iconType="circle"
+                            wrapperStyle={{
+                                fontSize: "12px"
+                            }}
+                        />
+
+                    </PieChart>
+
+                </ResponsiveContainer>
+
+            </div>
 
         </div>
 
     );
-
 }
 
 export default SeverityChart;

@@ -6,9 +6,14 @@ from app.models.traffic_alert import TrafficAlert
 class TrafficAlertRepository:
 
     @staticmethod
-    def create(db: Session, data: dict):
+    def create(
+        db: Session,
+        data: dict
+    ):
 
-        alert = TrafficAlert(**data)
+        alert = TrafficAlert(
+            **data
+        )
 
         db.add(alert)
 
@@ -18,33 +23,71 @@ class TrafficAlertRepository:
 
         return alert
 
+
     @staticmethod
-    def get_all(db: Session):
+    def get_all(
+        db: Session
+    ):
 
         return (
-            db.query(TrafficAlert)
-            .order_by(TrafficAlert.created_at.desc())
+
+            db.query(
+                TrafficAlert
+            )
+
+            .order_by(
+                TrafficAlert.created_at.desc()
+            )
+
             .all()
+
         )
 
+
     @staticmethod
-    def get_active(db: Session):
+    def get_active(
+        db: Session
+    ):
 
         return (
-            db.query(TrafficAlert)
-            .filter(TrafficAlert.is_active == True)
-            .order_by(TrafficAlert.created_at.desc())
+
+            db.query(
+                TrafficAlert
+            )
+
+            .filter(
+                TrafficAlert.is_active == True
+            )
+
+            .order_by(
+                TrafficAlert.created_at.desc()
+            )
+
             .all()
+
         )
 
+
     @staticmethod
-    def deactivate(db: Session, alert_id: int):
+    def deactivate(
+        db: Session,
+        alert_id: int
+    ):
 
         alert = (
-            db.query(TrafficAlert)
-            .filter(TrafficAlert.id == alert_id)
+
+            db.query(
+                TrafficAlert
+            )
+
+            .filter(
+                TrafficAlert.id == alert_id
+            )
+
             .first()
+
         )
+
 
         if alert:
 
@@ -53,5 +96,6 @@ class TrafficAlertRepository:
             db.commit()
 
             db.refresh(alert)
+
 
         return alert

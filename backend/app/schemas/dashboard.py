@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -7,7 +9,7 @@ class DashboardSummary(BaseModel):
 
     active_alerts: int
 
-    average_risk_score: float
+    average_risk_score: Optional[float] = None
 
     total_cities: int
 
@@ -48,4 +50,4 @@ class DangerousCity(BaseModel):
 
     total_accidents: int
 
-    average_risk_score: float
+    average_risk_score: Optional[float] = None

@@ -1,109 +1,250 @@
-function DangerousCities({ data }) {
+function DangerousCities({ data = [] }) {
 
-    if (!data || data.length === 0) {
+    return (
+        <section
+            className="
+                min-w-0
+                overflow-hidden
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                shadow-sm
 
-        return (
+                dark:border-slate-800
+                dark:bg-slate-900
+            "
+        >
 
-            <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div
+                className="
+                    flex
+                    items-start
+                    justify-between
+                    border-b
+                    border-slate-100
+                    px-5
+                    py-4
 
-                <h2 className="text-2xl font-bold mb-6">
+                    dark:border-slate-800
+                "
+            >
 
-                    Dangerous Cities
+                <div>
 
-                </h2>
+                    <h2
+                        className="
+                            text-base
+                            font-semibold
+                            text-slate-900
+                            dark:text-white
+                        "
+                    >
+                        High-Risk Cities
+                    </h2>
 
-                <p>No Data Available</p>
+                    <p
+                        className="
+                            mt-1
+                            text-xs
+                            text-slate-500
+                            dark:text-slate-400
+                        "
+                    >
+                        Cities with highest average risk
+                    </p>
+
+                </div>
+
+                <span
+                    className="
+                        rounded-lg
+                        bg-red-50
+                        px-2.5
+                        py-1
+                        text-xs
+                        font-medium
+                        text-red-600
+
+                        dark:bg-red-950/40
+                        dark:text-red-400
+                    "
+                >
+                    Top 5
+                </span>
 
             </div>
 
-        );
 
-    }
+            <div className="overflow-x-auto">
 
-    return (
+                <table className="w-full text-sm">
 
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <thead>
 
-            <h2 className="text-2xl font-bold mb-6">
+                        <tr
+                            className="
+                                border-b
+                                border-slate-100
+                                text-left
 
-                Top Dangerous Cities
+                                dark:border-slate-800
+                            "
+                        >
 
-            </h2>
-
-            <table className="w-full">
-
-                <thead>
-
-                    <tr className="border-b">
-
-                        <th className="text-left py-3">
-
-                            City
-
-                        </th>
-
-                        <th className="text-left py-3">
-
-                            Accidents
-
-                        </th>
-
-                        <th className="text-left py-3">
-
-                            Avg Risk
-
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-
-                        data.map((city, index) => (
-
-                            <tr
-
-                                key={index}
-
-                                className="border-b hover:bg-slate-50"
-
+                            <th
+                                className="
+                                    px-5
+                                    py-3
+                                    text-xs
+                                    font-medium
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
                             >
+                                City
+                            </th>
 
-                                <td className="py-3">
+                            <th
+                                className="
+                                    px-5
+                                    py-3
+                                    text-xs
+                                    font-medium
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+                                Accidents
+                            </th>
 
-                                    {city.city}
+                            <th
+                                className="
+                                    px-5
+                                    py-3
+                                    text-right
+                                    text-xs
+                                    font-medium
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+                                Avg Risk
+                            </th>
 
-                                </td>
+                        </tr>
 
-                                <td>
+                    </thead>
 
-                                    {city.total_accidents}
 
-                                </td>
+                    <tbody>
 
-                                <td>
+                        {data.length === 0 ? (
 
-                                    {city.average_risk_score}
+                            <tr>
 
+                                <td
+                                    colSpan="3"
+                                    className="
+                                        px-5
+                                        py-12
+                                        text-center
+                                        text-sm
+                                        text-slate-400
+                                    "
+                                >
+                                    No city data available
                                 </td>
 
                             </tr>
 
-                        ))
+                        ) : (
 
-                    }
+                            data
+                                .slice(0, 5)
+                                .map((city, index) => (
 
-                </tbody>
+                                    <tr
+                                        key={index}
+                                        className="
+                                            border-b
+                                            border-slate-100
+                                            last:border-0
+                                            transition-colors
+                                            hover:bg-slate-50
 
-            </table>
+                                            dark:border-slate-800
+                                            dark:hover:bg-slate-800/50
+                                        "
+                                    >
 
-        </div>
+                                        <td
+                                            className="
+                                                px-5
+                                                py-3.5
+                                                font-medium
+                                                text-slate-800
+                                                dark:text-slate-200
+                                            "
+                                        >
+                                            {city.city}
+                                        </td>
 
+                                        <td
+                                            className="
+                                                px-5
+                                                py-3.5
+                                                text-slate-500
+                                                dark:text-slate-400
+                                            "
+                                        >
+                                            {city.total_accidents}
+                                        </td>
+
+                                        <td
+                                            className="
+                                                px-5
+                                                py-3.5
+                                                text-right
+                                            "
+                                        >
+
+                                            <span
+                                                className="
+                                                    inline-flex
+                                                    rounded-full
+                                                    bg-red-50
+                                                    px-2.5
+                                                    py-1
+                                                    text-xs
+                                                    font-semibold
+                                                    text-red-600
+
+                                                    dark:bg-red-950/40
+                                                    dark:text-red-400
+                                                "
+                                            >
+                                                {
+                                                    city.average_risk_score
+                                                }
+                                            </span>
+
+                                        </td>
+
+                                    </tr>
+
+                                ))
+
+                        )}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
     );
-
 }
 
 export default DangerousCities;
