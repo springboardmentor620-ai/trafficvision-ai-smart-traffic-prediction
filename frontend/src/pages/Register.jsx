@@ -1,50 +1,46 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../services/api";
 import { toast } from "react-toastify";
+import { GoogleLogin } from "@react-oauth/google";
+import api from "../services/api";
 import "../styles/auth.css";
 
 function Register() {
 
     const navigate = useNavigate();
 
-    const [user, setUser] = useState({
-        name: "",
-        email: "",
-        password: ""
-    });
-
-    const [loading, setLoading] = useState(false);
-
-    const handleChange = (e) => {
-        setUser({
-            ...user,
-            [e.target.name]: e.target.value
-        });
-    };
-
-    const register = async () => {
-
-        setLoading(true);
+    const handleGoogleSignup = async (credentialResponse) => {
 
         try {
 
-            await api.post("/auth/register", user);
+            const response = await api.post(
+                "/auth/google",
+                {
+                    credential: credentialResponse.credential
+                }
+            );
 
-            toast.success("Registration Successful!");
+            localStorage.setItem(
+                "access_token",
+                response.data.access_token
+            );
 
-            navigate("/");
+            localStorage.setItem(
+                "role",
+                response.data.role
+            );
+
+            toast.success("Account created successfully!");
+
+            navigate("/dashboard");
 
         } catch (error) {
 
+            console.error(error);
+
             toast.error(
                 error.response?.data?.detail ||
-                "Registration Failed"
+                "Google sign-up failed"
             );
-
-        } finally {
-
-            setLoading(false);
 
         }
 
@@ -68,70 +64,20 @@ function Register() {
                     Join TrafficVision AI
                 </p>
 
-                <div className="input-group">
+                <p className="subtitle">
+                    Sign up securely using your Google account
+                </p>
 
-                    <label>Full Name</label>
+                <div className="google-login">
 
-                    <input
-                        name="name"
-                        placeholder="Enter your name"
-                        value={user.name}
-                        onChange={handleChange}
+                    <GoogleLogin
+                        onSuccess={handleGoogleSignup}
+                        onError={() => {
+                            toast.error("Google sign-up failed");
+                        }}
                     />
 
                 </div>
-
-                <div className="input-group">
-
-                    <label>Email</label>
-
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Enter your email"
-                        value={user.email}
-                        onChange={handleChange}
-                    />
-
-                </div>
-
-                <div className="input-group">
-
-                    <label>Password</label>
-
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Create password"
-                        value={user.password}
-                        onChange={handleChange}
-                    />
-
-                </div>
-
-                <div className="input-group">
-
-                    <label>Role</label>
-
-                    <input
-                        value="Operator"
-                        disabled
-                        title="New accounts are created as Operator. Admin accounts are provisioned separately."
-                    />
-
-                </div>
-
-                <button
-                    className="auth-btn"
-                    onClick={register}
-                    disabled={loading}
-                >
-
-                    {loading
-                        ? "Creating Account..."
-                        : "Register"}
-
-                </button>
 
                 <div className="auth-link">
 
@@ -150,7 +96,6 @@ function Register() {
         </div>
 
     );
-
 }
 
 export default Register;

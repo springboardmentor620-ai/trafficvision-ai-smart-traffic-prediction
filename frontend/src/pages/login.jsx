@@ -3,9 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import "../styles/auth.css";
+import { GoogleLogin } from "@react-oauth/google";
 
 function Login() {
-
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -13,11 +13,9 @@ function Login() {
     const [loading, setLoading] = useState(false);
 
     const login = async () => {
-
         setLoading(true);
 
         try {
-
             const formData = new URLSearchParams({
                 username: email,
                 password: password
@@ -48,22 +46,50 @@ function Login() {
             navigate("/dashboard");
 
         } catch (error) {
-
             toast.error(
                 error.response?.data?.detail ||
                 "Invalid email or password"
             );
-
         } finally {
-
             setLoading(false);
-
         }
+    };
 
+    // Google Login
+    const handleGoogleLogin = async (credentialResponse) => {
+        try {
+            const response = await api.post(
+                "/auth/google",
+                {
+                    credential: credentialResponse.credential
+                }
+            );
+
+            localStorage.setItem(
+                "access_token",
+                response.data.access_token
+            );
+
+            localStorage.setItem(
+                "role",
+                response.data.role
+            );
+
+            toast.success("Google login successful!");
+
+            navigate("/dashboard");
+
+        } catch (error) {
+            console.error(error);
+
+            toast.error(
+                error.response?.data?.detail ||
+                "Google login failed"
+            );
+        }
     };
 
     return (
-
         <div className="auth-container">
 
             <div className="auth-card">
@@ -80,6 +106,7 @@ function Login() {
                     Smart Traffic Prediction System
                 </p>
 
+                {/* Email */}
                 <div className="input-group">
 
                     <label>Email</label>
@@ -96,6 +123,7 @@ function Login() {
 
                 </div>
 
+                {/* Password */}
                 <div className="input-group">
 
                     <label>Password</label>
@@ -112,6 +140,7 @@ function Login() {
 
                 </div>
 
+                {/* Forgot Password */}
                 <div className="auth-link">
 
                     <Link to="/forgot-password">
@@ -120,18 +149,33 @@ function Login() {
 
                 </div>
 
+                {/* Normal Login */}
                 <button
                     className="auth-btn"
                     onClick={login}
                     disabled={loading}
                 >
-
                     {loading
                         ? "Logging in..."
                         : "Login"}
-
                 </button>
 
+                {/* Divider */}
+                <div className="google-divider">
+                    <span>OR</span>
+                </div>
+
+                {/* Google Login */}
+                <div className="google-login">
+                    <GoogleLogin
+                        onSuccess={handleGoogleLogin}
+                        onError={() => {
+                            toast.error("Google login failed");
+                        }}
+                    />
+                </div>
+
+                {/* Register */}
                 <div className="auth-link">
 
                     Don't have an account?
@@ -147,9 +191,7 @@ function Login() {
             </div>
 
         </div>
-
     );
-
 }
 
 export default Login;
