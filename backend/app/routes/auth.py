@@ -4,13 +4,21 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate, Token
+from app.schemas.user import (
+    UserCreate,
+    UserResponse,
+    UserUpdate,
+    Token,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+)
 from app.dependencies import get_current_user
 from app.security import (
     hash_password,
     verify_password,
     create_access_token
 )
+from app.services import password_reset_service
 
 router = APIRouter(
     prefix="/auth",
@@ -107,3 +115,39 @@ def update_me(
     db.refresh(current_user)
 
     return current_user
+
+
+@router.post("/forgot-password")
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    # Always the same response whether or not the email exists - the
+    # service function itself is a no-op for unknown emails, so there is
+    # nothing here that could leak account existence via timing or
+    # response shape differences.
+    password_reset_service.request_password_reset(db, payload.email)
+
+    return {
+        "message": "If the email exists, a password reset link has been sent."
+    }
+
+
+@router.post("/reset-password")
+def reset_password(
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    success = password_reset_service.reset_password(
+        db, payload.token, payload.new_password
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired reset token"
+        )
+
+    return {
+        "message": "Password reset successful."
+    }

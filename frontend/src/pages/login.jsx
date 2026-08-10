@@ -112,6 +112,14 @@ function Login() {
 
                 </div>
 
+                <div className="auth-link">
+
+                    <Link to="/forgot-password">
+                        Forgot Password?
+                    </Link>
+
+                </div>
+
                 <button
                     className="auth-btn"
                     onClick={login}

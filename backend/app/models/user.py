@@ -16,6 +16,13 @@ class User(Base):
 
     role = Column(String, default="operator")
 
+    # Forgot-password flow (see app.services.password_reset_service).
+    # reset_token is cleared (set back to None) as soon as it's used or
+    # once it expires, so a stale value here always means "no active
+    # reset request".
+    reset_token = Column(String, nullable=True, index=True)
+    reset_token_expiry = Column(DateTime, nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     traffic_records = relationship(
