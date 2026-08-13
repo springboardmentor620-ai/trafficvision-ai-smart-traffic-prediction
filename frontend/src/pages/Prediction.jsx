@@ -52,12 +52,48 @@ function Prediction() {
     const [aiRecommendation, setAiRecommendation] = useState(null);
 
     const handleChange = (e) => {
+        const { name, value, type } = e.target;
+
+        if (type === "number") {
+            // Keep numeric inputs inside their valid ranges even when a
+            // value is typed manually instead of using the arrow controls.
+            const limits = {
+                temp: { min: -50, max: 60 },
+                rain_1h: { min: 0, max: 500 },
+                snow_1h: { min: 0, max: 500 },
+                clouds_all: { min: 0, max: 100 },
+                hour: { min: 0, max: 23 },
+                day: { min: 1, max: 31 },
+                month: { min: 1, max: 12 },
+                weekday: { min: 1, max: 7 },
+                distance: { min: 0, max: 10000 }
+            };
+
+            if (value === "") {
+                setForm({ ...form, [name]: "" });
+                return;
+            }
+
+            const numberValue = Number(value);
+            const limit = limits[name];
+
+            if (limit) {
+                const clampedValue = Math.min(
+                    limit.max,
+                    Math.max(limit.min, numberValue)
+                );
+
+                setForm({
+                    ...form,
+                    [name]: clampedValue
+                });
+                return;
+            }
+        }
+
         setForm({
             ...form,
-            [e.target.name]:
-                e.target.type === "number"
-                    ? Number(e.target.value)
-                    : e.target.value
+            [name]: value
         });
     };
 
@@ -615,12 +651,15 @@ function Prediction() {
                         </div>
 
                         <div>
-                            <label>Temperature</label>
+                            <label>Temperature (°C)</label>
 
                             <input
                                 type="number"
                                 name="temp"
                                 value={form.temp}
+                                min="-50"
+                                max="60"
+                                step="0.1"
                                 onChange={handleChange}
                                 style={inputStyle}
                             />
@@ -653,24 +692,30 @@ function Prediction() {
                         </div>
 
                         <div>
-                            <label>Rain (1 hour)</label>
+                            <label>Rain (1 hour) (mm)</label>
 
                             <input
                                 type="number"
                                 name="rain_1h"
                                 value={form.rain_1h}
+                                min="0"
+                                max="500"
+                                step="0.1"
                                 onChange={handleChange}
                                 style={inputStyle}
                             />
                         </div>
 
                         <div>
-                            <label>Snow (1 hour)</label>
+                            <label>Snow (1 hour) (mm)</label>
 
                             <input
                                 type="number"
                                 name="snow_1h"
                                 value={form.snow_1h}
+                                min="0"
+                                max="500"
+                                step="0.1"
                                 onChange={handleChange}
                                 style={inputStyle}
                             />
@@ -683,6 +728,9 @@ function Prediction() {
                                 type="number"
                                 name="clouds_all"
                                 value={form.clouds_all}
+                                min="0"
+                                max="100"
+                                step="1"
                                 onChange={handleChange}
                                 style={inputStyle}
                             />
@@ -739,48 +787,60 @@ function Prediction() {
                         </div>
 
                         <div>
-                            <label>Hour</label>
+                            <label>Hour (0–23)</label>
 
                             <input
                                 type="number"
                                 name="hour"
                                 value={form.hour}
+                                min="0"
+                                max="23"
+                                step="1"
                                 onChange={handleChange}
                                 style={inputStyle}
                             />
                         </div>
 
                         <div>
-                            <label>Day</label>
+                            <label>Day (1–31)</label>
 
                             <input
                                 type="number"
                                 name="day"
                                 value={form.day}
+                                min="1"
+                                max="31"
+                                step="1"
                                 onChange={handleChange}
                                 style={inputStyle}
                             />
                         </div>
 
                         <div>
-                            <label>Month</label>
+                            <label>Month (1–12)</label>
 
                             <input
                                 type="number"
                                 name="month"
                                 value={form.month}
+                                min="1"
+                                max="12"
+                                step="1"
                                 onChange={handleChange}
                                 style={inputStyle}
                             />
                         </div>
 
                         <div>
-                            <label>Weekday</label>
+                            <label>Weekday (1–7)</label>
 
                             <input
                                 type="number"
                                 name="weekday"
                                 value={form.weekday}
+                                min="1"
+                                max="7"
+                                step="1"
                                 onChange={handleChange}
                                 style={inputStyle}
                             />
