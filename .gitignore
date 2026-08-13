@@ -46,3 +46,4 @@ backend/uploads/
 *.mov
 *.mkv
 
+backend/ml_models/traffic_model.pkl
