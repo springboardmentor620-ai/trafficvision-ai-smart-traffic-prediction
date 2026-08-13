@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import authFetch from "../api/http";
 import { useNavigate } from "react-router-dom";
 import {
   TrafficCone, Car, AlertTriangle, Siren, Activity, Construction,
@@ -8,7 +9,6 @@ import {
   Thermometer, Route,
 } from "lucide-react";
 
-const API = "http://localhost:8000";
 
 function StatCard({ title, value, icon: Icon, color = "blue", sub }) {
   const colors = {
@@ -77,9 +77,9 @@ function OperatorDashboard() {
     setLoading(true);
     try {
       const [ovRes, altRes, emRes] = await Promise.all([
-        fetch(`${API}/analytics/overview`).catch(() => null),
-        fetch(`${API}/alerts/?limit=1`).catch(() => null),
-        fetch(`${API}/emergency/active`).catch(() => null),
+        authFetch(`/analytics/overview`).catch(() => null),
+        authFetch(`/alerts/?limit=1`).catch(() => null),
+        authFetch(`/emergency/active`).catch(() => null),
       ]);
       const overview = ovRes && ovRes.ok ? await ovRes.json() : null;
       const alertsData = altRes && altRes.ok ? await altRes.json() : null;
@@ -176,8 +176,8 @@ function OperatorDashboard() {
             <ShieldAlert className="h-5 w-5 text-orange-400" /> Quick Actions
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <ActionButton label="Report Accident" icon={ShieldAlert} color="red" onClick={() => navigate("/accidents/report")} />
-            <ActionButton label="Report Congestion" icon={MessageSquareWarning} color="orange" onClick={() => navigate("/congestion/report")} />
+            <ActionButton label="Report Accident" icon={ShieldAlert} color="red" onClick={() => navigate("/accidents")} />
+            <ActionButton label="Report Congestion" icon={MessageSquareWarning} color="orange" onClick={() => navigate("/traffic-records")} />
             <ActionButton label="Update Traffic" icon={PencilLine} color="blue" onClick={() => navigate("/traffic-records")} />
             <ActionButton label="Emergency" icon={PhoneCall} color="red" onClick={() => navigate("/emergency")} />
             <ActionButton label="Heatmap" icon={Flame} color="purple" onClick={() => navigate("/heatmap")} />

@@ -20,6 +20,8 @@ function Profile() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     loadProfile();
@@ -30,13 +32,8 @@ function Profile() {
     try {
       const data = await getProfile();
       setProfile(data);
-    } catch {
-      // Fallback mocks if offline
-      setProfile({
-        name: localStorage.getItem("name") || "City Operator",
-        email: "operator@trafficvision.gov",
-        role: localStorage.getItem("role") || "operator"
-      });
+    } catch (error) {
+      setError(error.response?.data?.detail || "Unable to load your profile.");
     } finally {
       setLoading(false);
     }
@@ -58,27 +55,36 @@ function Profile() {
 
   const updateUserProfile = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
     try {
       await updateProfile({
-        name: profile.name,
-        email: profile.email
+        name: profile.name.trim(),
+        email: profile.email.trim()
       });
-      localStorage.setItem("name", profile.name);
-      alert("Profile updated successfully.");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      localStorage.setItem("name", profile.name.trim());
+      localStorage.setItem("user", JSON.stringify({
+        ...user,
+        name: profile.name.trim(),
+        email: profile.email.trim()
+      }));
+      setSuccess("Profile updated successfully.");
     } catch (error) {
-      alert(error.response?.data?.detail || "Profile updated (Simulation Mode)");
+      setError(error.response?.data?.detail || "Unable to update your profile.");
     }
   };
 
   const updateUserPassword = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
     try {
       await changePassword(password);
-      alert("Password changed successfully.");
+      setSuccess("Password changed successfully.");
       setPassword({ old_password: "", new_password: "" });
     } catch (error) {
-      alert(error.response?.data?.detail || "Password changed (Simulation Mode)");
-      setPassword({ old_password: "", new_password: "" });
+      setError(error.response?.data?.detail || "Unable to change your password.");
     }
   };
 
@@ -105,6 +111,17 @@ function Profile() {
           </div>
         </div>
 
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300">
+            {success}
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-10">
             <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
@@ -116,14 +133,14 @@ function Profile() {
             <div className="glass-panel p-6 rounded-2xl space-y-6">
               <div>
                 <h3 className="text-sm font-semibold text-slate-200">Operator Information</h3>
-                <p className="text-[10px] text-slate-550 mt-0.5">Edit credentials visible to other department supervisors.</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Edit credentials visible to other department supervisors.</p>
               </div>
 
               <form onSubmit={updateUserProfile} className="space-y-4">
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">Supervising Name</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-550" />
+                    <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                     <input
                       type="text"
                       name="name"
@@ -138,7 +155,7 @@ function Profile() {
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">Email Address</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-550" />
+                    <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                     <input
                       type="email"
                       name="email"
@@ -153,12 +170,12 @@ function Profile() {
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">Clearance Level</label>
                   <div className="relative">
-                    <Shield className="absolute left-3 top-2.5 h-4 w-4 text-slate-550" />
+                    <Shield className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                     <input
                       type="text"
                       readOnly
                       value={profile.role.toUpperCase()}
-                      className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-850 bg-slate-900 text-slate-500 focus:outline-none select-none font-bold tracking-wider"
+                      className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-700 bg-slate-900 text-slate-500 focus:outline-none select-none font-bold tracking-wider"
                     />
                   </div>
                 </div>
@@ -177,14 +194,14 @@ function Profile() {
             <div className="glass-panel p-6 rounded-2xl space-y-6">
               <div>
                 <h3 className="text-sm font-semibold text-slate-200">Security Credentials</h3>
-                <p className="text-[10px] text-slate-550 mt-0.5">Revise account passwords regularly to ensure security.</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Revise account passwords regularly to ensure security.</p>
               </div>
 
               <form onSubmit={updateUserPassword} className="space-y-4">
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">Current Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-550" />
+                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                     <input
                       type="password"
                       name="old_password"
@@ -200,7 +217,7 @@ function Profile() {
                 <div>
                   <label className="block text-xs text-slate-400 mb-1">New Secure Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-550" />
+                    <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                     <input
                       type="password"
                       name="new_password"

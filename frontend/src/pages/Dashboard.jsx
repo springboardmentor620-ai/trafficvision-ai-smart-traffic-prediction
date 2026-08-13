@@ -1,554 +1,2020 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import Layout from "../components/Layout";
+
 import {
-  Car, AlertTriangle, MapPin, Cpu, ArrowUpRight,
-  Zap, Shield, Activity, Bell, Clock, RefreshCw,
-  Siren, Radio, Navigation, Cloud, CloudRain,
-  Sun, CloudSnow, CloudLightning, Wind, Server, Database,
-  Wifi, HardDrive, BarChart3, PieChartIcon, TrendingUp,
+  Car,
+  MapPin,
+  Activity,
+  AlertTriangle,
+  Shield,
+  Cpu,
+  RefreshCw,
+  Navigation,
+  Clock,
+  Sun,
+  Bell,
+  CheckCircle,
+  TrendingUp,
+  BarChart3,
 } from "lucide-react";
+
 import {
-  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
 } from "recharts";
+
+
+// ================================================================
+// API
+// ================================================================
 
 const API = "http://localhost:8000";
 
-/* ── Small presentational pieces ─────────────────────────────────────── */
 
-function KpiCard({ title, value, icon: Icon, sub, color = "blue", badge }) {
-  const colors = {
-    blue: { bg: "bg-blue-500/10 border-blue-500/30", icon: "bg-blue-500/20 text-blue-400" },
-    red: { bg: "bg-red-500/10 border-red-500/30", icon: "bg-red-500/20 text-red-400" },
-    amber: { bg: "bg-amber-500/10 border-amber-500/30", icon: "bg-amber-500/20 text-amber-400" },
-    green: { bg: "bg-emerald-500/10 border-emerald-500/30", icon: "bg-emerald-500/20 text-emerald-400" },
-    purple: { bg: "bg-purple-500/10 border-purple-500/30", icon: "bg-purple-500/20 text-purple-400" },
-    orange: { bg: "bg-orange-500/10 border-orange-500/30", icon: "bg-orange-500/20 text-orange-400" },
-  }[color] || {};
+// ================================================================
+// DEFAULT OVERVIEW
+// ================================================================
 
-  return (
-    <div className={`glass-panel p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${colors.bg}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{title}</span>
-        <div className={`p-2.5 rounded-xl ${colors.icon}`}>
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
-      <div className="mt-3">
-        <div className="flex items-baseline justify-between">
-          <h3 className="text-2xl font-extrabold text-white">{value}</h3>
-          {badge && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-              {badge}
-            </span>
-          )}
-        </div>
-        <p className="mt-1 text-xs text-slate-400">{sub}</p>
-      </div>
-    </div>
-  );
-}
+const DEFAULT_OVERVIEW = {
+  total_records: 0,
+  total_vehicles: 0,
+  avg_vehicle_count: 0,
+  avg_speed_kmh: 0,
+  total_junctions: 0,
 
-function WeatherWidget() {
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(true);
+  high_congestion: 0,
+  medium_congestion: 0,
+  low_congestion: 0,
 
-  useEffect(() => {
-    let cancelled = false;
-    async function loadWeather() {
-      try {
-        const pos = await new Promise((resolve) => {
-          if (!navigator.geolocation) return resolve(null);
-          navigator.geolocation.getCurrentPosition(
-            (p) => resolve(p.coords),
-            () => resolve(null),
-            { timeout: 4000 }
-          );
-        });
-        const lat = pos?.latitude ?? 17.3850;
-        const lon = pos?.longitude ?? 78.4867;
-        const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m`
-        );
-        const data = await res.json();
-        if (!cancelled) setWeather(data.current);
-      } catch {
-        if (!cancelled) setWeather(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    loadWeather();
-    return () => { cancelled = true; };
-  }, []);
+  accident_locations: 0,
+  accidents: 0,
+  emergencies: 0,
 
-  const iconFor = (code) => {
-    if (code === 0) return <Sun className="h-8 w-8 text-amber-400" />;
-    if ([1, 2, 3].includes(code)) return <Cloud className="h-8 w-8 text-slate-300" />;
-    if ([61, 63, 65, 80, 81, 82].includes(code)) return <CloudRain className="h-8 w-8 text-blue-400" />;
-    if ([71, 73, 75, 77].includes(code)) return <CloudSnow className="h-8 w-8 text-cyan-300" />;
-    if ([95, 96, 99].includes(code)) return <CloudLightning className="h-8 w-8 text-purple-400" />;
-    return <Cloud className="h-8 w-8 text-slate-300" />;
-  };
+  most_congested_location: "Unknown",
+  most_congested_vehicles: 0,
+
+  least_congested_location: "Unknown",
+  least_congested_vehicles: 0,
+};
+
+
+// ================================================================
+// DASHBOARD CARD
+// ================================================================
+
+function DashboardCard({
+  title,
+  value,
+  icon: Icon,
+  color,
+  sub,
+  suffix = "",
+}) {
+  const numericValue = Number(value);
+
+  const safeValue = Number.isFinite(numericValue)
+    ? numericValue
+    : 0;
+
+  const formattedValue =
+    Number.isInteger(safeValue)
+      ? safeValue.toLocaleString()
+      : safeValue.toLocaleString(undefined, {
+        maximumFractionDigits: 1,
+      });
 
   return (
-    <div className="glass-panel p-5 rounded-2xl border border-slate-800 bg-gradient-to-br from-sky-950/40 via-slate-900 to-slate-900">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Local Weather</span>
-        {weather && iconFor(weather.weather_code)}
-      </div>
-      {loading ? (
-        <div className="h-14 flex items-center text-xs text-slate-500">Fetching conditions…</div>
-      ) : weather ? (
+    <div
+      className={`
+        rounded-2xl
+        border
+        ${color}
+        p-5
+        shadow-lg
+        transition-all
+        duration-300
+        hover:-translate-y-1
+      `}
+    >
+      <div className="flex justify-between items-center">
+
         <div>
-          <div className="flex items-baseline gap-2">
-            <h3 className="text-3xl font-extrabold text-white">{Math.round(weather.temperature_2m)}°C</h3>
-          </div>
-          <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
-            <span className="flex items-center gap-1"><Wind className="h-3.5 w-3.5" /> {Math.round(weather.wind_speed_10m)} km/h</span>
-            <span>Humidity {weather.relative_humidity_2m}%</span>
-          </div>
-        </div>
-      ) : (
-        <p className="text-xs text-slate-500">Weather data unavailable</p>
-      )}
-    </div>
-  );
-}
 
-function LiveClock() {
-  const [time, setTime] = useState(new Date());
+          <p className="text-xs uppercase tracking-widest text-slate-400 font-bold">
+            {title}
+          </p>
 
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+          <div className="flex items-baseline gap-1 mt-3">
 
-  const dateStr = time.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const timeStr = time.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+            <h2 className="text-3xl font-bold text-white">
+              {formattedValue}
+            </h2>
 
-  return (
-    <div className="text-right">
-      <p className="text-sm font-bold text-white tabular-nums">{timeStr}</p>
-      <p className="text-[11px] text-slate-400">{dateStr}</p>
-    </div>
-  );
-}
-
-function SystemHealth() {
-  const services = [
-    { name: "API Server", icon: Server, status: "Operational" },
-    { name: "Database", icon: Database, status: "Operational" },
-    { name: "ML Engine", icon: Cpu, status: "Operational" },
-    { name: "Network", icon: Wifi, status: "Operational" },
-  ];
-  return (
-    <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-      <h3 className="text-sm font-bold text-white flex items-center gap-2">
-        <HardDrive className="h-4 w-4 text-emerald-400" /> System Health
-      </h3>
-      <div className="grid grid-cols-2 gap-3">
-        {services.map((s) => (
-          <div key={s.name} className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 flex items-center gap-2.5">
-            <s.icon className="h-4 w-4 text-emerald-400 shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-slate-200 truncate">{s.name}</p>
-              <p className="text-[10px] text-emerald-400 flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {s.status}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const PIE_COLORS = ["#f87171", "#fb923c", "#facc15", "#4ade80"];
-const congestionLabels = ["Critical", "High", "Medium", "Low"];
-
-/* ── Main dashboard ───────────────────────────────────────────────────── */
-
-export default function Dashboard() {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [overview, setOverview] = useState(null);
-  const [accidents, setAccidents] = useState(0);
-  const [emergencies, setEmergencies] = useState(0);
-  const [alerts, setAlerts] = useState([]);
-  const [notifications, setNotifs] = useState([]);
-  const [predictions, setPredictions] = useState([]);
-  const [aiRecs, setAiRecs] = useState(null);
-  const [error, setError] = useState(null);
-
-  const user = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user")) || {};
-    } catch {
-      return {};
-    }
-  }, []);
-  const username = user.username || user.name || "Operator";
-  const role = user.role || "operator";
-
-  const fetchDashboardData = useCallback(async () => {
-    setLoading(true); setError(null);
-    try {
-      const [ovRes, accRes, emRes, altRes, notRes, predRes, recRes] = await Promise.all([
-        fetch(`${API}/analytics/overview`).catch(() => null),
-        fetch(`${API}/accidents/active`).catch(() => null),
-        fetch(`${API}/emergency/active`).catch(() => null),
-        fetch(`${API}/alerts/?limit=4`).catch(() => null),
-        fetch(`${API}/notifications/?limit=4`).catch(() => null),
-        fetch(`${API}/prediction/history?limit=4`).catch(() => null),
-        fetch(`${API}/recommendations/?limit=4`).catch(() => null),
-      ]);
-
-      if (ovRes && ovRes.ok) setOverview(await ovRes.json());
-      if (accRes && accRes.ok) setAccidents((await accRes.json()).count || 0);
-      if (emRes && emRes.ok) setEmergencies((await emRes.json()).count || 0);
-      if (altRes && altRes.ok) setAlerts(await altRes.json());
-      if (notRes && notRes.ok) setNotifs((await notRes.json()).notifications || []);
-      if (predRes && predRes.ok) setPredictions(await predRes.json());
-      if (recRes && recRes.ok) setAiRecs(await recRes.json());
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchDashboardData(); }, [fetchDashboardData]);
-
-  // Chart data — derived from live predictions/overview, with sane fallbacks
-  const barData = useMemo(() => {
-    if (predictions.length > 0) {
-      return predictions.slice(0, 6).map((p) => ({
-        name: `J${p.junction}`,
-        vehicles: p.predicted_vehicles,
-      }));
-    }
-    return [
-      { name: "J1", vehicles: 320 }, { name: "J2", vehicles: 540 },
-      { name: "J3", vehicles: 210 }, { name: "J4", vehicles: 460 },
-      { name: "J5", vehicles: 180 }, { name: "J6", vehicles: 390 },
-    ];
-  }, [predictions]);
-
-  const pieData = useMemo(() => {
-    if (overview?.congestion_breakdown) {
-      return congestionLabels.map((label) => ({
-        name: label,
-        value: overview.congestion_breakdown[label.toLowerCase()] || 0,
-      }));
-    }
-    return [
-      { name: "Critical", value: 2 }, { name: "High", value: 5 },
-      { name: "Medium", value: 8 }, { name: "Low", value: 12 },
-    ];
-  }, [overview]);
-
-  const lineData = useMemo(() => {
-    if (overview?.hourly_trend) return overview.hourly_trend;
-    return Array.from({ length: 8 }, (_, i) => ({
-      hour: `${(i * 3).toString().padStart(2, "0")}:00`,
-      vehicles: Math.round(200 + Math.sin(i) * 150 + i * 20),
-    }));
-  }, [overview]);
-
-  return (
-    <Layout>
-      <div className="space-y-6 animate-fade-in">
-
-        {/* ── 1. Top Control Header ───────────────────────────────────── */}
-        <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-950/40">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white">
-              Welcome, {username}
-            </h1>
-            <p className="text-slate-400 mt-2">
-              {role === "admin"
-                ? "Administrator Control Center"
-                : "Traffic Operator Dashboard"}
-            </p>
-            <p className="text-slate-400 text-xs mt-1">
-              Autonomous Smart City traffic monitoring, congestion optimization, and ML prediction platform
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-3 self-start md:self-auto">
-            <LiveClock />
-            <div className="flex gap-3">
-              <button onClick={fetchDashboardData}
-                className="px-4 py-2.5 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-all flex items-center gap-2">
-                <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh Hub
-              </button>
-              <button onClick={() => navigate("/ai-report")}
-                className="px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-blue-600/30">
-                <Cpu className="h-3.5 w-3.5" /> AI Traffic Report
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {error && (
-          <div className="rounded-xl bg-red-500/15 border border-red-500/30 p-4 text-xs text-red-400">⚠ {error}</div>
-        )}
-
-        {/* ── 2. KPI Cards Grid ────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <KpiCard title="Total Vehicles" value={overview?.total_vehicles ? overview.total_vehicles.toLocaleString() : "2,840"} icon={Car} color="blue" sub="Live recorded count" />
-          <KpiCard title="Active Junctions" value={overview?.total_records || 8} icon={MapPin} color="green" sub="100% Online" badge="Online" />
-          <KpiCard title="High Congestion" value={overview?.high_congestion || 0} icon={AlertTriangle} color="amber" sub="Junctions on high alert" />
-          <KpiCard title="Accidents Today" value={accidents} icon={Shield} color="red" sub="Active reported incidents" />
-          <KpiCard title="Emergency Alerts" value={emergencies} icon={Siren} color="orange" sub="Ambulance & Fire" />
-          <KpiCard title="Average Speed" value={`${overview?.avg_speed_kmh || 42} km/h`} icon={Activity} color="purple" sub="Citywide speed index" />
-        </div>
-
-        {/* ── 3. AI Prediction + Live Status + Weather ────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 bg-gradient-to-br from-purple-950/30 via-slate-900 to-slate-900 lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Cpu className="h-5 w-5 text-purple-400" />
-                AI Traffic Prediction Engine
-              </h3>
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                Random Forest ML Model
+            {suffix && (
+              <span className="text-sm text-slate-400">
+                {suffix}
               </span>
-            </div>
-
-            {aiRecs && aiRecs.recommendations?.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {aiRecs.recommendations.slice(0, 2).map((r, i) => (
-                  <div key={i} className="rounded-xl bg-slate-800/50 border border-slate-700/60 p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-white">{r.location}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${r.predicted_urgency === "Critical" ? "bg-red-500" :
-                        r.predicted_urgency === "High" ? "bg-orange-500" :
-                          r.predicted_urgency === "Medium" ? "bg-yellow-500" : "bg-green-500"
-                        }`}>{r.predicted_urgency}</span>
-                    </div>
-                    <p className="text-xs text-slate-300">
-                      Next-hour Prediction: <strong className="text-purple-300">{r.predicted_vehicle_count} vehicles</strong>
-                    </p>
-                    <p className="text-xs text-slate-400 leading-relaxed">{r.ai_recommendation}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-700 text-xs text-slate-300">
-                AI Prediction Engine active. Model predicts next-hour traffic volume and classifies congestion for optimal traffic signal cycles.
-              </div>
             )}
 
-            <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800/60">
-              <span>Model Accuracy: <strong className="text-emerald-400">99.4%</strong></span>
-              <button onClick={() => navigate("/recommendations")} className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1">
-                View All Recommendations <ArrowUpRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
           </div>
 
-          <div className="space-y-6">
-            <WeatherWidget />
-
-            <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Radio className="h-5 w-5 text-emerald-400" />
-                Live Traffic Status
-              </h3>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                <span className="text-xs text-slate-300 font-semibold">Citywide Status</span>
-                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                  Operational
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                <span className="text-xs text-slate-300 font-semibold">Most Congested</span>
-                <span className="text-xs font-bold text-red-400 truncate max-w-[120px]">
-                  {overview?.most_congested_location || "Junction 2"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
-                <span className="text-xs text-slate-300 font-semibold">Least Congested</span>
-                <span className="text-xs font-bold text-green-400 truncate max-w-[120px]">
-                  {overview?.least_congested_location || "Junction 6"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── 4. Charts Row ────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 lg:col-span-1">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
-              <BarChart3 className="h-4 w-4 text-blue-400" /> Vehicles by Junction
-            </h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} />
-                <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="vehicles" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 lg:col-span-1">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
-              <PieChartIcon className="h-4 w-4 text-amber-400" /> Congestion Breakdown
-            </h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={{ fontSize: 11, fill: "#94a3b8" }}>
-                  {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8, fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 lg:col-span-1">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
-              <TrendingUp className="h-4 w-4 text-emerald-400" /> Traffic Trend (24h)
-            </h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={lineData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="hour" stroke="#64748b" fontSize={11} />
-                <YAxis stroke="#64748b" fontSize={11} />
-                <Tooltip contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8, fontSize: 12 }} />
-                <Line type="monotone" dataKey="vehicles" stroke="#a855f7" strokeWidth={2.5} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* ── 5. Alerts / Notifications / Predictions ─────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-400" />
-                Latest Alerts
-              </h3>
-              <button onClick={() => navigate("/alerts")} className="text-[11px] text-blue-400 hover:text-blue-300">
-                View All ({alerts.length})
-              </button>
-            </div>
-            <div className="space-y-3">
-              {alerts.length > 0 ? (
-                alerts.slice(0, 3).map(a => (
-                  <div key={a.id} className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-200">{a.alert_type}</span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
-                        {a.severity}
-                      </span>
-                    </div>
-                    <p className="text-slate-400 line-clamp-1">{a.location}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-slate-500 py-4 text-center">No alerts active</p>
-              )}
-            </div>
-          </div>
-
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Bell className="h-4 w-4 text-blue-400" />
-                Recent Notifications
-              </h3>
-              <button onClick={() => navigate("/notifications")} className="text-[11px] text-blue-400 hover:text-blue-300">
-                View All
-              </button>
-            </div>
-            <div className="space-y-3">
-              {notifications.length > 0 ? (
-                notifications.slice(0, 3).map(n => (
-                  <div key={n.id} className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-200">{n.title}</span>
-                      <span className="text-[10px] text-slate-500">{n.priority}</span>
-                    </div>
-                    <p className="text-slate-400 line-clamp-1">{n.description || n.message}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-slate-500 py-4 text-center">No recent notifications</p>
-              )}
-            </div>
-          </div>
-
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Clock className="h-4 w-4 text-purple-400" />
-                Recent Predictions
-              </h3>
-              <button onClick={() => navigate("/recommendations")} className="text-[11px] text-blue-400 hover:text-blue-300">
-                History
-              </button>
-            </div>
-            <div className="space-y-3">
-              {predictions.length > 0 ? (
-                predictions.slice(0, 3).map(p => (
-                  <div key={p.id} className="p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-200">Junction {p.junction}</span>
-                      <span className="font-bold text-purple-300">{p.predicted_vehicles} veh</span>
-                    </div>
-                    <p className="text-slate-400">Status: <strong className="text-white">{p.congestion}</strong></p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-slate-500 py-4 text-center">No saved predictions yet</p>
-              )}
-            </div>
-          </div>
+          <p className="text-xs text-slate-400 mt-2">
+            {sub}
+          </p>
 
         </div>
 
-        {/* ── 6. Quick Navigation + System Health ─────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="glass-panel p-6 rounded-2xl border border-slate-800 lg:col-span-2 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Navigation className="h-4 w-4 text-blue-400" /> Quick Navigation
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {[
-                { label: "Live Map", path: "/map", icon: MapPin },
-                { label: "Alerts", path: "/alerts", icon: AlertTriangle },
-                { label: "Notifications", path: "/notifications", icon: Bell },
-                { label: "Recommendations", path: "/recommendations", icon: Cpu },
-                { label: "AI Report", path: "/ai-report", icon: Zap },
-                { label: "Predictions", path: "/predictions", icon: Activity },
-              ].map((item) => (
-                <button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  className="p-3.5 rounded-xl bg-slate-800/50 border border-slate-700/60 hover:bg-slate-700/60 hover:-translate-y-0.5 transition-all flex flex-col items-center gap-2 text-xs font-semibold text-slate-200"
-                >
-                  <item.icon className="h-5 w-5 text-blue-400" />
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="p-4 rounded-xl bg-white/10">
 
-          <SystemHealth />
+          <Icon className="h-8 w-8 text-white" />
+
         </div>
 
       </div>
+    </div>
+  );
+}
+
+
+// ================================================================
+// CHART CARD
+// ================================================================
+
+function ChartCard({
+  title,
+  subtitle,
+  children,
+  className = "",
+}) {
+  return (
+    <div
+      className={`
+        rounded-3xl
+        bg-slate-900
+        border
+        border-slate-700
+        p-6
+        shadow-xl
+        ${className}
+      `}
+    >
+
+      <div className="mb-5">
+
+        <h2 className="text-xl font-bold text-white">
+          {title}
+        </h2>
+
+        {subtitle && (
+          <p className="text-sm text-slate-400 mt-1">
+            {subtitle}
+          </p>
+        )}
+
+      </div>
+
+      {children}
+
+    </div>
+  );
+}
+
+
+// ================================================================
+// CUSTOM PIE LABEL
+// ================================================================
+
+function renderPieLabel({
+  name,
+  percent,
+}) {
+  if (!percent || percent < 0.05) {
+    return "";
+  }
+
+  return `${name} ${(percent * 100).toFixed(0)}%`;
+}
+
+
+// ================================================================
+// DASHBOARD
+// ================================================================
+
+export default function Dashboard() {
+
+  const navigate = useNavigate();
+
+
+  // ============================================================
+  // USER
+  // ============================================================
+
+  const [name] = useState(
+    localStorage.getItem("name")
+  );
+
+  const [role] = useState(
+    localStorage.getItem("role")
+  );
+
+
+  // ============================================================
+  // CLOCK
+  // ============================================================
+
+  const [currentTime, setCurrentTime] =
+    useState(new Date());
+
+
+  // ============================================================
+  // OVERVIEW
+  // ============================================================
+
+  const [overview, setOverview] =
+    useState(DEFAULT_OVERVIEW);
+
+
+  // ============================================================
+  // CHART DATA
+  // ============================================================
+
+  const [hourlyData, setHourlyData] =
+    useState([]);
+
+  const [congestionData, setCongestionData] =
+    useState([]);
+
+  const [speedData, setSpeedData] =
+    useState([]);
+
+
+  // ============================================================
+  // LOADING
+  // ============================================================
+
+  const [loading, setLoading] =
+    useState(false);
+
+
+  const [error, setError] =
+    useState(null);
+
+
+  // ============================================================
+  // WEATHER
+  // ============================================================
+
+  const weather = {
+    temperature: 32,
+    condition: "Sunny",
+    humidity: 68,
+  };
+
+
+  // ============================================================
+  // FETCH DASHBOARD
+  //
+  // IMPORTANT:
+  // All API calls run in parallel.
+  //
+  // We do NOT download traffic records.
+  //
+  // Backend returns:
+  //   overview -> 1 object
+  //   hourly -> 24 rows
+  //   congestion -> 3 rows
+  //   speed -> 5 rows
+  //
+  // ============================================================
+
+  const fetchDashboard = useCallback(
+    async () => {
+
+      setLoading(true);
+      setError(null);
+
+      const controller =
+        new AbortController();
+
+      const timeout =
+        setTimeout(() => {
+          controller.abort();
+        }, 10000);
+
+
+      try {
+
+        const endpoints = [
+          `${API}/analytics/overview`,
+          `${API}/analytics/hourly`,
+          `${API}/analytics/congestion-distribution`,
+          `${API}/analytics/speed-distribution`,
+        ];
+
+
+        const responses =
+          await Promise.all(
+            endpoints.map((url) =>
+              fetch(
+                url,
+                {
+                  method: "GET",
+
+                  cache: "no-store",
+
+                  signal:
+                    controller.signal,
+
+                  headers: {
+                    Accept:
+                      "application/json",
+                  },
+                }
+              )
+            )
+          );
+
+
+        const failedResponse =
+          responses.find(
+            (response) =>
+              !response.ok
+          );
+
+
+        if (failedResponse) {
+
+          throw new Error(
+            `Dashboard API error: ${failedResponse.status}`
+          );
+
+        }
+
+
+        const [
+          overviewResponse,
+          hourlyResponse,
+          congestionResponse,
+          speedResponse,
+        ] = await Promise.all(
+          responses.map(
+            (response) =>
+              response.json()
+          )
+        );
+
+
+        // ------------------------------------------------------
+        // OVERVIEW
+        // ------------------------------------------------------
+
+        setOverview({
+          ...DEFAULT_OVERVIEW,
+          ...(overviewResponse || {}),
+        });
+
+
+        // ------------------------------------------------------
+        // HOURLY
+        // ------------------------------------------------------
+
+        if (
+          Array.isArray(
+            hourlyResponse
+          )
+        ) {
+
+          setHourlyData(
+            hourlyResponse
+          );
+
+        } else {
+
+          setHourlyData([]);
+
+        }
+
+
+        // ------------------------------------------------------
+        // CONGESTION
+        // ------------------------------------------------------
+
+        if (
+          congestionResponse &&
+          Array.isArray(
+            congestionResponse.chart_labels
+          ) &&
+          Array.isArray(
+            congestionResponse.chart_data
+          )
+        ) {
+
+          const chartData =
+            congestionResponse.chart_labels.map(
+              (label, index) => ({
+                name: label,
+
+                value:
+                  Number(
+                    congestionResponse
+                      .chart_data[index]
+                  ) || 0,
+              })
+            );
+
+          setCongestionData(
+            chartData
+          );
+
+        } else {
+
+          setCongestionData([]);
+
+        }
+
+
+        // ------------------------------------------------------
+        // SPEED
+        // ------------------------------------------------------
+
+        if (
+          Array.isArray(
+            speedResponse
+          )
+        ) {
+
+          setSpeedData(
+            speedResponse.map(
+              (item) => ({
+                ...item,
+
+                count:
+                  Number(
+                    item.count
+                  ) || 0,
+              })
+            )
+          );
+
+        } else {
+
+          setSpeedData([]);
+
+        }
+
+      } catch (err) {
+
+        console.error(
+          "Dashboard loading error:",
+          err
+        );
+
+
+        if (
+          err.name ===
+          "AbortError"
+        ) {
+
+          setError(
+            "Dashboard request timed out."
+          );
+
+        } else {
+
+          setError(
+            "Unable to load dashboard data."
+          );
+
+        }
+
+      } finally {
+
+        clearTimeout(timeout);
+
+        setLoading(false);
+
+      }
+
+    },
+    []
+  );
+
+
+  // ============================================================
+  // INITIAL LOAD
+  // ============================================================
+
+  useEffect(() => {
+
+    fetchDashboard();
+
+  }, [fetchDashboard]);
+
+
+  // ============================================================
+  // CLOCK
+  // ============================================================
+
+  useEffect(() => {
+
+    const timer =
+      setInterval(() => {
+
+        setCurrentTime(
+          new Date()
+        );
+
+      }, 1000);
+
+
+    return () => {
+
+      clearInterval(timer);
+
+    };
+
+  }, []);
+
+
+  // ============================================================
+  // PIE COLORS
+  // ============================================================
+
+  const congestionColors = {
+    High: "#ef4444",
+    Medium: "#f59e0b",
+    Low: "#22c55e",
+  };
+
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+
+  return (
+
+    <Layout>
+
+      <div className="space-y-6">
+
+
+        {/* ======================================================
+            HEADER
+        ====================================================== */}
+
+        <div
+          className="
+            rounded-3xl
+            p-8
+            bg-gradient-to-r
+            from-blue-900
+            via-slate-900
+            to-purple-900
+            shadow-2xl
+            border
+            border-slate-700
+          "
+        >
+
+          <div
+            className="
+              flex
+              flex-col
+              lg:flex-row
+              justify-between
+              gap-6
+            "
+          >
+
+            <div>
+
+              <h1
+                className="
+                  text-4xl
+                  font-extrabold
+                  text-white
+                "
+              >
+
+                Welcome,
+
+                <span className="text-blue-400">
+
+                  {" "}
+                  {name || "Administrator"}
+
+                </span>
+
+              </h1>
+
+
+              <p className="text-slate-300 mt-2">
+
+                {role === "admin"
+                  ? "Administrator Control Center"
+                  : "Traffic Operator Dashboard"}
+
+              </p>
+
+
+              <div
+                className="
+                  mt-4
+                  flex
+                  flex-wrap
+                  gap-5
+                  text-sm
+                  text-slate-300
+                "
+              >
+
+                <div className="flex items-center gap-2">
+
+                  <Clock className="h-4 w-4" />
+
+                  {currentTime.toLocaleDateString()}
+
+                </div>
+
+
+                <div className="flex items-center gap-2">
+
+                  <Activity className="h-4 w-4" />
+
+                  {currentTime.toLocaleTimeString()}
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {/* BUTTONS */}
+
+            <div className="flex gap-3">
+
+              <button
+                onClick={fetchDashboard}
+                disabled={loading}
+                className="
+                  px-5
+                  py-3
+                  rounded-xl
+                  bg-slate-800
+                  hover:bg-slate-700
+                  disabled:opacity-60
+                  text-white
+                  flex
+                  items-center
+                  gap-2
+                "
+              >
+
+                <RefreshCw
+                  className={`
+                    h-4
+                    w-4
+                    ${loading
+                      ? "animate-spin"
+                      : ""
+                    }
+                  `}
+                />
+
+                {loading
+                  ? "Refreshing..."
+                  : "Refresh"}
+
+              </button>
+
+
+              <button
+                onClick={() =>
+                  navigate("/ai-report")
+                }
+                className="
+                  px-5
+                  py-3
+                  rounded-xl
+                  bg-blue-600
+                  hover:bg-blue-500
+                  text-white
+                  flex
+                  items-center
+                  gap-2
+                "
+              >
+
+                <Cpu className="h-4 w-4" />
+
+                AI Report
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* ======================================================
+            ERROR
+        ====================================================== */}
+
+        {error && (
+
+          <div
+            className="
+              rounded-xl
+              border
+              border-red-500/30
+              bg-red-500/10
+              px-5
+              py-4
+              text-sm
+              text-red-300
+              flex
+              items-center
+              justify-between
+            "
+          >
+
+            <span>
+              {error}
+            </span>
+
+
+            <button
+              onClick={fetchDashboard}
+              className="
+                text-red-200
+                underline
+                font-semibold
+              "
+            >
+              Retry
+            </button>
+
+          </div>
+
+        )}
+
+
+        {/* ======================================================
+            KPI CARDS
+        ====================================================== */}
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            lg:grid-cols-3
+            xl:grid-cols-6
+            gap-5
+          "
+        >
+
+          <DashboardCard
+            title="Vehicles"
+            value={
+              overview.total_vehicles
+            }
+            icon={Car}
+            color="
+              bg-blue-500/10
+              border-blue-500/40
+            "
+            sub="Total Vehicles"
+          />
+
+
+          <DashboardCard
+            title="Junctions"
+            value={
+              overview.total_junctions ||
+              overview.total_records
+            }
+            icon={MapPin}
+            color="
+              bg-green-500/10
+              border-green-500/40
+            "
+            sub="Connected Roads"
+          />
+
+
+          <DashboardCard
+            title="Congestion"
+            value={
+              overview.high_congestion
+            }
+            icon={AlertTriangle}
+            color="
+              bg-yellow-500/10
+              border-yellow-500/40
+            "
+            sub="High Traffic Records"
+          />
+
+
+          <DashboardCard
+            title="Accidents"
+            value={
+              overview.accident_locations
+            }
+            icon={Shield}
+            color="
+              bg-red-500/10
+              border-red-500/40
+            "
+            sub="Reported Cases"
+          />
+
+
+          <DashboardCard
+            title="Emergencies"
+            value={
+              overview.emergencies
+            }
+            icon={Bell}
+            color="
+              bg-orange-500/10
+              border-orange-500/40
+            "
+            sub="Emergency Records"
+          />
+
+
+          <DashboardCard
+            title="Average Speed"
+            value={
+              overview.avg_speed_kmh
+            }
+            suffix="km/h"
+            icon={Navigation}
+            color="
+              bg-purple-500/10
+              border-purple-500/40
+            "
+            sub="Network Average"
+          />
+
+        </div>
+
+
+        {/* ======================================================
+            CHARTS ROW 1
+        ====================================================== */}
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            xl:grid-cols-3
+            gap-6
+          "
+        >
+
+
+          {/* ====================================================
+              HOURLY TRAFFIC LINE CHART
+          ==================================================== */}
+
+          <ChartCard
+            title="Hourly Traffic Trend"
+            subtitle="Average vehicle count by hour"
+            className="xl:col-span-2"
+          >
+
+            <div className="h-[320px]">
+
+              {hourlyData.length > 0 ? (
+
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
+
+                  <LineChart
+                    data={hourlyData}
+                    margin={{
+                      top: 10,
+                      right: 20,
+                      left: 0,
+                      bottom: 5,
+                    }}
+                  >
+
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#334155"
+                    />
+
+                    <XAxis
+                      dataKey="hour_label"
+                      stroke="#94a3b8"
+                      tick={{
+                        fontSize: 11,
+                      }}
+                    />
+
+                    <YAxis
+                      stroke="#94a3b8"
+                      tick={{
+                        fontSize: 11,
+                      }}
+                    />
+
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor:
+                          "#0f172a",
+                        border:
+                          "1px solid #334155",
+                        borderRadius:
+                          "12px",
+                        color:
+                          "#fff",
+                      }}
+                    />
+
+                    <Legend />
+
+                    <Line
+                      type="monotone"
+                      dataKey="avg_vehicle_count"
+                      name="Average Vehicles"
+                      stroke="#3b82f6"
+                      strokeWidth={3}
+                      dot={{
+                        r: 3,
+                      }}
+                      activeDot={{
+                        r: 6,
+                      }}
+                    />
+
+                  </LineChart>
+
+                </ResponsiveContainer>
+
+              ) : (
+
+                <div
+                  className="
+                    h-full
+                    flex
+                    items-center
+                    justify-center
+                    text-slate-500
+                  "
+                >
+                  {loading
+                    ? "Loading chart..."
+                    : "No hourly data available"}
+                </div>
+
+              )}
+
+            </div>
+
+          </ChartCard>
+
+
+          {/* ====================================================
+              CONGESTION PIE CHART
+          ==================================================== */}
+
+          <ChartCard
+            title="Congestion Distribution"
+            subtitle="Traffic condition breakdown"
+          >
+
+            <div className="h-[320px]">
+
+              {congestionData.length > 0 ? (
+
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
+
+                  <PieChart>
+
+                    <Pie
+                      data={congestionData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="45%"
+                      innerRadius={65}
+                      outerRadius={105}
+                      paddingAngle={3}
+                      label={renderPieLabel}
+                      labelLine={false}
+                    >
+
+                      {congestionData.map(
+                        (entry) => (
+
+                          <Cell
+                            key={
+                              entry.name
+                            }
+                            fill={
+                              congestionColors[
+                              entry.name
+                              ] || "#64748b"
+                            }
+                          />
+
+                        )
+                      )}
+
+                    </Pie>
+
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor:
+                          "#0f172a",
+                        border:
+                          "1px solid #334155",
+                        borderRadius:
+                          "12px",
+                        color:
+                          "#fff",
+                      }}
+                    />
+
+                    <Legend />
+
+                  </PieChart>
+
+                </ResponsiveContainer>
+
+              ) : (
+
+                <div
+                  className="
+                    h-full
+                    flex
+                    items-center
+                    justify-center
+                    text-slate-500
+                  "
+                >
+                  {loading
+                    ? "Loading chart..."
+                    : "No congestion data available"}
+                </div>
+
+              )}
+
+            </div>
+
+          </ChartCard>
+
+        </div>
+
+
+        {/* ======================================================
+            CHARTS ROW 2
+        ====================================================== */}
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            lg:grid-cols-2
+            gap-6
+          "
+        >
+
+
+          {/* ====================================================
+              SPEED DISTRIBUTION
+          ==================================================== */}
+
+          <ChartCard
+            title="Speed Distribution"
+            subtitle="Traffic records grouped by vehicle speed"
+          >
+
+            <div className="h-[320px]">
+
+              {speedData.length > 0 ? (
+
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
+
+                  <BarChart
+                    data={speedData}
+                    margin={{
+                      top: 10,
+                      right: 10,
+                      left: 0,
+                      bottom: 5,
+                    }}
+                  >
+
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#334155"
+                    />
+
+                    <XAxis
+                      dataKey="range"
+                      stroke="#94a3b8"
+                      tick={{
+                        fontSize: 10,
+                      }}
+                    />
+
+                    <YAxis
+                      stroke="#94a3b8"
+                      tick={{
+                        fontSize: 11,
+                      }}
+                    />
+
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor:
+                          "#0f172a",
+                        border:
+                          "1px solid #334155",
+                        borderRadius:
+                          "12px",
+                        color:
+                          "#fff",
+                      }}
+                    />
+
+                    <Legend />
+
+                    <Bar
+                      dataKey="count"
+                      name="Traffic Records"
+                      fill="#8b5cf6"
+                      radius={[
+                        6,
+                        6,
+                        0,
+                        0,
+                      ]}
+                    />
+
+                  </BarChart>
+
+                </ResponsiveContainer>
+
+              ) : (
+
+                <div
+                  className="
+                    h-full
+                    flex
+                    items-center
+                    justify-center
+                    text-slate-500
+                  "
+                >
+                  {loading
+                    ? "Loading chart..."
+                    : "No speed data available"}
+                </div>
+
+              )}
+
+            </div>
+
+          </ChartCard>
+
+
+          {/* ====================================================
+              TRAFFIC SUMMARY
+          ==================================================== */}
+
+          <ChartCard
+            title="Traffic Summary"
+            subtitle="Current network congestion overview"
+          >
+
+            <div className="space-y-5">
+
+
+              {/* HIGH */}
+
+              <div>
+
+                <div
+                  className="
+                    flex
+                    justify-between
+                    mb-2
+                  "
+                >
+
+                  <span
+                    className="
+                      text-sm
+                      text-slate-300
+                    "
+                  >
+                    High Congestion
+                  </span>
+
+                  <span
+                    className="
+                      text-sm
+                      font-bold
+                      text-red-400
+                    "
+                  >
+                    {Number(
+                      overview.high_congestion
+                    ).toLocaleString()}
+                  </span>
+
+                </div>
+
+                <div
+                  className="
+                    h-3
+                    rounded-full
+                    bg-slate-800
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    className="
+                      h-full
+                      bg-red-500
+                      rounded-full
+                    "
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        (
+                          Number(
+                            overview.high_congestion
+                          ) /
+                          Math.max(
+                            1,
+                            Number(
+                              overview.total_records
+                            )
+                          )
+                        ) *
+                        100
+                      )
+                        }%`,
+                    }}
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* MEDIUM */}
+
+              <div>
+
+                <div
+                  className="
+                    flex
+                    justify-between
+                    mb-2
+                  "
+                >
+
+                  <span
+                    className="
+                      text-sm
+                      text-slate-300
+                    "
+                  >
+                    Medium Congestion
+                  </span>
+
+                  <span
+                    className="
+                      text-sm
+                      font-bold
+                      text-yellow-400
+                    "
+                  >
+                    {Number(
+                      overview.medium_congestion
+                    ).toLocaleString()}
+                  </span>
+
+                </div>
+
+                <div
+                  className="
+                    h-3
+                    rounded-full
+                    bg-slate-800
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    className="
+                      h-full
+                      bg-yellow-500
+                      rounded-full
+                    "
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        (
+                          Number(
+                            overview.medium_congestion
+                          ) /
+                          Math.max(
+                            1,
+                            Number(
+                              overview.total_records
+                            )
+                          )
+                        ) *
+                        100
+                      )
+                        }%`,
+                    }}
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* LOW */}
+
+              <div>
+
+                <div
+                  className="
+                    flex
+                    justify-between
+                    mb-2
+                  "
+                >
+
+                  <span
+                    className="
+                      text-sm
+                      text-slate-300
+                    "
+                  >
+                    Low Congestion
+                  </span>
+
+                  <span
+                    className="
+                      text-sm
+                      font-bold
+                      text-green-400
+                    "
+                  >
+                    {Number(
+                      overview.low_congestion
+                    ).toLocaleString()}
+                  </span>
+
+                </div>
+
+                <div
+                  className="
+                    h-3
+                    rounded-full
+                    bg-slate-800
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    className="
+                      h-full
+                      bg-green-500
+                      rounded-full
+                    "
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        (
+                          Number(
+                            overview.low_congestion
+                          ) /
+                          Math.max(
+                            1,
+                            Number(
+                              overview.total_records
+                            )
+                          )
+                        ) *
+                        100
+                      )
+                        }%`,
+                    }}
+                  />
+
+                </div>
+
+              </div>
+
+
+              {/* NETWORK TOTAL */}
+
+              <div
+                className="
+                  mt-6
+                  rounded-2xl
+                  bg-slate-800/70
+                  border
+                  border-slate-700
+                  p-5
+                "
+              >
+
+                <div className="flex items-center gap-3">
+
+                  <TrendingUp
+                    className="
+                      h-6
+                      w-6
+                      text-blue-400
+                    "
+                  />
+
+                  <div>
+
+                    <p className="text-xs text-slate-500 uppercase tracking-wider">
+                      Network Average
+                    </p>
+
+                    <p className="text-2xl font-bold text-white">
+                      {Number(
+                        overview.avg_vehicle_count
+                      ).toLocaleString()}
+                    </p>
+
+                    <p className="text-xs text-slate-400">
+                      vehicles per traffic record
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </ChartCard>
+
+        </div>
+
+
+        {/* ======================================================
+            ROAD PERFORMANCE
+        ====================================================== */}
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            lg:grid-cols-2
+            gap-6
+          "
+        >
+
+          {/* MOST CONGESTED */}
+
+          <div
+            className="
+              rounded-3xl
+              p-6
+              bg-slate-900
+              border
+              border-red-500/30
+            "
+          >
+
+            <div className="flex items-center gap-3">
+
+              <div
+                className="
+                  p-3
+                  rounded-xl
+                  bg-red-500/15
+                "
+              >
+
+                <AlertTriangle
+                  className="
+                    h-6
+                    w-6
+                    text-red-400
+                  "
+                />
+
+              </div>
+
+
+              <div>
+
+                <p className="text-xs uppercase tracking-wider text-slate-500">
+                  Most Congested Road
+                </p>
+
+                <h2 className="text-xl font-bold text-white mt-1">
+
+                  {overview.most_congested_location}
+
+                </h2>
+
+              </div>
+
+            </div>
+
+
+            <div className="mt-6">
+
+              <p className="text-slate-400 text-sm">
+                Average Vehicles
+              </p>
+
+              <p
+                className="
+                  text-3xl
+                  font-bold
+                  text-red-400
+                  mt-1
+                "
+              >
+
+                {Number(
+                  overview.most_congested_vehicles
+                ).toLocaleString()}
+
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* LEAST CONGESTED */}
+
+          <div
+            className="
+              rounded-3xl
+              p-6
+              bg-slate-900
+              border
+              border-green-500/30
+            "
+          >
+
+            <div className="flex items-center gap-3">
+
+              <div
+                className="
+                  p-3
+                  rounded-xl
+                  bg-green-500/15
+                "
+              >
+
+                <CheckCircle
+                  className="
+                    h-6
+                    w-6
+                    text-green-400
+                  "
+                />
+
+              </div>
+
+
+              <div>
+
+                <p className="text-xs uppercase tracking-wider text-slate-500">
+                  Least Congested Road
+                </p>
+
+                <h2 className="text-xl font-bold text-white mt-1">
+
+                  {overview.least_congested_location}
+
+                </h2>
+
+              </div>
+
+            </div>
+
+
+            <div className="mt-6">
+
+              <p className="text-slate-400 text-sm">
+                Average Vehicles
+              </p>
+
+              <p
+                className="
+                  text-3xl
+                  font-bold
+                  text-green-400
+                  mt-1
+                "
+              >
+
+                {Number(
+                  overview.least_congested_vehicles
+                ).toLocaleString()}
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* ======================================================
+            WEATHER + SYSTEM STATUS
+        ====================================================== */}
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            lg:grid-cols-2
+            gap-6
+          "
+        >
+
+          {/* WEATHER */}
+
+          <div
+            className="
+              rounded-3xl
+              p-6
+              bg-slate-900
+              border
+              border-slate-700
+            "
+          >
+
+            <div className="flex justify-between">
+
+              <h2
+                className="
+                  text-xl
+                  font-bold
+                  text-white
+                "
+              >
+                Weather
+              </h2>
+
+
+              <Sun
+                className="
+                  text-yellow-400
+                  h-8
+                  w-8
+                "
+              />
+
+            </div>
+
+
+            <div className="mt-6">
+
+              <h1
+                className="
+                  text-5xl
+                  font-bold
+                  text-white
+                "
+              >
+                {weather.temperature}°
+              </h1>
+
+
+              <p className="text-slate-300 mt-2">
+                {weather.condition}
+              </p>
+
+
+              <p className="text-slate-400 mt-1">
+                Humidity {weather.humidity}%
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* SYSTEM */}
+
+          <div
+            className="
+              rounded-3xl
+              p-6
+              bg-slate-900
+              border
+              border-slate-700
+            "
+          >
+
+            <h2
+              className="
+                text-xl
+                font-bold
+                text-white
+              "
+            >
+              System Status
+            </h2>
+
+
+            <div className="space-y-5 mt-6">
+
+              <div className="flex justify-between">
+
+                <span className="text-slate-300">
+                  Backend
+                </span>
+
+                <span
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    text-green-400
+                  "
+                >
+
+                  <CheckCircle className="h-5 w-5" />
+
+                  Online
+
+                </span>
+
+              </div>
+
+
+              <div className="flex justify-between">
+
+                <span className="text-slate-300">
+                  Database
+                </span>
+
+                <span
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    text-green-400
+                  "
+                >
+
+                  <CheckCircle className="h-5 w-5" />
+
+                  Connected
+
+                </span>
+
+              </div>
+
+
+              <div className="flex justify-between">
+
+                <span className="text-slate-300">
+                  AI Engine
+                </span>
+
+                <span
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    text-green-400
+                  "
+                >
+
+                  <CheckCircle className="h-5 w-5" />
+
+                  Running
+
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* ======================================================
+            AI PREDICTION
+        ====================================================== */}
+
+        <div
+          className="
+            rounded-3xl
+            p-8
+            bg-gradient-to-r
+            from-purple-900/40
+            to-slate-900
+            border
+            border-purple-500/40
+          "
+        >
+
+          <div className="flex justify-between">
+
+            <div>
+
+              <h2
+                className="
+                  text-2xl
+                  font-bold
+                  text-white
+                "
+              >
+                AI Traffic Prediction
+              </h2>
+
+
+              <p className="text-slate-400 mt-2">
+
+                Random Forest model prediction
+                module.
+
+              </p>
+
+            </div>
+
+
+            <Cpu
+              className="
+                h-12
+                w-12
+                text-purple-400
+              "
+            />
+
+          </div>
+
+
+          <div
+            className="
+              grid
+              md:grid-cols-3
+              gap-6
+              mt-8
+            "
+          >
+
+            <div
+              className="
+                rounded-xl
+                bg-slate-800
+                p-5
+              "
+            >
+
+              <p className="text-slate-400">
+                Current Average
+              </p>
+
+              <h1
+                className="
+                  text-4xl
+                  font-bold
+                  text-white
+                  mt-2
+                "
+              >
+
+                {Number(
+                  overview.avg_vehicle_count
+                ).toLocaleString()}
+
+              </h1>
+
+            </div>
+
+
+            <div
+              className="
+                rounded-xl
+                bg-slate-800
+                p-5
+              "
+            >
+
+              <p className="text-slate-400">
+                Network Speed
+              </p>
+
+              <h1
+                className="
+                  text-4xl
+                  font-bold
+                  text-blue-400
+                  mt-2
+                "
+              >
+
+                {Number(
+                  overview.avg_speed_kmh
+                ).toLocaleString(
+                  undefined,
+                  {
+                    maximumFractionDigits: 1,
+                  }
+                )}
+
+                <span className="text-lg ml-1">
+                  km/h
+                </span>
+
+              </h1>
+
+            </div>
+
+
+            <div
+              className="
+                rounded-xl
+                bg-slate-800
+                p-5
+              "
+            >
+
+              <p className="text-slate-400">
+                High Congestion
+              </p>
+
+              <h1
+                className="
+                  text-4xl
+                  font-bold
+                  text-red-400
+                  mt-2
+                "
+              >
+
+                {Number(
+                  overview.high_congestion
+                ).toLocaleString()}
+
+              </h1>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
     </Layout>
   );
 }

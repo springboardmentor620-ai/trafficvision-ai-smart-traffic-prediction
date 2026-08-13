@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import authFetch from "../api/http";
 import {
   FileText, Download, RefreshCw, Cpu, MapPin, Clock,
   AlertTriangle, Car, TrendingUp, Shield, CheckCircle,
   Zap, Activity, BarChart3
 } from "lucide-react";
 
-const API = "http://localhost:8000";
 
 function StatRow({ label, value, color = "text-white" }) {
   return (
@@ -48,7 +48,7 @@ export default function AIReport() {
   const loadReport = async () => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch(`${API}/report/ai-report`);
+      const res = await authFetch(`/report/ai-report`);
       if (!res.ok) throw new Error("Failed to generate report");
       setReport(await res.json());
     } catch (e) {
@@ -61,7 +61,7 @@ export default function AIReport() {
   useEffect(() => { loadReport(); }, []);
 
   const handleDownload = async () => {
-    const res = await fetch(`${API}/report/download`);
+    const res = await authFetch(`/report/download`);
     const text = await res.text();
     const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);

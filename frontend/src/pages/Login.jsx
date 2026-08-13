@@ -36,7 +36,7 @@ function Login() {
       );
 
       if (role === "admin") {
-        navigate("/home");
+        navigate("/dashboard");
       } else if (
         role === "traffic_operator" ||
         role === "traffic operator" ||
@@ -101,7 +101,7 @@ function Login() {
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">Access Password</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-550" />
+              <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
               <input
                 type="password"
                 required

@@ -1,107 +1,206 @@
 import pandas as pd
 import joblib
 import json
+import os
 
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# Load dataset
-df = pd.read_excel("dataset/trafficvision.xlsx")
 
-# -----------------------
-# Date & Time Features
-# -----------------------
-df["DateTime"] = pd.to_datetime(df["DateTime"])
+# ==========================
+# Load Dataset
+# ==========================
 
-df["Hour"] = df["DateTime"].dt.hour
-df["Day"] = df["DateTime"].dt.day
-df["Month"] = df["DateTime"].dt.month
-df["Weekday"] = df["DateTime"].dt.weekday
+df = pd.read_csv(
+    "dataset/traffic_hyderabad_realistic.csv"
+)
 
-# -----------------------
-# Features & Target
-# -----------------------
-X = df.drop(columns=["Vehicle_Count", "DateTime"])
-y = df["Vehicle_Count"]
 
-# -----------------------
-# Numerical Columns
-# -----------------------
-numeric_features = [
-    "Latitude",
-    "Longitude",
-    "Speed",
-    "Hour",
-    "Day",
-    "Month",
-    "Weekday"
-]
+print("Dataset Loaded")
+print(df.head())
 
-# -----------------------
-# Categorical Columns
-# -----------------------
-categorical_features = [
+
+# ==========================
+# Remove unwanted columns
+# ==========================
+
+df = df.drop(
+    columns=[
+        "DateTime",
+        "Alternative_Route",
+        "Estimated_Delay"
+    ]
+)
+
+
+# ==========================
+# Encode categorical columns
+# ==========================
+
+categorical_columns = [
     "Congestion_Level",
     "Weather",
     "Road_Name",
     "Traffic_Signal",
-    "Accident"
+    "Accident",
+    "TimeSlot"
 ]
 
-# -----------------------
-# Preprocessor
-# -----------------------
-preprocessor = ColumnTransformer(
-    transformers=[
-        (
-            "cat",
-            OneHotEncoder(handle_unknown="ignore"),
-            categorical_features,
-        )
-    ],
-    remainder="passthrough"
+
+encoders = {}
+
+
+for col in categorical_columns:
+
+    encoder = LabelEncoder()
+
+    df[col] = encoder.fit_transform(
+        df[col].astype(str)
+    )
+
+    encoders[col] = encoder
+
+
+# ==========================
+# Features and Target
+# ==========================
+
+X = df.drop(
+    columns=[
+        "Vehicle_Count"
+    ]
 )
 
-# -----------------------
-# Model
-# -----------------------
-model = RandomForestRegressor(
-    n_estimators=200,
-    random_state=42
-)
 
-pipeline = Pipeline([
-    ("preprocessor", preprocessor),
-    ("model", model)
-])
+y = df["Vehicle_Count"]
 
-# -----------------------
-# Train
-# -----------------------
+
+# Save feature names
+
+feature_columns = list(X.columns)
+
+
+# ==========================
+# Split Data
+# ==========================
+
 X_train, X_test, y_train, y_test = train_test_split(
+
     X,
     y,
     test_size=0.2,
     random_state=42
+
 )
 
-pipeline.fit(X_train, y_train)
 
-# -----------------------
-# Save Model
-# -----------------------
-joblib.dump(pipeline, "ml_models/traffic_model.pkl")
+# ==========================
+# Train Model
+# ==========================
 
-# -----------------------
-# Save Feature Names
-# -----------------------
-feature_columns = list(X.columns)
+model = RandomForestRegressor(
 
-with open("ml_models/feature_columns.json", "w") as f:
-    json.dump(feature_columns, f)
+    n_estimators=200,
+    random_state=42
 
-print("✅ traffic_model.pkl created successfully")
-print("✅ feature_columns.json created successfully")
+)
+
+
+model.fit(
+
+    X_train,
+    y_train
+
+)
+
+
+# ==========================
+# Evaluation
+# ==========================
+
+prediction = model.predict(
+    X_test
+)
+
+
+print("======================")
+print("MODEL RESULT")
+print("======================")
+
+print(
+    "MAE:",
+    mean_absolute_error(
+        y_test,
+        prediction
+    )
+)
+
+
+print(
+    "RMSE:",
+    mean_squared_error(
+        y_test,
+        prediction,
+        squared=False
+    )
+)
+
+
+print(
+    "R2:",
+    r2_score(
+        y_test,
+        prediction
+    )
+)
+
+
+# ==========================
+# Create folder
+# ==========================
+
+os.makedirs(
+    "ml_models",
+    exist_ok=True
+)
+
+
+# ==========================
+# Save Files
+# ==========================
+
+joblib.dump(
+
+    model,
+
+    "ml_models/traffic_model.pkl"
+
+)
+
+
+joblib.dump(
+
+    encoders,
+
+    "ml_models/label_encoders.pkl"
+
+)
+
+
+with open(
+    "ml_models/feature_columns.json",
+    "w"
+) as f:
+
+    json.dump(
+        feature_columns,
+        f,
+        indent=4
+    )
+
+
+print("✅ Model saved")
+print("✅ Encoders saved")
+print("✅ Feature columns saved")

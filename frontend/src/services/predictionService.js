@@ -1,10 +1,11 @@
 import api from "../api/axios";
 
-/**
- * Predict traffic volume and congestion level for a junction
- * @param {Object} params - { junction, hour, day, month, weekday }
- */
 export const predictTraffic = async (params) => {
-  const response = await api.post("/traffic/predict", params);
+  const response = await api.post("/prediction/predict", params);
+  return response.data;
+};
+
+export const getPredictionHistory = async (limit = 10) => {
+  const response = await api.get("/prediction/history", { params: { limit } });
   return response.data;
 };

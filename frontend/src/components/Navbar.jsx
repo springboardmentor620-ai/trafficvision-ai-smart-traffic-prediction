@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import api from "../api/axios";
 import {
   Menu,
   Bell,
@@ -33,16 +34,12 @@ function Navbar({ toggleSidebar }) {
 
     try {
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/notifications/?limit=10"
-      );
-
-      const data = await response.json();
+      const response = await api.get("/notifications/?limit=10");
 
       // GET /notifications/ returns { unread_count, total_count, notifications: [...] },
       // not a bare array — using `data` directly here used to make
       // notifications.map(...) throw as soon as the dropdown was opened.
-      setNotifications(data.notifications || []);
+      setNotifications(response.data.notifications || []);
 
     }
 
@@ -97,10 +94,10 @@ function Navbar({ toggleSidebar }) {
 
   const getDotColor = (type) => {
 
-    if (type === "Accident")
+    if (String(type || "").toLowerCase() === "accident")
       return "bg-red-500 animate-pulse";
 
-    if (type === "Congestion")
+    if (String(type || "").toLowerCase() === "congestion")
       return "bg-yellow-500";
 
     return "bg-blue-500";
@@ -227,7 +224,7 @@ function Navbar({ toggleSidebar }) {
 
                           <span className="font-semibold text-white">
 
-                            {notif.type}
+                            {notif.alert_type || notif.type || "System"}
 
                           </span>
 

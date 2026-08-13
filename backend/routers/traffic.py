@@ -1,14 +1,21 @@
-import json
 import warnings
-from pathlib import Path
-import joblib
-import numpy as np
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from typing import Optional
 
 from database import get_db
 from models.traffic import Traffic
+from services.ml_service import (
+    predict_from_features,
+    classify_congestion,
+    get_recommendation,
+    get_signal_recommendation,
+    needs_police_deployment,
+    get_feature_columns,
+    get_categorical_columns,
+    get_available_categories
+)
 
 warnings.filterwarnings("ignore")
 
@@ -18,45 +25,72 @@ router = APIRouter(
 )
 
 # =====================================================
-# Load ML Model
-# =====================================================
-BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = BASE_DIR / "ml_models" / "traffic_prediction_model.pkl"
-FEATURE_PATH = BASE_DIR / "ml_models" / "feature_columns.pkl"
-
-model = joblib.load(MODEL_PATH)
-
-
-feature_columns = joblib.load(FEATURE_PATH)
-
-
-# =====================================================
 # Schemas
 # =====================================================
 
 
 class TrafficUpdate(BaseModel):
-
+    """Update traffic record."""
     location: str
-
     vehicle_count: int
-
     congestion_level: str
-
     road_status: str
 
 
-class PredictionRequest(BaseModel):
+class TrafficPredictionRequest(BaseModel):
+    """Traffic prediction with all 18 required features."""
+    Latitude: float
+    Longitude: float
+    Speed: float
+    Congestion_Level: int
+    Weather: str
+    Road_Name: str
+    Traffic_Signal: int
+    Accident: int
+    Hour: int
+    Day: int
+    Month: int
+    Year: int
+    DayOfWeek: int
+    Weekday: int
+    IsWeekend: int
+    PeakHour: int
+    Minute: int
+    TimeSlot: str
 
-    junction: int
 
-    hour: int
+class TrafficResponse(BaseModel):
+    """
+    Standard traffic record response.
 
-    day: int
+    IMPORTANT FIX:
+    Every one of these fields is `nullable=True` on the Traffic
+    model (see models/traffic.py). Pydantic/FastAPI validates the
+    response against this schema BEFORE sending it — if even one
+    row in the query result has a NULL in a field that was
+    previously required (str/int/float, not Optional), the whole
+    response raises a ResponseValidationError and FastAPI returns
+    a 500 for the ENTIRE request, not just that row. With ~200
+    rows fetched at once, hitting at least one NULL is close to
+    guaranteed. Making these Optional (with default None) fixes
+    that without changing anything about how populated rows look.
 
-    month: int
-
-    weekday: int
+    Also added `weather`, `speed`, and `accident` — the frontend's
+    Road Performance table (Analytics.jsx -> roadStats) reads these
+    fields directly, but they were previously missing from this
+    response entirely, so the Weather/Accident/Speed columns were
+    silently always showing default/placeholder values.
+    """
+    id: int
+    location: Optional[str] = None
+    vehicle_count: Optional[int] = None
+    congestion_level: Optional[str] = None
+    road_status: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    weather: Optional[str] = None
+    speed: Optional[float] = None
+    accident: Optional[str] = None
 
 
 # =====================================================
@@ -64,51 +98,34 @@ class PredictionRequest(BaseModel):
 # =====================================================
 
 
-@router.get("/")
+@router.get("/", response_model=list[TrafficResponse])
 def get_all_traffic(
-
     skip: int = 0,
-
     limit: int = 50,
-
     db: Session = Depends(get_db)
-
 ):
-
+    """Get all traffic records with pagination."""
     records = (
-
         db.query(Traffic)
-
         .offset(skip)
-
         .limit(limit)
-
         .all()
-
     )
 
     return [
-
         {
-
             "id": record.id,
-
             "location": record.location,
-
             "vehicle_count": record.vehicle_count,
-
             "congestion_level": record.congestion_level,
-
             "road_status": record.road_status,
-
             "latitude": record.latitude,
-
-            "longitude": record.longitude
-
+            "longitude": record.longitude,
+            "weather": record.weather,
+            "speed": record.speed,
+            "accident": record.accident,
         }
-
         for record in records
-
     ]
 
 
@@ -117,47 +134,30 @@ def get_all_traffic(
 # =====================================================
 
 
-@router.get("/map")
-def get_map_data(
-
-    db: Session = Depends(get_db)
-
-):
-
+@router.get("/map", response_model=list[TrafficResponse])
+def get_map_data(db: Session = Depends(get_db)):
+    """Get traffic data for map visualization (100 most recent records)."""
     records = (
-
         db.query(Traffic)
-
         .order_by(Traffic.id.desc())
-
         .limit(100)
-
         .all()
-
     )
 
     return [
-
         {
-
             "id": record.id,
-
             "location": record.location,
-
             "vehicle_count": record.vehicle_count,
-
             "congestion_level": record.congestion_level,
-
             "road_status": record.road_status,
-
             "latitude": record.latitude,
-
-            "longitude": record.longitude
-
+            "longitude": record.longitude,
+            "weather": record.weather,
+            "speed": record.speed,
+            "accident": record.accident,
         }
-
         for record in records
-
     ]
 
 
@@ -167,38 +167,22 @@ def get_map_data(
 
 
 @router.get("/trend")
-def get_traffic_trend(
-
-    db: Session = Depends(get_db)
-
-):
-
+def get_traffic_trend(db: Session = Depends(get_db)):
+    """Get traffic trend data for line charts."""
     traffic_data = (
-
         db.query(Traffic)
-
         .order_by(Traffic.id)
-
         .limit(20)
-
         .all()
-
     )
 
     result = []
-
     for traffic in traffic_data:
-
         result.append(
-
             {
-
                 "time": str(traffic.id),
-
                 "vehicles": traffic.vehicle_count
-
             }
-
         )
 
     return result
@@ -210,87 +194,61 @@ def get_traffic_trend(
 
 
 @router.post("/predict")
-def predict_traffic(
+def predict_traffic(request: TrafficPredictionRequest):
+    """
+    Predict traffic congestion with all features.
 
-    request: PredictionRequest
+    Returns:
+    - Vehicle count prediction
+    - Congestion classification (Low/Moderate/High/Severe)
+    - Text recommendation
+    - Signal timing suggestion
+    - Police deployment flag
 
-):
+    Args:
+        request: All 18 required features
 
-    input_data = np.zeros(
+    Raises:
+        HTTPException 400: Missing/invalid features
+        HTTPException 500: Prediction error
+    """
+    try:
+        # Convert request to dict
+        features = request.model_dump()
 
-        len(feature_columns)
+        # Predict using ml_service
+        prediction_result = predict_from_features(features)
+        vehicle_count = prediction_result["prediction"]
 
-    )
+        # Generate congestion classification
+        congestion = classify_congestion(vehicle_count)
 
-    # Time features
+        # Generate text recommendation
+        road_name = features.get("Road_Name", "Unknown Road")
+        hour = features.get("Hour", 0)
+        recommendation = get_recommendation(vehicle_count, road_name, hour)
 
-    if "hour" in feature_columns:
+        # Generate signal timing recommendation
+        signal_timing = get_signal_recommendation(vehicle_count)
 
-        input_data[
-            feature_columns.index("hour")
-        ] = request.hour
+        # Check if police deployment is needed
+        police_needed = needs_police_deployment(vehicle_count)
 
-    if "day" in feature_columns:
+        return {
+            "prediction": vehicle_count,
+            "confidence": prediction_result["confidence"],
+            "model_version": prediction_result["model_version"],
+            "congestion": congestion,
+            "recommendation": recommendation,
+            "signal_timing": signal_timing,
+            "police_deployment_needed": police_needed
+        }
 
-        input_data[
-            feature_columns.index("day")
-        ] = request.day
-
-    if "month" in feature_columns:
-
-        input_data[
-            feature_columns.index("month")
-        ] = request.month
-
-    if "weekday" in feature_columns:
-
-        input_data[
-            feature_columns.index("weekday")
-        ] = request.weekday
-
-    # Junction one hot encoding
-
-    junction_column = (
-
-        "Junction_"
-
-        + str(request.junction)
-
-    )
-
-    if junction_column in feature_columns:
-
-        input_data[
-            feature_columns.index(junction_column)
-        ] = 1
-
-    prediction = model.predict(
-
-        [input_data]
-
-    )
-
-    predicted_vehicle = round(
-
-        prediction[0]
-
-    )
-
-    if predicted_vehicle < 50:
-        congestion = "Low"
-        status_msg = "Traffic is Normal"
-    elif predicted_vehicle < 150:
-        congestion = "Medium"
-        status_msg = "Moderate Traffic Expected"
-    else:
-        congestion = "High"
-        status_msg = "Heavy Traffic Expected"
-
-    return {
-        "predicted_vehicle_count": predicted_vehicle,
-        "congestion_level": congestion,
-        "traffic_status": status_msg
-    }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
 # =====================================================
@@ -298,38 +256,36 @@ def predict_traffic(
 # =====================================================
 
 
-@router.get("/{traffic_id}")
+@router.get("/{traffic_id}", response_model=TrafficResponse)
 def get_traffic_by_id(
-
     traffic_id: int,
-
     db: Session = Depends(get_db)
-
 ):
-
+    """Get a specific traffic record by ID."""
     record = (
-
         db.query(Traffic)
-
-        .filter(
-            Traffic.id == traffic_id
-        )
-
+        .filter(Traffic.id == traffic_id)
         .first()
-
     )
 
     if not record:
-
         raise HTTPException(
-
             status_code=404,
-
             detail="Traffic record not found"
-
         )
 
-    return record
+    return {
+        "id": record.id,
+        "location": record.location,
+        "vehicle_count": record.vehicle_count,
+        "congestion_level": record.congestion_level,
+        "road_status": record.road_status,
+        "latitude": record.latitude,
+        "longitude": record.longitude,
+        "weather": record.weather,
+        "speed": record.speed,
+        "accident": record.accident,
+    }
 
 
 # =====================================================
@@ -339,52 +295,33 @@ def get_traffic_by_id(
 
 @router.put("/{traffic_id}")
 def update_traffic(
-
     traffic_id: int,
-
     traffic_data: TrafficUpdate,
-
     db: Session = Depends(get_db)
-
 ):
-
+    """Update a traffic record."""
     record = (
-
         db.query(Traffic)
-
-        .filter(
-            Traffic.id == traffic_id
-        )
-
+        .filter(Traffic.id == traffic_id)
         .first()
-
     )
 
     if not record:
-
         raise HTTPException(
-
             status_code=404,
-
             detail="Traffic record not found"
-
         )
 
     record.location = traffic_data.location
-
     record.vehicle_count = traffic_data.vehicle_count
-
     record.congestion_level = traffic_data.congestion_level
-
     record.road_status = traffic_data.road_status
 
     db.commit()
 
     return {
-
-        "message":
-        "Traffic record updated successfully"
-
+        "message": "Traffic record updated successfully",
+        "id": record.id
     }
 
 
@@ -395,42 +332,26 @@ def update_traffic(
 
 @router.delete("/{traffic_id}")
 def delete_traffic(
-
     traffic_id: int,
-
     db: Session = Depends(get_db)
-
 ):
-
+    """Delete a traffic record."""
     record = (
-
         db.query(Traffic)
-
-        .filter(
-            Traffic.id == traffic_id
-        )
-
+        .filter(Traffic.id == traffic_id)
         .first()
-
     )
 
     if not record:
-
         raise HTTPException(
-
             status_code=404,
-
             detail="Traffic record not found"
-
         )
 
     db.delete(record)
-
     db.commit()
 
     return {
-
-        "message":
-        "Traffic record deleted successfully"
-
+        "message": "Traffic record deleted successfully",
+        "id": traffic_id
     }

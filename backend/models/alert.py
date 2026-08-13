@@ -1,41 +1,135 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, text
+"""
+TrafficVisionAI
+Alert SQLAlchemy Model
+
+Maps the existing MySQL `alerts` table.
+
+IMPORTANT:
+- This model must match the existing database schema.
+- No automatic database schema changes are performed.
+- Do NOT add fields unless the corresponding MySQL
+  columns actually exist.
+"""
+
 from datetime import datetime
+
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    text,
+)
+
 from database import Base
 
 
 class Alert(Base):
+    """
+    SQLAlchemy model for the existing `alerts` table.
+    """
+
     __tablename__ = "alerts"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # ========================================================
+    # PRIMARY KEY
+    # ========================================================
 
-    # Alert classification
-    alert_type = Column(String(50), nullable=False)
-    # Congestion | Accident | RouteDelay | Emergency
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+        autoincrement=True,
+    )
 
-    # Location info
-    location = Column(String(150), nullable=False)
-    latitude = Column(String(30), nullable=True)
-    longitude = Column(String(30), nullable=True)
+    # ========================================================
+    # ALERT INFORMATION
+    # ========================================================
 
-    # Severity / Priority
-    severity = Column(String(20), nullable=False)
-    # Critical | High | Medium | Low
+    alert_type = Column(
+        String(50),
+        nullable=False,
+    )
 
-    # Details
-    description = Column(Text, nullable=True)
-    recommendation = Column(Text, nullable=True)
+    location = Column(
+        String(150),
+        nullable=False,
+    )
 
-    # Status lifecycle
-    status = Column(String(20), default="Active", nullable=False)
-    # Active | Acknowledged | Resolved
+    # ========================================================
+    # LOCATION COORDINATES
+    # ========================================================
 
-    # Link back to traffic record that triggered this
-    traffic_id = Column(Integer, ForeignKey("traffic.id"), nullable=True)
+    latitude = Column(
+        String(30),
+        nullable=True,
+    )
 
-    # Timestamps
+    longitude = Column(
+        String(30),
+        nullable=True,
+    )
+
+    # ========================================================
+    # SEVERITY
+    # ========================================================
+
+    severity = Column(
+        String(20),
+        nullable=False,
+    )
+
+    # ========================================================
+    # DESCRIPTION
+    # ========================================================
+
+    description = Column(
+        Text,
+        nullable=True,
+    )
+
+    # ========================================================
+    # RECOMMENDATION
+    # ========================================================
+
+    recommendation = Column(
+        Text,
+        nullable=True,
+    )
+
+    # ========================================================
+    # STATUS
+    # ========================================================
+
+    status = Column(
+        String(20),
+        nullable=False,
+        default="Active",
+    )
+
+    # ========================================================
+    # TRAFFIC REFERENCE
+    # ========================================================
+
+    traffic_id = Column(
+        Integer,
+        ForeignKey("traffic_data.id"),
+        nullable=True,
+    )
+
+    # ========================================================
+    # TIMESTAMPS
+    # ========================================================
+
     created_at = Column(
         DateTime,
-        default=datetime.utcnow,
+        nullable=True,
         server_default=text("CURRENT_TIMESTAMP"),
     )
-    resolved_at = Column(DateTime, nullable=True)
+
+    resolved_at = Column(
+        DateTime,
+        nullable=True,
+    )

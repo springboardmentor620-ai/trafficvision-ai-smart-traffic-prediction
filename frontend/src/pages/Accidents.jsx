@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import Layout from "../components/Layout";
+import authFetch from "../api/http";
 import {
   Car, AlertTriangle, MapPin, CheckCircle, RefreshCw,
   Zap, Shield, Clock, Navigation, Radio
 } from "lucide-react";
 
-const API = "http://localhost:8000";
 
 const SEVERITY_CFG = {
   Fatal: { bg: "bg-red-950/60", border: "border-red-500/50", badge: "bg-red-600", text: "text-red-400" },
@@ -112,7 +112,7 @@ export default function Accidents() {
       if (filterSev !== "All") params.append("severity", filterSev);
       if (filterStatus !== "All") params.append("status", filterStatus);
 
-      const res = await fetch(`${API}/accidents/?${params}`);
+      const res = await authFetch(`/accidents/?${params}`);
       if (!res.ok) throw new Error("Failed to fetch accidents");
       const data = await res.json();
       setAccidents(data);
@@ -136,7 +136,7 @@ export default function Accidents() {
   const handleSimulate = async () => {
     setSimulating(true);
     try {
-      const res = await fetch(`${API}/accidents/simulate`, { method: "POST" });
+      const res = await authFetch(`/accidents/simulate`, { method: "POST" });
       if (!res.ok) throw new Error("Simulation failed");
       await loadData();
     } catch (e) {
@@ -147,7 +147,7 @@ export default function Accidents() {
   };
 
   const handleClear = async (id) => {
-    await fetch(`${API}/accidents/${id}/clear`, { method: "PATCH" });
+    await authFetch(`/accidents/${id}/clear`, { method: "PATCH" });
     loadData();
   };
 

@@ -22,6 +22,7 @@ function Traffic() {
   const [trafficList, setTrafficList] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     location: "",
@@ -38,14 +39,12 @@ function Traffic() {
     setLoading(true);
     try {
       const data = await getAllTraffic();
-      setTrafficList(data);
+      setTrafficList(Array.isArray(data) ? data : []);
+      setError("");
     } catch (error) {
       console.error(error);
-      // Setup default fallback list if API is offline
-      setTrafficList([
-        { id: 1, location: "Junction 1 - Main St", vehicle_count: 320, congestion_level: "Medium", road_status: "Open" },
-        { id: 2, location: "Junction 2 - Broadway", vehicle_count: 980, congestion_level: "High", road_status: "Closed" }
-      ]);
+      setError(error.response?.data?.detail || "Unable to load traffic records.");
+      setTrafficList([]);
     } finally {
       setLoading(false);
     }
@@ -84,26 +83,7 @@ function Traffic() {
       loadTraffic();
     } catch (error) {
       console.error(error);
-      // Simulation mode fallback
-      if (editingId === null) {
-        const newRecord = {
-          id: trafficList.length > 0 ? Math.max(...trafficList.map(t => t.id)) + 1 : 1,
-          ...form,
-          vehicle_count: parseInt(form.vehicle_count) || 0
-        };
-        setTrafficList([...trafficList, newRecord]);
-      } else {
-        setTrafficList(trafficList.map(t => t.id === editingId ? { ...t, ...form, vehicle_count: parseInt(form.vehicle_count) || 0 } : t));
-        setEditingId(null);
-      }
-      
-      setForm({
-        location: "",
-        vehicle_count: "",
-        congestion_level: "Low",
-        road_status: "Open"
-      });
-      alert("Action Completed (Simulation Mode)");
+      setError(error.response?.data?.detail || "Unable to save the traffic record.");
     }
   };
 
@@ -124,8 +104,7 @@ function Traffic() {
       loadTraffic();
     } catch (error) {
       console.error(error);
-      setTrafficList(trafficList.filter(t => t.id !== id));
-      alert("Traffic Node Deleted (Simulation Mode)");
+      setError(error.response?.data?.detail || "Unable to delete the traffic record.");
     }
   };
 
@@ -165,6 +144,12 @@ function Traffic() {
             Register new traffic intersections or modify status codes dynamically, pushing configurations to automated traffic light modules.
           </p>
         </div>
+
+        {error && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+            {error}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Node Registration Form Card */}

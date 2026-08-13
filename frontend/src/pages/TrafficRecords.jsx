@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import Layout from "../components/Layout";
 import {
   Search, SlidersHorizontal, ChevronLeft, ChevronRight,
@@ -7,7 +7,6 @@ import {
   AlertTriangle, Download, Eye, FileText, Database
 } from "lucide-react";
 
-const API = "http://localhost:8000";
 
 export default function TrafficRecords() {
   const [records, setRecords] = useState([]);
@@ -30,7 +29,7 @@ export default function TrafficRecords() {
   const fetchTraffic = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API}/traffic/`);
+      const response = await api.get("/traffic/");
       setRecords(response.data);
     } catch (error) {
       console.error("Fetch traffic failed", error);
@@ -44,7 +43,7 @@ export default function TrafficRecords() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this record?")) return;
     try {
-      await axios.delete(`${API}/traffic/${id}`);
+      await api.delete(`/traffic/${id}`);
       setRecords(records.filter(r => r.id !== id));
     } catch (error) {
       console.error(error);
@@ -54,7 +53,7 @@ export default function TrafficRecords() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${API}/traffic/${editRecord.id}`, editRecord);
+      await api.put(`/traffic/${editRecord.id}`, editRecord);
       setIsModalOpen(false);
       fetchTraffic();
     } catch (error) {

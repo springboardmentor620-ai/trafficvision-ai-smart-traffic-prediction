@@ -1,0 +1,21 @@
+[
+    "latitude",
+    "longitude",
+    "speed",
+    "hour",
+    "day",
+    "month",
+    "year",
+    "day_of_week",
+    "is_weekend",
+    "peak_hour",
+    "minute",
+    "weather",
+    "road_name",
+    "traffic_signal",
+    "accident",
+    "weekday",
+    "time_slot",
+    "congestion_level",
+    "alternative_route"
+]

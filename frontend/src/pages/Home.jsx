@@ -1,11 +1,12 @@
 import Layout from "../components/Layout";
 import { useNavigate } from "react-router-dom";
-import { TrafficCone, BarChart3, Database, Navigation, Users, ShieldAlert, Cpu } from "lucide-react";
+import { TrafficCone, Database, Navigation, Users, Cpu } from "lucide-react";
 
 function Home() {
   const navigate = useNavigate();
-  const name = localStorage.getItem("name") || "Chief Inspector";
-  const role = localStorage.getItem("role") || "operator";
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const name = user.name || "Chief Inspector";
+  const role = user.role || "operator";
 
   return (
     <Layout>
@@ -20,7 +21,7 @@ function Home() {
               Welcome back, <span className="text-blue-500">{name}</span>
             </h1>
             <p className="text-xs text-slate-400 leading-relaxed">
-              You are signed in as an authorization group <span className="text-slate-350 font-bold uppercase underline decoration-blue-500 decoration-2">{role}</span>. All active telemetry controls are synced.
+              You are signed in as an authorization group <span className="text-slate-300 font-bold uppercase underline decoration-blue-500 decoration-2">{role}</span>. All active telemetry controls are synced.
             </p>
           </div>
           
@@ -34,7 +35,7 @@ function Home() {
             </button>
             <button
               onClick={() => navigate("/map")}
-              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-350 border border-slate-700 hover:text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
             >
               <Navigation className="h-4 w-4 rotate-45" />
               Launch GIS Maps
@@ -50,7 +51,7 @@ function Home() {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-slate-200 text-sm">Traffic Registries</h3>
-              <p className="text-[10px] text-slate-405 leading-relaxed">
+              <p className="text-[10px] text-slate-400 leading-relaxed">
                 Log and regulate lane vehicle count and lane clearance categories.
               </p>
             </div>
@@ -68,7 +69,7 @@ function Home() {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-slate-200 text-sm">AI Congestion Forecasts</h3>
-              <p className="text-[10px] text-slate-405 leading-relaxed">
+              <p className="text-[10px] text-slate-400 leading-relaxed">
                 Predict queue lengths and peak load trends via machine learning model inference.
               </p>
             </div>
@@ -86,7 +87,7 @@ function Home() {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-slate-200 text-sm">Route Pathfinder</h3>
-              <p className="text-[10px] text-slate-405 leading-relaxed">
+              <p className="text-[10px] text-slate-400 leading-relaxed">
                 Identify clearing paths and optimal highways across connected telemetry loops.
               </p>
             </div>
@@ -104,7 +105,7 @@ function Home() {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-slate-200 text-sm">Operator Accounts</h3>
-              <p className="text-[10px] text-slate-405 leading-relaxed">
+              <p className="text-[10px] text-slate-400 leading-relaxed">
                 Verify operator activities, update permissions profiles, and issue key tokens.
               </p>
             </div>

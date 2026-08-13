@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import Layout from "../components/Layout";
+import authFetch from "../api/http";
 import {
   Siren, Zap, RefreshCw, CheckCircle, Shield,
   MapPin, Radio, Navigation, AlertTriangle, Plus, X
 } from "lucide-react";
 
-const API = "http://localhost:8000";
 
 const EMERGENCY_TYPES = ["Ambulance", "FireVehicle", "PoliceVehicle", "RoadBlock", "VIPMovement"];
 
@@ -107,7 +107,7 @@ function CreateEmergencyModal({ onClose, onCreate }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await fetch(`${API}/emergency/`, {
+      await authFetch(`/emergency/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -208,8 +208,8 @@ export default function Emergency() {
       if (filterStatus !== "All") params.append("status", filterStatus);
 
       const [aRes, sRes] = await Promise.all([
-        fetch(`${API}/emergency/?${params}`),
-        fetch(`${API}/emergency/summary`),
+        authFetch(`/emergency/?${params}`),
+        authFetch(`/emergency/summary`),
       ]);
       setAlerts(await aRes.json());
       setSummary(await sRes.json());
@@ -220,17 +220,17 @@ export default function Emergency() {
   useEffect(() => { loadData(); }, [loadData]);
 
   const handleSimulate = async () => {
-    await fetch(`${API}/emergency/simulate`, { method: "POST" });
+    await authFetch(`/emergency/simulate`, { method: "POST" });
     loadData();
   };
 
   const handleResolve = async (id) => {
-    await fetch(`${API}/emergency/${id}/resolve`, { method: "PATCH" });
+    await authFetch(`/emergency/${id}/resolve`, { method: "PATCH" });
     loadData();
   };
 
   const handleRouteClear = async (id) => {
-    await fetch(`${API}/emergency/${id}/route-cleared`, { method: "PATCH" });
+    await authFetch(`/emergency/${id}/route-cleared`, { method: "PATCH" });
     loadData();
   };
 

@@ -1,29 +1,20 @@
 from fastapi import HTTPException
 
 
-# ==========================================
-# Admin Only
-# ==========================================
+def _normalized_role(role: str) -> str:
+    return str(role or "").strip().lower().replace(" ", "_")
+
+
 def admin_only(current_user):
-
-    if current_user.role != "Admin":
-        raise HTTPException(
-            status_code=403,
-            detail="Access Denied! Admin Only"
-        )
-
+    if _normalized_role(current_user.role) != "admin":
+        raise HTTPException(status_code=403, detail="Access Denied! Admin Only")
     return current_user
 
 
-# ==========================================
-# Traffic Operator Only
-# ==========================================
 def operator_only(current_user):
-
-    if current_user.role != "Traffic Operator":
+    if _normalized_role(current_user.role) not in {"operator", "traffic_operator"}:
         raise HTTPException(
             status_code=403,
-            detail="Access Denied! Traffic Operator Only"
+            detail="Access Denied! Traffic Operator Only",
         )
-
     return current_user
