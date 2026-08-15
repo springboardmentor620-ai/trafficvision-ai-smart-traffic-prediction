@@ -12,8 +12,7 @@ Responsibilities:
    read/delete/update operations backing the Alerts dashboard and the
    notification panel. Routers stay thin and simply call into these.
 """
-
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 
 from sqlalchemy import or_
@@ -78,7 +77,9 @@ def _is_low_visibility(data) -> bool:
 
 
 def _is_accident_prone_route(db: Session, source: str, destination: str) -> bool:
-    since = datetime.utcnow() - timedelta(days=ACCIDENT_PRONE_WINDOW_DAYS)
+    since = datetime.now(timezone.utc) - timedelta(
+        days=ACCIDENT_PRONE_WINDOW_DAYS
+    )
 
     count = (
         db.query(PredictionHistory)
@@ -348,7 +349,7 @@ def mark_alert_read(db: Session, alert_id: int, user_id: int) -> Optional[Traffi
 
     if not alert.is_read:
         alert.is_read = True
-        alert.read_at = datetime.utcnow()
+        alert.read_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(alert)
 

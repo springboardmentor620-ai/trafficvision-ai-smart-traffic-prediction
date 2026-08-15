@@ -1,54 +1,116 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 from app.database import Base
 
 
 class TrafficAlert(Base):
-    """An automatically generated traffic alert tied to a prediction.
-
-    Alerts are never created directly by end users - they are produced
-    by app.services.traffic_alert_service whenever a traffic prediction
-    is made (see app.services.prediction_service).
-    """
 
     __tablename__ = "traffic_alerts"
 
-    id = Column(Integer, primary_key=True, index=True)
-
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
-    prediction_id = Column(
-        Integer, ForeignKey("prediction_history.id"), nullable=True, index=True
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
     )
 
-    source = Column(String, nullable=False)
-    destination = Column(String, nullable=False)
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True,
+        index=True
+    )
 
-    # Congestion | Accident | Weather | Road Work | Event
-    category = Column(String, nullable=False, default="Congestion", index=True)
+    prediction_id = Column(
+        Integer,
+        ForeignKey("prediction_history.id"),
+        nullable=True,
+        index=True
+    )
 
-    # Low | Medium | High | Critical
-    severity = Column(String, nullable=False, default="Low", index=True)
+    source = Column(
+        String,
+        nullable=False
+    )
 
-    title = Column(String, nullable=False)
-    message = Column(String, nullable=False)
+    destination = Column(
+        String,
+        nullable=False
+    )
 
-    congestion = Column(String, nullable=False)
-    congestion_percentage = Column(Float, nullable=False, default=0.0)
+    category = Column(
+        String,
+        nullable=False,
+        default="Congestion",
+        index=True
+    )
 
-    # Composite 0-100 accident-risk score - see
-    # traffic_alert_service._accident_risk_score for the factors that
-    # feed into it (congestion, rain, snow, visibility, rush hour,
-    # accident-prone route history).
-    accident_risk_score = Column(Float, nullable=False, default=0.0, index=True)
+    severity = Column(
+        String,
+        nullable=False,
+        default="Low",
+        index=True
+    )
 
-    recommended_route = Column(String, nullable=True)
-    expected_delay = Column(Float, nullable=False, default=0.0)  # minutes
+    title = Column(
+        String,
+        nullable=False
+    )
 
-    is_read = Column(Boolean, nullable=False, default=False, index=True)
-    read_at = Column(DateTime, nullable=True)
+    message = Column(
+        String,
+        nullable=False
+    )
 
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    congestion = Column(
+        String,
+        nullable=False
+    )
 
-    user = relationship("User", backref="traffic_alerts")
+    congestion_percentage = Column(
+        Float,
+        nullable=False,
+        default=0.0
+    )
+
+    accident_risk_score = Column(
+        Float,
+        nullable=False,
+        default=0.0,
+        index=True
+    )
+
+    recommended_route = Column(
+        String,
+        nullable=True
+    )
+
+    expected_delay = Column(
+        Float,
+        nullable=False,
+        default=0.0
+    )
+
+    is_read = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        index=True
+    )
+
+    read_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Always store alert creation time as timezone-aware UTC.
+    created_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=datetime.utcnow,
+        index=True
+    )
+
+    user = relationship(
+        "User",
+        backref="traffic_alerts"
+    )

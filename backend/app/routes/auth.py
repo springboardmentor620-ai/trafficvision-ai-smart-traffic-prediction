@@ -1,31 +1,42 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 import secrets
+
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
 from app.database import get_db
+
 from app.models.user import User
+from app.models.deleted_account import DeletedAccount
+from app.models.traffic_alert import TrafficAlert
+from app.models.prediction_history import PredictionHistory
+from app.models.traffic import TrafficRecord
+
 from app.schemas.user import (
+    UserCreate,
     UserResponse,
     UserUpdate,
     Token,
     ForgotPasswordRequest,
     ResetPasswordRequest,
 )
+
 from app.dependencies import get_current_user
+
 from app.security import (
     hash_password,
     verify_password,
     create_access_token
 )
+
 from app.services import password_reset_service
 
-from google.oauth2 import id_token
-from google.auth.transport import requests
 from app.config import GOOGLE_CLIENT_ID
+
 
 router = APIRouter(
     prefix="/auth",
@@ -33,29 +44,154 @@ router = APIRouter(
 )
 
 
-@router.post("/login", response_model=Token)
+# =========================================================
+# REGISTER
+# =========================================================
+
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=201
+)
+def register(
+    payload: UserCreate,
+    db: Session = Depends(get_db)
+):
+    """
+    Create a new normal user account.
+
+    Public registration can only create an operator account.
+    The role is taken from the UserCreate schema and defaults
+    to 'operator'.
+    """
+
+    # -----------------------------------------------------
+    # CHECK WHETHER EMAIL ALREADY EXISTS
+    # -----------------------------------------------------
+
+    existing_user = db.query(User).filter(
+        User.email == payload.email
+    ).first()
+
+    if existing_user:
+
+        raise HTTPException(
+            status_code=409,
+            detail="An account with this email already exists."
+        )
+
+    # -----------------------------------------------------
+    # CHECK WHETHER THIS EMAIL WAS PREVIOUSLY DELETED
+    # -----------------------------------------------------
+
+    deleted_account = db.query(DeletedAccount).filter(
+        DeletedAccount.email == payload.email
+    ).first()
+
+    # -----------------------------------------------------
+    # CREATE NEW USER
+    # -----------------------------------------------------
+
+    new_user = User(
+        name=payload.name,
+        email=payload.email,
+        password=hash_password(payload.password),
+
+        # Never trust the client with an admin role.
+        role="operator",
+
+        google_sub=None
+    )
+
+    db.add(new_user)
+
+    # -----------------------------------------------------
+    # REMOVE OLD DELETED-ACCOUNT RECORD
+    #
+    # This allows a previously deleted account to register
+    # again using the same email address.
+    # -----------------------------------------------------
+
+    if deleted_account:
+
+        db.delete(deleted_account)
+
+    try:
+
+        db.commit()
+
+        db.refresh(new_user)
+
+    except IntegrityError:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=409,
+            detail="An account with this email already exists."
+        )
+
+    except SQLAlchemyError:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create account."
+        )
+
+    return new_user
+
+
+# =========================================================
+# NORMAL LOGIN
+# =========================================================
+
+@router.post(
+    "/login",
+    response_model=Token
+)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
+
+    # -----------------------------------------------------
+    # FIND USER
+    # -----------------------------------------------------
+
     db_user = db.query(User).filter(
         User.email == form_data.username
     ).first()
 
+    # -----------------------------------------------------
+    # USER DOES NOT EXIST
+    # -----------------------------------------------------
+
     if not db_user:
+
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"
         )
+
+    # -----------------------------------------------------
+    # VERIFY PASSWORD
+    # -----------------------------------------------------
 
     if not verify_password(
         form_data.password,
         db_user.password
     ):
+
         raise HTTPException(
             status_code=401,
             detail="Invalid email or password"
         )
+
+    # -----------------------------------------------------
+    # CREATE JWT
+    # -----------------------------------------------------
 
     token = create_access_token(
         {
@@ -70,21 +206,39 @@ def login(
         "role": db_user.role
     }
 
-@router.post("/google", response_model=Token)
+
+# =========================================================
+# GOOGLE LOGIN
+# =========================================================
+
+@router.post(
+    "/google",
+    response_model=Token
+)
 def google_login(
     payload: dict,
     db: Session = Depends(get_db)
 ):
+
     credential = payload.get("credential")
 
+    # -----------------------------------------------------
+    # CHECK CREDENTIAL
+    # -----------------------------------------------------
+
     if not credential:
+
         raise HTTPException(
             status_code=400,
             detail="Google credential is required"
         )
 
+    # -----------------------------------------------------
+    # VERIFY GOOGLE ID TOKEN
+    # -----------------------------------------------------
+
     try:
-        # Verify the Google ID token
+
         google_user = id_token.verify_oauth2_token(
             credential,
             requests.Request(),
@@ -92,43 +246,109 @@ def google_login(
         )
 
     except ValueError:
+
         raise HTTPException(
             status_code=401,
             detail="Invalid Google credential"
         )
 
-    # Get verified information from Google
+    # -----------------------------------------------------
+    # EXTRACT GOOGLE INFORMATION
+    # -----------------------------------------------------
+
     google_email = google_user.get("email")
     google_name = google_user.get("name")
+    google_sub = google_user.get("sub")
 
     if not google_email:
+
         raise HTTPException(
             status_code=400,
             detail="Google account email not available"
         )
 
-    # Check whether user already exists
+    if not google_sub:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Google account ID not available"
+        )
+
+    # -----------------------------------------------------
+    # FIND EXISTING USER
+    #
+    # IMPORTANT:
+    #
+    # Google login DOES NOT create a new account.
+    #
+    # The user must already have an account created through
+    # /auth/register.
+    # -----------------------------------------------------
+
     db_user = db.query(User).filter(
         User.email == google_email
     ).first()
 
-    # Create account if it doesn't exist
+    # -----------------------------------------------------
+    # USER DOES NOT EXIST
+    # -----------------------------------------------------
+
     if not db_user:
 
-        random_password = secrets.token_urlsafe(32)
-
-        db_user = User(
-            name=google_name or google_email.split("@")[0],
-            email=google_email,
-            password=hash_password(random_password),
-            role="operator"
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Account not found. "
+                "Please register first using your email and password."
+            )
         )
 
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+    # -----------------------------------------------------
+    # CHECK GOOGLE SUB
+    #
+    # If the existing account has no Google account linked,
+    # link this verified Google account.
+    # -----------------------------------------------------
 
-    # Create your normal TrafficVision JWT
+    if not db_user.google_sub:
+
+        db_user.google_sub = google_sub
+
+        try:
+
+            db.commit()
+
+            db.refresh(db_user)
+
+        except IntegrityError:
+
+            db.rollback()
+
+            raise HTTPException(
+                status_code=409,
+                detail="This Google account is already linked to another account."
+            )
+
+    # -----------------------------------------------------
+    # GOOGLE SUB EXISTS BUT DOES NOT MATCH
+    #
+    # This means the email belongs to one account but the
+    # Google identity being used is different.
+    # -----------------------------------------------------
+
+    elif db_user.google_sub != google_sub:
+
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "This Google account is not linked to this account."
+            )
+        )
+
+    # -----------------------------------------------------
+    # CREATE TRAFFICVISION JWT
+    # -----------------------------------------------------
+
     token = create_access_token(
         {
             "sub": db_user.email,
@@ -141,57 +361,327 @@ def google_login(
         "token_type": "bearer",
         "role": db_user.role
     }
-@router.get("/me", response_model=UserResponse)
+
+
+# =========================================================
+# GET CURRENT USER
+# =========================================================
+
+@router.get(
+    "/me",
+    response_model=UserResponse
+)
 def get_me(
     current_user: User = Depends(get_current_user)
 ):
+
     return current_user
 
 
-@router.put("/me", response_model=UserResponse)
+# =========================================================
+# UPDATE CURRENT USER
+# =========================================================
+
+@router.put(
+    "/me",
+    response_model=UserResponse
+)
 def update_me(
     payload: UserUpdate,
+
     db: Session = Depends(get_db),
+
     current_user: User = Depends(get_current_user)
 ):
-    # Only name is editable here by design. Email is the login identifier
-    # (changing it safely needs re-verification, out of scope for this
-    # pass) and role is intentionally never client-editable - see the
-    # privilege-escalation note on UserCreate.role.
+
     current_user.name = payload.name
 
-    db.commit()
-    db.refresh(current_user)
+    try:
+
+        db.commit()
+
+        db.refresh(current_user)
+
+    except SQLAlchemyError:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to update account."
+        )
 
     return current_user
 
+
+# =========================================================
+# DELETE ACCOUNT
+# =========================================================
+
+@router.delete("/me")
+def delete_account(
+    db: Session = Depends(get_db),
+
+    current_user: User = Depends(get_current_user)
+):
+
+    print()
+    print("========== DELETE ACCOUNT START ==========")
+
+    print(
+        f"User ID: {current_user.id}"
+    )
+
+    print(
+        f"User email: {current_user.email}"
+    )
+
+    try:
+
+        # -------------------------------------------------
+        # SAVE VALUES BEFORE DELETING USER
+        # -------------------------------------------------
+
+        user_id = current_user.id
+        user_email = current_user.email
+        google_sub = current_user.google_sub
+
+        # -------------------------------------------------
+        # STEP 1
+        # SAVE DELETED ACCOUNT INFORMATION
+        # -------------------------------------------------
+
+        print(
+            "Step 1: Saving deleted account..."
+        )
+
+        deleted_account = DeletedAccount(
+            email=user_email,
+            google_sub=google_sub
+        )
+
+        db.add(deleted_account)
+
+        # -------------------------------------------------
+        # STEP 2
+        # DELETE TRAFFIC ALERTS
+        # -------------------------------------------------
+
+        print(
+            "Step 2: Deleting traffic alerts..."
+        )
+
+        db.query(TrafficAlert).filter(
+            TrafficAlert.user_id == user_id
+        ).delete(
+            synchronize_session=False
+        )
+
+        # -------------------------------------------------
+        # STEP 3
+        # DELETE PREDICTION HISTORY
+        # -------------------------------------------------
+
+        print(
+            "Step 3: Deleting prediction history..."
+        )
+
+        db.query(PredictionHistory).filter(
+            PredictionHistory.user_id == user_id
+        ).delete(
+            synchronize_session=False
+        )
+
+        # -------------------------------------------------
+        # STEP 4
+        # DELETE TRAFFIC RECORDS
+        # -------------------------------------------------
+
+        print(
+            "Step 4: Deleting traffic records..."
+        )
+
+        db.query(TrafficRecord).filter(
+            TrafficRecord.user_id == user_id
+        ).delete(
+            synchronize_session=False
+        )
+
+        # -------------------------------------------------
+        # IMPORTANT:
+        #
+        # DO NOT DELETE FROM predictions USING user_id.
+        #
+        # Your actual PostgreSQL predictions table does not
+        # currently contain a user_id column.
+        #
+        # Attempting:
+        #
+        # Prediction.user_id == current_user.id
+        #
+        # caused:
+        #
+        # psycopg2.errors.UndefinedColumn
+        #
+        # Therefore predictions are intentionally NOT
+        # queried here.
+        # -------------------------------------------------
+
+        print(
+            "Step 5: Deleting user..."
+        )
+
+        # -------------------------------------------------
+        # STEP 5
+        # DELETE USER
+        # -------------------------------------------------
+
+        db.delete(current_user)
+
+        # -------------------------------------------------
+        # STEP 6
+        # COMMIT EVERYTHING
+        # -------------------------------------------------
+
+        print(
+            "Step 6: Committing..."
+        )
+
+        db.commit()
+
+        print()
+        print("========== DELETE ACCOUNT SUCCESS ==========")
+        print()
+
+        return {
+            "message": "Account deleted successfully"
+        }
+
+    except IntegrityError as error:
+
+        db.rollback()
+
+        print()
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("ACCOUNT DELETE ERROR")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+        print(
+            "ERROR TYPE: IntegrityError"
+        )
+
+        print(
+            f"ERROR: {error}"
+        )
+
+        print(
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Account could not be deleted because "
+                "related data still exists."
+            )
+        )
+
+    except SQLAlchemyError as error:
+
+        db.rollback()
+
+        print()
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("ACCOUNT DELETE ERROR")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+        print(
+            "ERROR TYPE: SQLAlchemyError"
+        )
+
+        print(
+            f"ERROR: {error}"
+        )
+
+        print(
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete your account."
+        )
+
+    except Exception as error:
+
+        db.rollback()
+
+        print()
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print("ACCOUNT DELETE ERROR")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+        print(
+            "ERROR TYPE: Unexpected Error"
+        )
+
+        print(
+            f"ERROR: {error}"
+        )
+
+        print(
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete your account."
+        )
+
+
+# =========================================================
+# FORGOT PASSWORD
+# =========================================================
 
 @router.post("/forgot-password")
 def forgot_password(
     payload: ForgotPasswordRequest,
+
     db: Session = Depends(get_db)
 ):
-    # Always the same response whether or not the email exists - the
-    # service function itself is a no-op for unknown emails, so there is
-    # nothing here that could leak account existence via timing or
-    # response shape differences.
-    password_reset_service.request_password_reset(db, payload.email)
+
+    password_reset_service.request_password_reset(
+        db,
+        payload.email
+    )
 
     return {
-        "message": "If the email exists, a password reset link has been sent."
+        "message": (
+            "If the email exists, "
+            "a password reset link has been sent."
+        )
     }
 
+
+# =========================================================
+# RESET PASSWORD
+# =========================================================
 
 @router.post("/reset-password")
 def reset_password(
     payload: ResetPasswordRequest,
+
     db: Session = Depends(get_db)
 ):
+
     success = password_reset_service.reset_password(
-        db, payload.token, payload.new_password
+        db,
+        payload.token,
+        payload.new_password
     )
 
     if not success:
+
         raise HTTPException(
             status_code=400,
             detail="Invalid or expired reset token"

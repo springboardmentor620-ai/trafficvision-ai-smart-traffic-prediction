@@ -88,13 +88,12 @@ def predict_traffic(data, db, current_user):
 
     if predicted_value < 2500:
         congestion = "Low"
-        route = "Current Route"
     elif predicted_value < 4500:
         congestion = "Medium"
-        route = "Inner Ring Road"
     else:
         congestion = "High"
-        route = "Outer Ring Road"
+
+    route = "Best Route"
 
     history = PredictionHistory(
         user_id=current_user.id,

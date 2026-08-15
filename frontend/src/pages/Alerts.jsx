@@ -9,6 +9,24 @@ import { toast } from "react-toastify";
 const SEVERITY_OPTIONS = ["Critical", "High", "Medium", "Low"];
 const CATEGORY_OPTIONS = ["Congestion", "Accident", "Weather", "Road Work", "Event"];
 
+function formatAlertTime(timestamp) {
+
+    if (!timestamp) {
+        return "Time unavailable";
+    }
+
+    const date = new Date(timestamp);
+
+    if (Number.isNaN(date.getTime())) {
+        return "Time unavailable";
+    }
+
+    return date.toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
 function Alerts() {
     const [alerts, setAlerts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -294,7 +312,9 @@ function Alerts() {
                                         {alert.recommended_route && (
                                             <div>🛣️ Suggested route: <b>{alert.recommended_route}</b></div>
                                         )}
-                                        <div>🕒 {new Date(alert.created_at).toLocaleString()}</div>
+                                        <div>
+                                            🕒 {formatAlertTime(alert.created_at)}
+                                        </div>
                                     </div>
 
                                     <div style={{ display: "flex", gap: "10px", marginTop: "6px" }}>
