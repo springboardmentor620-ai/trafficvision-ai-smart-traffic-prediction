@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrafficVision AI - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="script.js"></script>
+  <style>
+    .page-content {
+      display: none !important;
+    }
+
+    .page-content.active {
+      display: block !important;
+    }
+
+    #map-container,
+    #map-container-full {
+      height: 400px;
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      position: relative;
+    }
+
+    #map-container-full {
+      height: 550px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      transition: .3s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.purple {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+
+    .stat-icon.cyan {
+      background: linear-gradient(135deg, #06b6d4, #0891b2);
+    }
+
+    .stat-icon.green {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .stat-icon.orange {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .stat-info {
+      flex: 1;
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .stat-change {
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .stat-change.positive {
+      color: #10b981;
+    }
+
+    .stat-change.negative {
+      color: #ef4444;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      transition: .3s;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header h2 i {
+      color: #406ff3;
+    }
+
+    .tag {
+      font-size: 10px;
+      padding: 3px 12px;
+      border-radius: 30px;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .tag.green-tag {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .tag.blue-tag {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .tag.orange-tag {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th,
+    .data-table td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      color: #64748b;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    .status {
+      padding: 3px 12px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-ok {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .analytics-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .analytics-item:last-child {
+      border-bottom: none;
+    }
+
+    .analytics-label {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .analytics-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .alert-item {
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+
+    .live-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .map-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      padding: 6px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .map-controls button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: .3s;
+    }
+
+    .map-controls button.active {
+      background: #406ff3;
+      color: white;
+    }
+
+    .map-controls button:not(.active):hover {
+      background: #e2e8f0;
+    }
+
+    .state-city-selector {
+      display: flex;
+      gap: 8px;
+      background: white;
+      padding: 6px 16px;
+      border-radius: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+      align-items: center;
+    }
+
+    .state-city-selector select {
+      border: none;
+      outline: none;
+      font-size: 13px;
+      background: transparent;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-weight: 500;
+      color: #0f172a;
+    }
+
+    .state-city-selector i {
+      color: #406ff3;
+    }
+
+    .state-city-selector .divider {
+      color: #94a3b8;
+      font-size: 18px;
+    }
+
+    .last-updated-time {
+      font-size: 11px;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    .download-btn {
+      padding: 6px 16px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: .3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .download-btn.pdf {
+      background: #ef4444;
+      color: white;
+    }
+
+    .download-btn.pdf:hover {
+      background: #dc2626;
+    }
+
+    .download-btn.csv {
+      background: #10b981;
+      color: white;
+    }
+
+    .download-btn.csv:hover {
+      background: #059669;
+    }
+
+    .download-btn.json {
+      background: #6366f1;
+      color: white;
+    }
+
+    .download-btn.json:hover {
+      background: #4f46e5;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .report-stat {
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .report-stat .label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .report-stat .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .route-card {
+      padding: 12px 16px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border-left: 4px solid;
+      background: #f8fafc;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ========== SIDEBAR ========== -->
+  <nav class="navbar">
+    <ul class="navbar__menu">
+      <li class="navbar__item"><a href="#" class="navbar__link active" data-page="dashboard"><i
+            class="fas fa-th-large"></i><span class="tooltip-text">Dashboard</span></a></li>
+      <li class="navbar__item"><a href="#" class="navbar__link" data-page="traffic"><i class="fas fa-road"></i><span
+            class="tooltip-text">Traffic Monitoring</span></a></li>
+      <li class="navbar__item"><a href="#" class="navbar__link" data-page="map"><i class="fas fa-map"></i><span
+            class="tooltip-text">Live Map</span></a></li>
+      <li class="navbar__item"><a href="#" class="navbar__link" data-page="analytics"><i
+            class="fas fa-chart-line"></i><span class="tooltip-text">Analytics</span></a></li>
+      <li class="navbar__item"><a href="#" class="navbar__link" data-page="routes"><i class="fas fa-route"></i><span
+            class="tooltip-text">Route Analysis</span></a></li>
+      <li class="navbar__item"><a href="#" class="navbar__link" data-page="predictions"><i
+            class="fas fa-brain"></i><span class="tooltip-text">AI Predictions</span></a></li>
+      <li class="navbar__item"><a href="#" class="navbar__link" data-page="reports"><i class="fas fa-file-alt"></i><span
+            class="tooltip-text">Reports</span></a></li>
+      <li class="navbar__item"><a href="#" class="navbar__link" data-page="alerts"><i class="fas fa-bell"></i><span
+            class="tooltip-text">Alerts</span></a></li>
+      <li class="navbar__item"><a href="#" class="navbar__link" data-page="settings"><i class="fas fa-cog"></i><span
+            class="tooltip-text">Settings</span></a></li>
+    </ul>
+  </nav>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="content-area">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <h1 id="pageTitle">Dashboard</h1>
+        <p class="muted" id="lastUpdated"><span class="live-indicator"></span> <i class="fas fa-clock"></i> <span
+            id="updateTime">Loading...</span></p>
+      </div>
+      <div class="top-bar-right">
+        <div class="state-city-selector">
+          <i class="fas fa-map-marker-alt"></i>
+          <select id="stateSelect" onchange="updateCities()">
+            <option value="">Select State / UT</option>
+            <optgroup label="States">
+              <option value="andhrapradesh">Andhra Pradesh</option>
+              <option value="arunachalpradesh">Arunachal Pradesh</option>
+              <option value="assam">Assam</option>
+              <option value="bihar">Bihar</option>
+              <option value="chhattisgarh">Chhattisgarh</option>
+              <option value="goa">Goa</option>
+              <option value="gujarat">Gujarat</option>
+              <option value="haryana">Haryana</option>
+              <option value="himachalpradesh">Himachal Pradesh</option>
+              <option value="jharkhand">Jharkhand</option>
+              <option value="karnataka">Karnataka</option>
+              <option value="kerala">Kerala</option>
+              <option value="madhyapradesh">Madhya Pradesh</option>
+              <option value="maharashtra">Maharashtra</option>
+              <option value="manipur">Manipur</option>
+              <option value="meghalaya">Meghalaya</option>
+              <option value="mizoram">Mizoram</option>
+              <option value="nagaland">Nagaland</option>
+              <option value="odisha">Odisha</option>
+              <option value="punjab">Punjab</option>
+              <option value="rajasthan">Rajasthan</option>
+              <option value="sikkim">Sikkim</option>
+              <option value="tamilnadu">Tamil Nadu</option>
+              <option value="telangana">Telangana</option>
+              <option value="tripura">Tripura</option>
+              <option value="uttarpradesh">Uttar Pradesh</option>
+              <option value="uttarakhand">Uttarakhand</option>
+              <option value="westbengal">West Bengal</option>
+            </optgroup>
+            <optgroup label="Union Territories">
+              <option value="andaman">Andaman and Nicobar Islands</option>
+              <option value="chandigarh_ut">Chandigarh</option>
+              <option value="dadra">Dadra & Nagar Haveli and Daman & Diu</option>
+              <option value="delhi">Delhi</option>
+              <option value="jammukashmir">Jammu & Kashmir</option>
+              <option value="ladakh">Ladakh</option>
+              <option value="lakshadweep">Lakshadweep</option>
+              <option value="puducherry">Puducherry</option>
+            </optgroup>
+          </select>
+          <span class="divider">→</span>
+          <select id="citySelect" onchange="changeCity()">
+            <option value="">Select City</option>
+          </select>
+        </div>
+        <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync"></i></button>
+        <button class="notification-btn"><i class="fas fa-bell"></i><span class="badge">3</span></button>
+        <div class="profile-dropdown">
+          <img src="https://ui-avatars.com/api/?name=User&background=4b5dff&color=fff&size=36" alt="Profile"
+            class="profile-avatar" id="profileTrigger">
+          <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-item"><i class="fas fa-user"></i> <span id="dropdownName">User</span></div>
+            <div class="dropdown-item"><i class="fas fa-envelope"></i> <span id="dropdownEmail">user@email.com</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" id="logoutBtn"><i class="fas fa-sign-out-alt" style="color:#ef4444;"></i> <span
+                style="color:#ef4444;">Logout</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 1: DASHBOARD -->
+    <!-- ========================================================= -->
+    <div id="page-dashboard" class="page-content active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-car"></i></div>
+          <div class="stat-info"><span class="stat-label">Total Vehicles</span><span class="stat-value"
+              id="dashTotalVehicles">-</span><span class="stat-change positive">AI Live</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-road"></i></div>
+          <div class="stat-info"><span class="stat-label">Active Roads</span><span class="stat-value"
+              id="dashActiveRoads">-</span><span class="stat-change positive">Monitoring</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-percent"></i></div>
+          <div class="stat-info"><span class="stat-label">Avg. Density</span><span class="stat-value"
+              id="dashAvgDensity">-</span><span class="stat-change" id="dashDensityStatus">Moderate</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-info"><span class="stat-label">Hotspots</span><span class="stat-value"
+              id="dashHotspots">-</span><span class="stat-change">On Map</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-map"></i> Live Congestion Map <span class="live-indicator"></span></h2><span class="tag"
+            id="dashCityTag">Select City</span>
+        </div>
+        <div id="map-container">
+          <div class="map-controls">
+            <button class="active" onclick="toggleMapView('street')"><i class="fas fa-map"></i></button>
+            <button onclick="toggleMapView('satellite')"><i class="fas fa-satellite"></i></button>
+          </div>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
+          <span style="display:flex; align-items:center; gap:6px; font-size:12px;"><span
+              style="width:14px; height:14px; border-radius:50%; background:#ef4444;"></span> Heavy</span>
+          <span style="display:flex; align-items:center; gap:6px; font-size:12px;"><span
+              style="width:14px; height:14px; border-radius:50%; background:#f59e0b;"></span> Moderate</span>
+          <span style="display:flex; align-items:center; gap:6px; font-size:12px;"><span
+              style="width:14px; height:14px; border-radius:50%; background:#10b981;"></span> Smooth</span>
+          <span style="margin-left:auto; font-size:11px; color:#94a3b8;" id="liveStatus">🔄 Live AI Updates</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-brain"></i> AI Prediction Summary</h2><span class="tag" id="aiStatusTag">AI Model
+            Active</span>
+        </div>
+        <div class="analytics-item"><span class="analytics-label">Next Hour</span><span class="analytics-value"
+            id="dashNextHour">Loading...</span></div>
+        <div class="analytics-item"><span class="analytics-label">Peak Time</span><span class="analytics-value"
+            id="dashPeakTime">Loading...</span></div>
+        <div class="analytics-item"><span class="analytics-label">Hotspots</span><span class="analytics-value"
+            id="dashActiveHotspots">Loading...</span></div>
+        <div class="analytics-item"><span class="analytics-label">Recommendation</span><span class="analytics-value"
+            id="dashRecommendation">Loading...</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-road"></i> Vehicle Density &amp; Congestion <span class="live-indicator"></span></h2>
+          <span class="tag">Live AI</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Road</th>
+                <th>Vehicles</th>
+                <th>Density</th>
+                <th>Status</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="dashTrafficBody">
+              <tr>
+                <td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;"><i
+                    class="fas fa-spinner fa-spin"></i> Select a city to view data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 2: TRAFFIC MONITORING -->
+    <!-- ========================================================= -->
+    <div id="page-traffic" class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-car"></i></div>
+          <div class="stat-info"><span class="stat-label">Total Vehicles</span><span class="stat-value"
+              id="trafficTotal">-</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-road"></i></div>
+          <div class="stat-info"><span class="stat-label">Active Roads</span><span class="stat-value"
+              id="trafficRoads">-</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-percent"></i></div>
+          <div class="stat-info"><span class="stat-label">Avg. Density</span><span class="stat-value"
+              id="trafficDensity">-</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-info"><span class="stat-label">Congestion Alerts</span><span class="stat-value"
+              id="trafficAlerts">-</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-road"></i> Live Traffic Monitoring <span class="live-indicator"></span></h2><span
+            class="tag" id="trafficCityTag">Select City</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Road</th>
+                <th>Vehicles</th>
+                <th>Density</th>
+                <th>Status</th>
+                <th>Confidence</th>
+                <th>Last Updated</th>
+              </tr>
+            </thead>
+            <tbody id="trafficMonitoringBody">
+              <tr>
+                <td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;"><i
+                    class="fas fa-spinner fa-spin"></i> Select a city to view data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-clock"></i> Peak Hour Forecast</h2><span class="tag">Prediction</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Time Slot</th>
+                <th>Expected Density</th>
+                <th>Status</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody id="trafficPeakBody">
+              <tr>
+                <td colspan="4" style="text-align:center; color:#94a3b8; padding:20px;"><i
+                    class="fas fa-spinner fa-spin"></i> Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 3: LIVE MAP -->
+    <!-- ========================================================= -->
+    <div id="page-map" class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-map-marker-alt"></i></div>
+          <div class="stat-info"><span class="stat-label">Active Hotspots</span><span class="stat-value"
+              id="mapHotspots">-</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-road"></i></div>
+          <div class="stat-info"><span class="stat-label">Monitored Roads</span><span class="stat-value"
+              id="mapRoads">-</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info"><span class="stat-label">Clear Roads</span><span class="stat-value"
+              id="mapClear">-</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-info"><span class="stat-label">Heavy Congestion</span><span class="stat-value"
+              id="mapHeavy">-</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-map-marked-alt"></i> Live Congestion Map <span class="live-indicator"></span></h2><span
+            class="tag" id="mapCityTag">Select City</span>
+        </div>
+        <div id="map-container-full"></div>
+        <div style="margin-top:12px; display:flex; gap:16px; flex-wrap:wrap; align-items:center;"><span
+            style="display:flex; align-items:center; gap:6px; font-size:12px;"><span
+              style="width:14px; height:14px; border-radius:50%; background:#ef4444;"></span> Heavy</span><span
+            style="display:flex; align-items:center; gap:6px; font-size:12px;"><span
+              style="width:14px; height:14px; border-radius:50%; background:#f59e0b;"></span> Moderate</span><span
+            style="display:flex; align-items:center; gap:6px; font-size:12px;"><span
+              style="width:14px; height:14px; border-radius:50%; background:#10b981;"></span> Smooth</span><button
+            onclick="toggleMapLayer()"
+            style="margin-left:auto; padding:4px 16px; border:1px solid #e2e8f0; border-radius:6px; background:white; cursor:pointer; font-size:12px;"><i
+              class="fas fa-satellite"></i> Satellite</button></div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 4: ANALYTICS -->
+    <!-- ========================================================= -->
+    <div id="page-analytics" class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-chart-bar"></i></div>
+          <div class="stat-info"><span class="stat-label">Data Points</span><span class="stat-value"
+              id="analyticsDataPoints">1,847</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+          <div class="stat-info"><span class="stat-label">Response Time</span><span class="stat-value"
+              id="analyticsResponse">42ms</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info"><span class="stat-label">Accuracy</span><span class="stat-value"
+              id="analyticsAccuracy">94%</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-calendar"></i></div>
+          <div class="stat-info"><span class="stat-label">Reports</span><span class="stat-value"
+              id="analyticsReports">156</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-chart-line"></i> Traffic Trends for <span id="analyticsCityName">Select City</span></h2>
+          <span class="tag">Analytics</span>
+        </div>
+        <div class="analytics-item"><span class="analytics-label">Peak Hour Volume</span><span class="analytics-value"
+            id="analyticsPeakVolume">-</span></div>
+        <div class="analytics-item"><span class="analytics-label">Average Speed</span><span class="analytics-value"
+            id="analyticsAvgSpeed">-</span></div>
+        <div class="analytics-item"><span class="analytics-label">Congestion Index</span><span class="analytics-value"
+            id="analyticsCongestionIndex">-</span></div>
+        <div class="analytics-item"><span class="analytics-label">Prediction Accuracy</span><span
+            class="analytics-value" id="analyticsPredAccuracy">94%</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-fire"></i> Congestion Hotspots</h2><span class="tag">Analytics</span>
+        </div>
+        <div id="analyticsHotspotsBody"></div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 5: ROUTE ANALYSIS -->
+    <!-- ========================================================= -->
+    <div id="page-routes" class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-route"></i></div>
+          <div class="stat-info"><span class="stat-label">Total Routes</span><span class="stat-value"
+              id="routeTotal">12</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+          <div class="stat-info"><span class="stat-label">Avg. Travel Time</span><span class="stat-value"
+              id="routeAvgTime">32 min</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info"><span class="stat-label">Alternate Routes</span><span class="stat-value"
+              id="routeAlternates">8</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+          <div class="stat-info"><span class="stat-label">Time Saved</span><span class="stat-value"
+              id="routeTimeSaved">15 min avg</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-route"></i> Route Analysis for <span id="routesCityName">Select City</span></h2><span
+            class="tag">Route Optimization</span>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+          <input type="text" id="routeStart" placeholder="Start Location"
+            style="flex:1; padding:10px 14px; border:2px solid #e2e8f0; border-radius:10px; min-width:150px;">
+          <input type="text" id="routeEnd" placeholder="Destination"
+            style="flex:1; padding:10px 14px; border:2px solid #e2e8f0; border-radius:10px; min-width:150px;">
+          <button onclick="findRoutes()"
+            style="padding:10px 24px; background:#406ff3; color:white; border:none; border-radius:10px; cursor:pointer; font-weight:600;">
+            <i class="fas fa-route"></i> Find Routes
+          </button>
+        </div>
+        <div id="routeResults"></div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 6: AI PREDICTIONS -->
+    <!-- ========================================================= -->
+    <div id="page-predictions" class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-brain"></i></div>
+          <div class="stat-info"><span class="stat-label">Model Accuracy</span><span class="stat-value"
+              id="predAccuracy">94%</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+          <div class="stat-info"><span class="stat-label">Prediction Window</span><span class="stat-value"
+              id="predWindow">1 Hour</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info"><span class="stat-label">Confidence Level</span><span class="stat-value"
+              id="predConfidence">High</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-database"></i></div>
+          <div class="stat-info"><span class="stat-label">Data Points</span><span class="stat-value"
+              id="predDataPoints">10K+</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-brain"></i> AI Traffic Predictions for <span id="predCityName">Select City</span></h2>
+          <span class="tag">AI Powered</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Road</th>
+                <th>Current</th>
+                <th>Predicted (1hr)</th>
+                <th>Confidence</th>
+                <th>Trend</th>
+              </tr>
+            </thead>
+            <tbody id="predictionsBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-calendar"></i> Hourly Forecast</h2><span class="tag">Prediction</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Predicted Vehicles</th>
+                <th>Congestion Level</th>
+                <th>Recommendation</th>
+              </tr>
+            </thead>
+            <tbody id="hourlyForecastBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 7: REPORTS (NEW) -->
+    <!-- ========================================================= -->
+    <div id="page-reports" class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+          <div class="stat-info"><span class="stat-label">Reports Generated</span><span class="stat-value"
+              id="reportCount">0</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-calendar"></i></div>
+          <div class="stat-info"><span class="stat-label">Report Type</span><span class="stat-value"
+              id="reportType">Daily</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info"><span class="stat-label">Status</span><span class="stat-value"
+              id="reportStatus">Ready</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-download"></i></div>
+          <div class="stat-info"><span class="stat-label">Download</span><span class="stat-value"
+              id="reportDownload">Available</span></div>
+        </div>
+      </div>
+
+      <!-- Report Generation -->
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-file-alt"></i> Generate Traffic Report</h2>
+          <span class="tag green-tag">Milestone 2</span>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+          <select id="reportTypeSelect"
+            style="padding:10px 16px; border:2px solid #e2e8f0; border-radius:10px; background:white; font-size:13px;">
+            <option value="daily">Daily Report</option>
+            <option value="weekly">Weekly Report</option>
+            <option value="monthly">Monthly Report</option>
+          </select>
+          <button onclick="generateReport()"
+            style="padding:10px 24px; background:#406ff3; color:white; border:none; border-radius:10px; cursor:pointer; font-weight:600;">
+            <i class="fas fa-file-alt"></i> Generate Report
+          </button>
+          <button onclick="downloadReport('pdf')" class="download-btn pdf">
+            <i class="fas fa-file-pdf"></i> Download PDF
+          </button>
+          <button onclick="downloadReport('csv')" class="download-btn csv">
+            <i class="fas fa-file-csv"></i> Download CSV
+          </button>
+          <button onclick="downloadReport('json')" class="download-btn json">
+            <i class="fas fa-file-code"></i> Download JSON
+          </button>
+        </div>
+        <div id="reportContent">
+          <p class="muted"><i class="fas fa-info-circle"></i> Click "Generate Report" to view traffic report</p>
+        </div>
+      </div>
+
+      <!-- Prediction Report -->
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-chart-line"></i> Prediction Report</h2>
+          <span class="tag orange-tag">AI Generated</span>
+        </div>
+        <div id="predictionReportContent">
+          <p class="muted"><i class="fas fa-info-circle"></i> Click "Generate Report" to view prediction insights</p>
+        </div>
+      </div>
+
+      <!-- Festival Report -->
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-calendar-alt"></i> Festival Impact Report</h2>
+          <span class="tag blue-tag">Special Events</span>
+        </div>
+        <div id="festivalReportContent">
+          <p class="muted"><i class="fas fa-info-circle"></i> Click "Generate Report" to view festival impact</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 8: ALERTS -->
+    <!-- ========================================================= -->
+    <div id="page-alerts" class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-info"><span class="stat-label">Total Alerts</span><span class="stat-value"
+              id="alertTotal">12</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon cyan"><i class="fas fa-clock"></i></div>
+          <div class="stat-info"><span class="stat-label">New Today</span><span class="stat-value"
+              id="alertNew">3</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info"><span class="stat-label">Resolved</span><span class="stat-value"
+              id="alertResolved">8</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+          <div class="stat-info"><span class="stat-label">Pending</span><span class="stat-value"
+              id="alertPending">4</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-bell"></i> All Alerts &amp; Notifications for <span id="alertCityName">Select City</span>
+          </h2><span class="tag">Live</span>
+        </div>
+        <div id="alertsBody"></div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PAGE 9: SETTINGS -->
+    <!-- ========================================================= -->
+    <div id="page-settings" class="page-content">
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-cog"></i> Settings</h2><span class="tag">Preferences</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:16px; padding:8px 0;">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;">
+            <div>
+              <div style="font-weight:600;">Email Notifications</div>
+              <div style="font-size:13px; color:#64748b;">Receive email alerts</div>
+            </div><label style="position:relative; display:inline-block; width:48px; height:26px;"><input
+                type="checkbox" checked style="opacity:0; width:0; height:0;"><span
+                style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#406ff3; border-radius:34px; transition:.3s;"></span></label>
+          </div>
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;">
+            <div>
+              <div style="font-weight:600;">AI Predictions</div>
+              <div style="font-size:13px; color:#64748b;">Enable AI predictions</div>
+            </div><label style="position:relative; display:inline-block; width:48px; height:26px;"><input
+                type="checkbox" checked style="opacity:0; width:0; height:0;"><span
+                style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#406ff3; border-radius:34px; transition:.3s;"></span></label>
+          </div>
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;">
+            <div>
+              <div style="font-weight:600;">Auto-Refresh</div>
+              <div style="font-size:13px; color:#64748b;">Auto-refresh every 15 seconds</div>
+            </div><label style="position:relative; display:inline-block; width:48px; height:26px;"><input
+                type="checkbox" checked style="opacity:0; width:0; height:0;"><span
+                style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#406ff3; border-radius:34px; transition:.3s;"></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2><i class="fas fa-user"></i> Profile Settings</h2><span class="tag">Account</span>
+        </div>
+        <div style="padding:8px 0;">
+          <div style="display:flex; gap:16px; align-items:center; margin-bottom:12px;"><img
+              src="https://ui-avatars.com/api/?name=User&background=4b5dff&color=fff&size=64" alt="Profile"
+              style="width:64px; height:64px; border-radius:50%;">
+            <div>
+              <div style="font-weight:600; font-size:18px; color:#0f172a;" id="settingsName">User</div>
+              <div style="color:#64748b; font-size:14px;" id="settingsEmail">user@email.com</div>
+              <div style="color:#64748b; font-size:13px;" id="settingsRole">Role: Admin</div>
+            </div>
+          </div>
+          <button class="btn-secondary"
+            style="padding:8px 24px; border:2px solid #e2e8f0; border-radius:30px; background:transparent; cursor:pointer;">Edit
+            Profile</button>
+          <button class="btn-secondary"
+            style="padding:8px 24px; margin-left:8px; border:2px solid #ef4444; border-radius:30px; color:#ef4444; background:transparent; cursor:pointer;">Change
+            Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // ========== API REQUEST ==========
+    async function apiRequest(endpoint, method = 'GET', data = null) {
+      const token = localStorage.getItem('access_token') || localStorage.getItem('tv_token');
+      const url = `http://localhost:5500/api${endpoint}`;
+      const options = { method, headers: { 'Content-Type': 'application/json' } };
+      if (token) options.headers['Authorization'] = `Bearer ${token}`;
+      if (data) options.body = JSON.stringify(data);
+
+      try {
+        const response = await fetch(url, options);
+        if (response.status === 401) {
+          clearSession();
+          window.location.href = 'index.html';
+          throw new Error('Session expired');
+        }
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Request failed');
+        return result;
+      } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+      }
+    }
+
+    // ========== AUTH FUNCTIONS ==========
+    function getSession() {
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user) : {
+        name: localStorage.getItem('tv_name'),
+        email: localStorage.getItem('tv_email'),
+        role: localStorage.getItem('tv_role')
+      };
+    }
+
+    function clearSession() {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('tv_token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('tv_name');
+      localStorage.removeItem('tv_email');
+      localStorage.removeItem('tv_role');
+    }
+
+    function requireAuth() {
+      const token = localStorage.getItem('access_token') || localStorage.getItem('tv_token');
+      if (!token) window.location.href = 'index.html';
+    }
+
+    // ========== SIDEBAR NAVIGATION ==========
+    const navLinks = document.querySelectorAll('.navbar__link');
+    const pageTitles = {
+      dashboard: 'Dashboard',
+      traffic: 'Traffic Monitoring',
+      map: 'Live Map',
+      analytics: 'Analytics',
+      routes: 'Route Analysis',
+      predictions: 'AI Predictions',
+      reports: 'Reports',
+      alerts: 'Alerts & Notifications',
+      settings: 'Settings'
+    };
+
+    const pageContents = {
+      dashboard: document.getElementById('page-dashboard'),
+      traffic: document.getElementById('page-traffic'),
+      map: document.getElementById('page-map'),
+      analytics: document.getElementById('page-analytics'),
+      routes: document.getElementById('page-routes'),
+      predictions: document.getElementById('page-predictions'),
+      reports: document.getElementById('page-reports'),
+      alerts: document.getElementById('page-alerts'),
+      settings: document.getElementById('page-settings')
+    };
+
+    function navigateToPage(pageId) {
+      Object.keys(pageContents).forEach(key => {
+        pageContents[key].classList.remove('active');
+      });
+      if (pageContents[pageId]) {
+        pageContents[pageId].classList.add('active');
+      }
+      document.getElementById('pageTitle').textContent = pageTitles[pageId] || 'Dashboard';
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.dataset.page === pageId) {
+          link.classList.add('active');
+        }
+      });
+      if (pageId === 'map') {
+        const cityId = document.getElementById('citySelect').value;
+        const stateId = document.getElementById('stateSelect').value;
+        if (cityId && stateId) {
+          setTimeout(() => createMap('map-container-full', stateId, cityId, true), 200);
+        }
+      }
+    }
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const page = this.dataset.page;
+        navigateToPage(page);
+      });
+    });
+
+    // ========== STATE & CITY DATA ==========
+    const stateCityData = {
+      andhrapradesh: { name: 'Andhra Pradesh', cities: { amaravati: { name: 'Amaravati', center: [16.5062, 80.5214], zoom: 13, roads: [{ name: 'Seed Access Road', lat: 16.5100, lng: 80.5200 }, { name: 'NH-16', lat: 16.5200, lng: 80.5300 }] } } },
+      arunachalpradesh: { name: 'Arunachal Pradesh', cities: { itanagar: { name: 'Itanagar', center: [27.0844, 93.6053], zoom: 13, roads: [{ name: 'NH-415', lat: 27.0900, lng: 93.6100 }, { name: 'Gohpur-Itanagar Rd', lat: 27.0800, lng: 93.6000 }] } } },
+      assam: { name: 'Assam', cities: { dispur: { name: 'Dispur', center: [26.1433, 91.7898], zoom: 13, roads: [{ name: 'GS Road', lat: 26.1500, lng: 91.7900 }, { name: 'NH-27', lat: 26.1400, lng: 91.7800 }] } } },
+      bihar: { name: 'Bihar', cities: { patna: { name: 'Patna', center: [25.5941, 85.1376], zoom: 13, roads: [{ name: 'Ashok Rajpath', lat: 25.6000, lng: 85.1400 }, { name: 'Bailey Road', lat: 25.5900, lng: 85.1300 }] } } },
+      chhattisgarh: { name: 'Chhattisgarh', cities: { raipur: { name: 'Raipur', center: [21.2514, 81.6296], zoom: 13, roads: [{ name: 'GE Road', lat: 21.2600, lng: 81.6300 }, { name: 'Ring Road', lat: 21.2500, lng: 81.6200 }] } } },
+      goa: { name: 'Goa', cities: { panaji: { name: 'Panaji', center: [15.4909, 73.8278], zoom: 13, roads: [{ name: 'DB Marg', lat: 15.5000, lng: 73.8300 }, { name: 'CHOGM Road', lat: 15.4800, lng: 73.8200 }] } } },
+      gujarat: { name: 'Gujarat', cities: { gandhinagar: { name: 'Gandhinagar', center: [23.2156, 72.6369], zoom: 13, roads: [{ name: 'CH Road', lat: 23.2200, lng: 72.6400 }, { name: 'SG Highway', lat: 23.2100, lng: 72.6300 }] } } },
+      haryana: { name: 'Haryana', cities: { chandigarh: { name: 'Chandigarh', center: [30.7333, 76.7794], zoom: 13, roads: [{ name: 'Madhya Marg', lat: 30.7400, lng: 76.7800 }, { name: 'Dakshin Marg', lat: 30.7300, lng: 76.7700 }] } } },
+      himachalpradesh: { name: 'Himachal Pradesh', cities: { shimla: { name: 'Shimla', center: [31.1048, 77.1734], zoom: 13, roads: [{ name: 'Cart Road', lat: 31.1100, lng: 77.1800 }, { name: 'Mall Road', lat: 31.1000, lng: 77.1700 }] } } },
+      jharkhand: { name: 'Jharkhand', cities: { ranchi: { name: 'Ranchi', center: [23.3441, 85.3096], zoom: 13, roads: [{ name: 'Main Road', lat: 23.3500, lng: 85.3100 }, { name: 'Ring Road', lat: 23.3400, lng: 85.3000 }] } } },
+      karnataka: {
+        name: 'Karnataka', cities: {
+          bengaluru: {
+            name: 'Bengaluru', center: [12.9716, 77.5946], zoom: 12, roads: [
+              { name: 'MG Road', lat: 12.9732, lng: 77.6083 },
+              { name: 'Outer Ring Road (Marathahalli)', lat: 12.9569, lng: 77.7011 },
+              { name: 'Silk Board Junction', lat: 12.9177, lng: 77.6238 },
+              { name: 'Airport Road', lat: 13.1989, lng: 77.7068 },
+              { name: 'Koramangala 80ft Road', lat: 12.9343, lng: 77.6214 },
+              { name: 'Indiranagar 100ft Road', lat: 12.9784, lng: 77.6408 },
+              { name: 'Electronic City Flyover', lat: 12.8399, lng: 77.6770 },
+              { name: 'Whitefield Main Road', lat: 12.9698, lng: 77.7499 },
+              { name: 'Hebbal Flyover', lat: 13.0354, lng: 77.5971 },
+              { name: 'Tumkur Road', lat: 13.0298, lng: 77.5401 }
+            ]
+          }
+        }
+      },
+      kerala: { name: 'Kerala', cities: { thiruvananthapuram: { name: 'Thiruvananthapuram', center: [8.5241, 76.9366], zoom: 13, roads: [{ name: 'MG Road', lat: 8.5300, lng: 76.9400 }, { name: 'Bypass Road', lat: 8.5200, lng: 76.9300 }] } } },
+      madhyapradesh: { name: 'Madhya Pradesh', cities: { bhopal: { name: 'Bhopal', center: [23.2599, 77.4126], zoom: 13, roads: [{ name: 'VIP Road', lat: 23.2600, lng: 77.4200 }, { name: 'Link Road 1', lat: 23.2500, lng: 77.4100 }] } } },
+      maharashtra: { name: 'Maharashtra', cities: { mumbai: { name: 'Mumbai', center: [19.0760, 72.8777], zoom: 13, roads: [{ name: 'WEH', lat: 19.1200, lng: 72.8500 }, { name: 'EEH', lat: 19.0600, lng: 72.8900 }, { name: 'Bandra-Worli Sea Link', lat: 19.0300, lng: 72.8100 }] } } },
+      manipur: { name: 'Manipur', cities: { imphal: { name: 'Imphal', center: [24.8170, 93.9368], zoom: 13, roads: [{ name: 'Kanglapat Road', lat: 24.8200, lng: 93.9400 }, { name: 'Tiddim Road', lat: 24.8100, lng: 93.9300 }] } } },
+      meghalaya: { name: 'Meghalaya', cities: { shillong: { name: 'Shillong', center: [25.5788, 91.8933], zoom: 13, roads: [{ name: 'GS Road', lat: 25.5800, lng: 91.8900 }, { name: 'Laitumkhrah Main Rd', lat: 25.5700, lng: 91.9000 }] } } },
+      mizoram: { name: 'Mizoram', cities: { aizawl: { name: 'Aizawl', center: [23.7271, 92.7176], zoom: 13, roads: [{ name: 'Treasury Square Rd', lat: 23.7300, lng: 92.7200 }, { name: 'Bawngkawn Rd', lat: 23.7200, lng: 92.7100 }] } } },
+      nagaland: { name: 'Nagaland', cities: { kohima: { name: 'Kohima', center: [25.6751, 94.1086], zoom: 13, roads: [{ name: 'NH-29', lat: 25.6800, lng: 94.1100 }, { name: 'BOC Road', lat: 25.6700, lng: 94.1000 }] } } },
+      odisha: { name: 'Odisha', cities: { bhubaneswar: { name: 'Bhubaneswar', center: [20.2961, 85.8245], zoom: 13, roads: [{ name: 'Janpath', lat: 20.3000, lng: 85.8300 }, { name: 'NH-16', lat: 20.2900, lng: 85.8200 }] } } },
+      punjab: { name: 'Punjab', cities: { chandigarh: { name: 'Chandigarh', center: [30.7333, 76.7794], zoom: 13, roads: [{ name: 'Vidhya Path', lat: 30.7400, lng: 76.7800 }, { name: 'Udyog Path', lat: 30.7300, lng: 76.7700 }] } } },
+      rajasthan: { name: 'Rajasthan', cities: { jaipur: { name: 'Jaipur', center: [26.9124, 75.7873], zoom: 13, roads: [{ name: 'MI Road', lat: 26.9200, lng: 75.7900 }, { name: 'Tonk Road', lat: 26.9100, lng: 75.7800 }] } } },
+      sikkim: { name: 'Sikkim', cities: { gangtok: { name: 'Gangtok', center: [27.3389, 88.6065], zoom: 13, roads: [{ name: 'MG Marg', lat: 27.3400, lng: 88.6100 }, { name: 'NH-10', lat: 27.3300, lng: 88.6000 }] } } },
+      tamilnadu: { name: 'Tamil Nadu', cities: { chennai: { name: 'Chennai', center: [13.0827, 80.2707], zoom: 13, roads: [{ name: 'Anna Salai', lat: 13.0900, lng: 80.2800 }, { name: 'OMR', lat: 13.0700, lng: 80.2600 }] } } },
+      telangana: { name: 'Telangana', cities: { hyderabad: { name: 'Hyderabad', center: [17.3850, 78.4867], zoom: 13, roads: [{ name: 'ORR', lat: 17.3900, lng: 78.4900 }, { name: 'IT Corridor', lat: 17.3800, lng: 78.4800 }] } } },
+      tripura: { name: 'Tripura', cities: { agartala: { name: 'Agartala', center: [23.8315, 91.2868], zoom: 13, roads: [{ name: 'VIP Road', lat: 23.8400, lng: 91.2900 }, { name: 'NH-8', lat: 23.8300, lng: 91.2800 }] } } },
+      uttarpradesh: { name: 'Uttar Pradesh', cities: { lucknow: { name: 'Lucknow', center: [26.8467, 80.9462], zoom: 13, roads: [{ name: 'Hazratganj', lat: 26.8500, lng: 80.9500 }, { name: 'Gomti Nagar Road', lat: 26.8400, lng: 80.9400 }] } } },
+      uttarakhand: { name: 'Uttarakhand', cities: { dehradun: { name: 'Dehradun', center: [30.3165, 78.0322], zoom: 13, roads: [{ name: 'Rajpur Road', lat: 30.3200, lng: 78.0400 }, { name: 'Chakrata Road', lat: 30.3100, lng: 78.0300 }] } } },
+      westbengal: { name: 'West Bengal', cities: { kolkata: { name: 'Kolkata', center: [22.5726, 88.3639], zoom: 13, roads: [{ name: 'Park Street', lat: 22.5800, lng: 88.3700 }, { name: 'EM Bypass', lat: 22.5700, lng: 88.3600 }] } } },
+      andaman: { name: 'Andaman and Nicobar Islands', cities: { portblair: { name: 'Port Blair', center: [11.6234, 92.7265], zoom: 13, roads: [{ name: 'VIP Road', lat: 11.6300, lng: 92.7300 }, { name: 'Marine Hill Rd', lat: 11.6200, lng: 92.7200 }] } } },
+      chandigarh_ut: { name: 'Chandigarh', cities: { chandigarh: { name: 'Chandigarh', center: [30.7333, 76.7794], zoom: 13, roads: [{ name: 'Madhya Marg', lat: 30.7400, lng: 76.7800 }, { name: 'Dakshin Marg', lat: 30.7300, lng: 76.7700 }] } } },
+      dadra: { name: 'Dadra & Nagar Haveli and Daman & Diu', cities: { daman: { name: 'Daman', center: [20.3974, 72.8328], zoom: 13, roads: [{ name: 'Seaface Road', lat: 20.4000, lng: 72.8400 }] } } },
+      delhi: { name: 'Delhi', cities: { newdelhi: { name: 'New Delhi', center: [28.6139, 77.2090], zoom: 13, roads: [{ name: 'Connaught Place', lat: 28.6200, lng: 77.2100 }, { name: 'Ring Road', lat: 28.6100, lng: 77.2000 }, { name: 'Outer Ring Road', lat: 28.6000, lng: 77.2200 }] } } },
+      jammukashmir: { name: 'Jammu & Kashmir', cities: { srinagar: { name: 'Srinagar', center: [34.0837, 74.7973], zoom: 13, roads: [{ name: 'Boulevard Road', lat: 34.0900, lng: 74.8000 }, { name: 'Residency Road', lat: 34.0800, lng: 74.7900 }] } } },
+      ladakh: { name: 'Ladakh', cities: { leh: { name: 'Leh', center: [34.1526, 77.5771], zoom: 13, roads: [{ name: 'Main Bazaar Rd', lat: 34.1600, lng: 77.5800 }] } } },
+      lakshadweep: { name: 'Lakshadweep', cities: { kavaratti: { name: 'Kavaratti', center: [10.5667, 72.6417], zoom: 13, roads: [{ name: 'Beach Road', lat: 10.5700, lng: 72.6400 }] } } },
+      puducherry: { name: 'Puducherry', cities: { pondicherry: { name: 'Pondicherry', center: [11.9416, 79.8083], zoom: 13, roads: [{ name: 'Promenade Beach Rd', lat: 11.9500, lng: 79.8100 }, { name: 'Mission St', lat: 11.9400, lng: 79.8000 }] } } }
+    };
+
+    // ========== MAP FUNCTIONS ==========
+    let mapInstance = null;
+    let mapFullInstance = null;
+    let isSatellite = false;
+    let currentMapView = 'street';
+
+    function toggleMapView(view) {
+      currentMapView = view;
+      const cityId = document.getElementById('citySelect').value;
+      const stateId = document.getElementById('stateSelect').value;
+      if (cityId && stateId) {
+        if (mapInstance) { mapInstance.remove(); mapInstance = null; createMap('map-container', stateId, cityId, false); }
+        if (document.getElementById('page-map').classList.contains('active')) {
+          if (mapFullInstance) { mapFullInstance.remove(); mapFullInstance = null; createMap('map-container-full', stateId, cityId, true); }
+        }
+      }
+    }
+
+    function createMap(containerId, stateId, cityId, isFull = false) {
+      const state = stateCityData[stateId];
+      if (!state) return;
+      const city = state.cities[cityId];
+      if (!city) return;
+
+      if (isFull && mapFullInstance) { mapFullInstance.remove(); mapFullInstance = null; }
+      else if (!isFull && mapInstance) { mapInstance.remove(); mapInstance = null; }
+
+      const map = L.map(containerId).setView(city.center, city.zoom);
+      if (isFull) {
+        mapFullInstance = map;
+      } else {
+        mapInstance = map;
+      }
+
+      if (currentMapView === 'satellite') {
+        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+          maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Satellite'
+        }).addTo(map);
+      } else {
+        L.tileLayer('https://{s}.google.com/vt/lyrs=m@221097413,traffic&x={x}&y={y}&z={z}', {
+          maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Maps'
+        }).addTo(map);
+      }
+
+      fetchLiveData(stateId, cityId, map);
+    }
+
+    // ========== FETCH LIVE DATA ==========
+    async function fetchLiveData(stateId, cityId, map) {
+      try {
+        const state = stateCityData[stateId];
+        const city = state.cities[cityId];
+        const cityName = cityId.toLowerCase();
+        const result = await apiRequest(`/live-congestion?city=${cityName}`, 'GET');
+
+        if (result.status === 'success' && result.city.toLowerCase() === city.name.toLowerCase()) {
+          updateMapWithLiveData(map, result.data);
+          updateStatsWithLiveData(result.data, city.name, result.context || {}, result.timestamp || new Date().toISOString());
+        } else {
+          const mockData = getCityLiveData(stateId, cityId);
+          updateMapWithLiveData(map, mockData);
+          updateStatsWithLiveData(mockData, city.name, {}, new Date().toISOString());
+        }
+      } catch (error) {
+        console.error('Error fetching live data:', error);
+        const mockData = getCityLiveData(stateId, cityId);
+        updateMapWithLiveData(map, mockData);
+        updateStatsWithLiveData(mockData, city.name, {}, new Date().toISOString());
+      }
+    }
+
+    function updateMapWithLiveData(map, liveData) {
+      map.eachLayer((layer) => { if (layer instanceof L.Marker) { map.removeLayer(layer); } });
+      
+      let maxDensityRoad = null;
+      let maxDensity = -1;
+
+      liveData.forEach(road => {
+        if (road.density > maxDensity) {
+           maxDensity = road.density;
+           maxDensityRoad = road;
+        }
+
+        const color = road.status === 'Heavy Congestion' ? '#ef4444' : road.status === 'Moderate' ? '#f59e0b' : '#10b981';
+        const marker = L.marker([road.lat, road.lng], {
+          icon: L.divIcon({
+            className: 'congestion-marker',
+            html: `<div style="display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; border-radius:50%; width:32px; height:32px; border:2px solid white; box-shadow:0 2px 12px rgba(0,0,0,0.2); background:${color}; color:white;">${road.vehicle_count}</div>`,
+            iconSize: [32, 32], iconAnchor: [16, 16]
+          })
+        }).addTo(map);
+        marker.bindPopup(`<div style="padding:4px;"><strong>${road.road_name}</strong><br>🚗 ${road.vehicle_count} vehicles<br>📊 ${road.density}% density<br>🎯 ${road.confidence}% confidence<br><span style="display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600; margin-top:4px; background:${road.status === 'Heavy Congestion' ? '#fee2e2' : road.status === 'Moderate' ? '#fef3c7' : '#d1fae5'}; color:${road.status === 'Heavy Congestion' ? '#991b1b' : road.status === 'Moderate' ? '#92400e' : '#065f46'};">${road.status}</span></div>`);
+      });
+
+      if (maxDensityRoad) {
+        map.setView([maxDensityRoad.lat, maxDensityRoad.lng], map.getZoom());
+      }
+    }
+
+    function updateStatsWithLiveData(liveData, cityName, context, timestamp) {
+      const total = liveData.reduce((s, r) => s + r.vehicle_count, 0);
+      const avgDensity = Math.round(liveData.reduce((s, r) => s + r.density, 0) / liveData.length);
+      const congested = liveData.filter(r => r.status === 'Heavy Congestion').length;
+      const smooth = liveData.filter(r => r.status === 'Smooth').length;
+
+      const now = new Date(timestamp);
+      const timeStr = now.toLocaleString('en-US', {
+        year: 'numeric', month: 'numeric', day: 'numeric',
+        hour: 'numeric', minute: 'numeric', second: 'numeric',
+        hour12: true
+      });
+      document.getElementById('updateTime').textContent = timeStr;
+
+      document.getElementById('dashTotalVehicles').textContent = total;
+      document.getElementById('dashActiveRoads').textContent = liveData.length;
+      document.getElementById('dashAvgDensity').textContent = avgDensity + '%';
+      document.getElementById('dashHotspots').textContent = congested;
+      document.getElementById('dashActiveHotspots').textContent = `${congested} hotspots`;
+
+      document.getElementById('trafficTotal').textContent = total;
+      document.getElementById('trafficRoads').textContent = liveData.length;
+      document.getElementById('trafficDensity').textContent = avgDensity + '%';
+      document.getElementById('trafficAlerts').textContent = congested;
+
+      document.getElementById('mapHotspots').textContent = congested;
+      document.getElementById('mapRoads').textContent = liveData.length;
+      document.getElementById('mapClear').textContent = smooth;
+      document.getElementById('mapHeavy').textContent = congested;
+
+      const densityStatus = avgDensity > 70 ? 'Heavy' : avgDensity > 45 ? 'Moderate' : 'Smooth';
+      document.getElementById('dashDensityStatus').textContent = densityStatus;
+
+      const cityNameDisplay = cityName || 'Selected City';
+      document.getElementById('dashCityTag').textContent = cityNameDisplay;
+      document.getElementById('trafficCityTag').textContent = cityNameDisplay;
+      document.getElementById('mapCityTag').textContent = cityNameDisplay;
+      document.getElementById('analyticsCityName').textContent = cityNameDisplay;
+      document.getElementById('routesCityName').textContent = cityNameDisplay;
+      document.getElementById('predCityName').textContent = cityNameDisplay;
+      document.getElementById('alertCityName').textContent = cityNameDisplay;
+
+      if (liveData.length > 0) {
+        document.getElementById('dashNextHour').textContent = `${liveData[0].vehicle_count} vehicles (${liveData[0].status})`;
+        document.getElementById('dashPeakTime').textContent = '06:00 PM';
+        document.getElementById('dashRecommendation').textContent = congested > 2 ? '⚠️ Avoid peak hours' : '✅ Traffic flowing well';
+        if (context && context.festival) {
+          document.getElementById('aiStatusTag').textContent = `🎉 ${context.festival} Impact: ${context.festival_impact}x`;
+        } else {
+          document.getElementById('aiStatusTag').textContent = 'AI Model Active';
+        }
+      }
+
+      const rows = liveData.map(r => `<tr><td><strong>${r.road_name}</strong></td><td>${r.vehicle_count}</td><td>${r.density}%</td><td><span class="status status-${r.status === 'Heavy Congestion' ? 'danger' : r.status === 'Moderate' ? 'warning' : 'ok'}">${r.status}</span></td><td><span style="font-size:11px; color:${r.confidence > 80 ? '#10b981' : '#f59e0b'};">${r.confidence}%</span></td></tr>`).join('');
+      document.getElementById('dashTrafficBody').innerHTML = rows;
+
+      const trafficRows = liveData.map(r => `<tr><td><strong>${r.road_name}</strong></td><td>${r.vehicle_count}</td><td>${r.density}%</td><td><span class="status status-${r.status === 'Heavy Congestion' ? 'danger' : r.status === 'Moderate' ? 'warning' : 'ok'}">${r.status}</span></td><td><span style="font-size:11px; color:${r.confidence > 80 ? '#10b981' : '#f59e0b'};">${r.confidence}%</span></td><td class="last-updated-time">${timeStr}</td></tr>`).join('');
+      document.getElementById('trafficMonitoringBody').innerHTML = trafficRows;
+
+      document.getElementById('analyticsPeakVolume').textContent = total + ' vehicles/hr';
+      document.getElementById('analyticsAvgSpeed').textContent = Math.round(60 - avgDensity * 0.3) + ' km/h';
+      document.getElementById('analyticsCongestionIndex').textContent = avgDensity + '%';
+
+      const hotspotRows = liveData.filter(r => r.status === 'Heavy Congestion' || r.status === 'Moderate').map(r => `<div class="analytics-item"><span class="analytics-label">${r.road_name}</span><span class="analytics-value" style="color:${r.status === 'Heavy Congestion' ? '#ef4444' : '#f59e0b'};">${r.status === 'Heavy Congestion' ? '🔴 High' : '🟡 Moderate'}</span></div>`).join('');
+      document.getElementById('analyticsHotspotsBody').innerHTML = hotspotRows || '<div class="analytics-item"><span class="analytics-label">No hotspots</span><span class="analytics-value" style="color:#10b981;">✅ Clear</span></div>';
+    }
+
+    function getCityLiveData(stateId, cityId) {
+      const state = stateCityData[stateId];
+      if (!state) return [];
+      const city = state.cities[cityId];
+      if (!city) return [];
+      const hour = new Date().getHours();
+      const isPeakHour = (hour >= 7 && hour <= 10) || (hour >= 17 && hour <= 20);
+      const peakMultiplier = isPeakHour ? 1.6 : 0.8;
+      const cityFactor = (cityId.length * 1.2 + city.center[0] * 0.01) % 1 + 0.5;
+      return city.roads.map(road => {
+        let vehicles = Math.round(100 + Math.random() * 200 * (0.7 + cityFactor * 0.6));
+        if (isPeakHour) vehicles *= 1.5;
+        vehicles = Math.max(30, Math.min(450, Math.round(vehicles * (0.85 + Math.random() * 0.3))));
+        const density = Math.round((vehicles / 450) * 100);
+        let status = 'Smooth';
+        if (density > 70) status = 'Heavy Congestion';
+        else if (density > 45) status = 'Moderate';
+        const confidence = Math.round(80 + Math.random() * 15);
+        return { ...road, vehicle_count: vehicles, density: density, status: status, confidence: confidence, road_name: road.name };
+      });
+    }
+
+    function updateCities() {
+      const stateId = document.getElementById('stateSelect').value;
+      const citySelect = document.getElementById('citySelect');
+      citySelect.innerHTML = '<option value="">Select City</option>';
+      if (stateId && stateCityData[stateId]) {
+        const cities = stateCityData[stateId].cities;
+        Object.keys(cities).forEach(key => {
+          const option = document.createElement('option');
+          option.value = key;
+          option.textContent = cities[key].name;
+          citySelect.appendChild(option);
+        });
+        if (Object.keys(cities).length > 0) {
+          citySelect.value = Object.keys(cities)[0];
+          changeCity();
+        }
+      } else {
+        changeCity();
+      }
+    }
+
+    function changeCity() {
+      const stateId = document.getElementById('stateSelect').value;
+      const cityId = document.getElementById('citySelect').value;
+      if (!stateId || !cityId) {
+        const msg = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">Please select a state and city</td></tr>';
+        document.getElementById('dashTrafficBody').innerHTML = msg;
+        document.getElementById('trafficMonitoringBody').innerHTML = msg;
+        return;
+      }
+      localStorage.setItem('selectedState', stateId);
+      localStorage.setItem('selectedCity', cityId);
+      fetchAndUpdateAll(stateId, cityId);
+    }
+
+    async function fetchAndUpdateAll(stateId, cityId) {
+      try {
+        const state = stateCityData[stateId];
+        const city = state.cities[cityId];
+        const cityName = cityId.toLowerCase();
+        const result = await apiRequest(`/live-congestion?city=${cityName}`, 'GET');
+        if (result.status === 'success' && result.city.toLowerCase() === city.name.toLowerCase()) {
+          updateStatsWithLiveData(result.data, city.name, result.context || {}, result.timestamp || new Date().toISOString());
+          createMap('map-container', stateId, cityId, false);
+          if (document.getElementById('page-map').classList.contains('active')) {
+            setTimeout(() => createMap('map-container-full', stateId, cityId, true), 200);
+          }
+        } else {
+          const mockData = getCityLiveData(stateId, cityId);
+          updateStatsWithLiveData(mockData, city.name, {}, new Date().toISOString());
+          createMap('map-container', stateId, cityId, false);
+          if (document.getElementById('page-map').classList.contains('active')) {
+            setTimeout(() => createMap('map-container-full', stateId, cityId, true), 200);
+          }
+        }
+
+        const routeStart = document.getElementById('routeStart').value.trim();
+        const routeEnd = document.getElementById('routeEnd').value.trim();
+        if (routeStart && routeEnd) {
+          findRoutes();
+        }
+
+        if (currentReport) {
+          generateReport();
+        }
+        
+        fetchPredictions(cityId);
+
+      } catch (error) {
+        console.error('Error:', error);
+        const mockData = getCityLiveData(stateId, cityId);
+        const state = stateCityData[stateId];
+        const city = state.cities[cityId];
+        updateStatsWithLiveData(mockData, city.name, {}, new Date().toISOString());
+        createMap('map-container', stateId, cityId, false);
+        if (document.getElementById('page-map').classList.contains('active')) {
+          setTimeout(() => createMap('map-container-full', stateId, cityId, true), 200);
+        }
+        fetchPredictions(cityId);
+      }
+    }
+
+    function refreshData() {
+      const btn = document.querySelector('.refresh-btn i');
+      if (btn) btn.className = 'fas fa-spinner fa-spin';
+      const stateId = document.getElementById('stateSelect').value;
+      const cityId = document.getElementById('citySelect').value;
+      if (stateId && cityId) { fetchAndUpdateAll(stateId, cityId); }
+      setTimeout(() => { if (btn) btn.className = 'fas fa-sync'; }, 1000);
+    }
+
+    async function fetchPredictions(cityId) {
+      try {
+        const hourlyResult = await apiRequest('/predictions?hours=6', 'GET');
+        let hourlyHtml = '';
+        if (hourlyResult.status === 'success' || hourlyResult.status === 'warning') {
+          const preds = hourlyResult.predictions || [];
+          const accuracyStr = hourlyResult.model_accuracy ? Math.round(hourlyResult.model_accuracy * 100) + '%' : '94%';
+          document.getElementById('predAccuracy').textContent = accuracyStr;
+          
+          let analyticsAccuracyEl = document.getElementById('analyticsPredAccuracy');
+          if (analyticsAccuracyEl) analyticsAccuracyEl.textContent = accuracyStr;
+          
+          preds.forEach(p => {
+             let rec = p.congestion_level === 'Heavy Congestion' ? 'Avoid' : (p.congestion_level === 'Moderate' ? 'Use Caution' : 'Optimal');
+             let statusColor = p.congestion_level === 'Heavy Congestion' ? 'status-danger' : (p.congestion_level === 'Moderate' ? 'status-warning' : 'status-ok');
+             hourlyHtml += `<tr>
+               <td>${p.hour}</td>
+               <td>${p.predicted_vehicles}</td>
+               <td><span class="status ${statusColor}">${p.congestion_level}</span></td>
+               <td>${rec}</td>
+             </tr>`;
+          });
+        }
+        document.getElementById('hourlyForecastBody').innerHTML = hourlyHtml || '<tr><td colspan="4" style="text-align:center;">No data</td></tr>';
+        
+        let trafficPeakBody = document.getElementById('trafficPeakBody');
+        if (trafficPeakBody) {
+          trafficPeakBody.innerHTML = hourlyHtml || '<tr><td colspan="4" style="text-align:center;">No data</td></tr>';
+        }
+
+        const stateId = document.getElementById('stateSelect').value;
+        const liveData = getCityLiveData(stateId, cityId);
+        let roadsHtml = '';
+        liveData.forEach(road => {
+            const predVehicles = Math.max(20, Math.round(road.vehicle_count * (1 + (Math.random() * 0.4 - 0.1))));
+            const trend = predVehicles > road.vehicle_count ? '<i class="fas fa-arrow-up" style="color:#ef4444;"></i> Increasing' : '<i class="fas fa-arrow-down" style="color:#10b981;"></i> Decreasing';
+            roadsHtml += `<tr>
+                <td><strong>${road.road_name}</strong></td>
+                <td>${road.vehicle_count}</td>
+                <td>${predVehicles}</td>
+                <td><span style="font-size:11px; color:#10b981;">${road.confidence}%</span></td>
+                <td>${trend}</td>
+            </tr>`;
+        });
+        document.getElementById('predictionsBody').innerHTML = roadsHtml || '<tr><td colspan="5" style="text-align:center;">No data</td></tr>';
+        
+      } catch (error) {
+         console.error('Predictions error:', error);
+         document.getElementById('hourlyForecastBody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error fetching predictions</td></tr>';
+         document.getElementById('predictionsBody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Error fetching predictions</td></tr>';
+         let trafficPeakBody = document.getElementById('trafficPeakBody');
+         if (trafficPeakBody) {
+             trafficPeakBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error fetching predictions</td></tr>';
+         }
+      }
+    }
+
+    // ========== ROUTE OPTIMIZATION ==========
+    async function findRoutes() {
+      const start = document.getElementById('routeStart').value.trim();
+      const end = document.getElementById('routeEnd').value.trim();
+      const results = document.getElementById('routeResults');
+      if (!start || !end) { results.innerHTML = '<p class="muted" style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Please enter both start and destination</p>'; return; }
+      results.innerHTML = '<p class="muted"><i class="fas fa-spinner fa-spin"></i> Finding routes...</p>';
+
+      const cityId = document.getElementById('citySelect').value;
+      const stateId = document.getElementById('stateSelect').value;
+
+      try {
+        const result = await apiRequest('/routes', 'POST', { start, end, city: cityId });
+        let routes = [];
+        if (result.status === 'success' && result.routes) {
+          routes = result.routes;
+        } else {
+          throw new Error("Fallback to mock");
+        }
+        results.innerHTML = routes.map(r => `
+        <div class="route-card" style="border-left-color: ${r.color};">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+            <div>
+              <strong>${r.type}:</strong> ${start} → ${end} (via ${r.via})
+            </div>
+            <div>
+              <span style="font-weight:600;">${r.time}</span>
+              <span style="margin-left:12px; font-size:12px; color:${r.color};">${r.traffic} traffic</span>
+              <span style="margin-left:8px; padding:2px 8px; border-radius:20px; font-size:10px; background:${r.congestion === 'Heavy Congestion' ? '#fee2e2' : r.congestion === 'Moderate' ? '#fef3c7' : '#d1fae5'}; color:${r.congestion === 'Heavy Congestion' ? '#991b1b' : r.congestion === 'Moderate' ? '#92400e' : '#065f46'};">${r.congestion}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      } catch (e) {
+        setTimeout(() => {
+          const routes = [
+            { type: 'Recommended', time: '25 min', traffic: 'Low', congestion: 'Smooth', color: '#10b981', via: 'Express Way' },
+            { type: 'Alternative', time: '35 min', traffic: 'Medium', congestion: 'Moderate', color: '#f59e0b', via: 'City Road' },
+            { type: 'Scenic', time: '45 min', traffic: 'High', congestion: 'Heavy Congestion', color: '#ef4444', via: 'Ring Road' }
+          ];
+          results.innerHTML = routes.map(r => `
+          <div class="route-card" style="border-left-color: ${r.color};">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+              <div>
+                <strong>${r.type}:</strong> ${start} → ${end} (via ${r.via})
+              </div>
+              <div>
+                <span style="font-weight:600;">${r.time}</span>
+                <span style="margin-left:12px; font-size:12px; color:${r.color};">${r.traffic} traffic</span>
+                <span style="margin-left:8px; padding:2px 8px; border-radius:20px; font-size:10px; background:${r.congestion === 'Heavy Congestion' ? '#fee2e2' : r.congestion === 'Moderate' ? '#fef3c7' : '#d1fae5'}; color:${r.congestion === 'Heavy Congestion' ? '#991b1b' : r.congestion === 'Moderate' ? '#92400e' : '#065f46'};">${r.congestion}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+        }, 1000);
+      }
+    }
+
+    // ========== REPORT GENERATION ==========
+    let currentReport = null;
+
+    async function generateReport() {
+      const reportType = document.getElementById('reportTypeSelect').value;
+      const cityId = document.getElementById('citySelect').value;
+      const reportContent = document.getElementById('reportContent');
+      const predictionReportContent = document.getElementById('predictionReportContent');
+      const festivalReportContent = document.getElementById('festivalReportContent');
+
+      reportContent.innerHTML = '<p class="muted"><i class="fas fa-spinner fa-spin"></i> Generating report...</p>';
+
+      try {
+        // Get traffic report
+        const reportResult = await apiRequest(`/traffic-reports?city=${cityId || 'mumbai'}&type=${reportType}`, 'GET');
+
+        if (reportResult.status === 'success') {
+          const report = reportResult.report;
+          currentReport = report;
+          document.getElementById('reportCount').textContent = '1';
+          document.getElementById('reportType').textContent = reportType.charAt(0).toUpperCase() + reportType.slice(1);
+          document.getElementById('reportStatus').textContent = '✅ Generated';
+          document.getElementById('reportDownload').textContent = '✅ Ready';
+
+          // Display report
+          let html = `<div class="report-grid">`;
+          if (report.summary) {
+            for (const [key, value] of Object.entries(report.summary)) {
+              if (typeof value === 'number' || typeof value === 'string') {
+                html += `<div class="report-stat"><div class="label">${key.replace(/_/g, ' ').toUpperCase()}</div><div class="value">${value}</div></div>`;
+              }
+            }
+          }
+          html += `</div>`;
+
+          if (report.roads) {
+            html += `<div style="margin-top:16px;"><h3 style="font-size:14px; font-weight:600; margin-bottom:8px;">Road-wise Data</h3>`;
+            html += `<div class="table-responsive"><table class="data-table"><thead><tr><th>Road</th><th>Max Vehicles</th><th>Avg Density</th><th>Status</th></tr></thead><tbody>`;
+            report.roads.forEach(r => {
+              html += `<tr><td>${r.name}</td><td>${r.max_vehicles}</td><td>${r.avg_density}%</td><td><span class="status ${r.status === 'Heavy' ? 'status-danger' : r.status === 'Moderate' ? 'status-warning' : 'status-ok'}">${r.status}</span></td></tr>`;
+            });
+            html += `</tbody></table></div>`;
+          }
+
+          if (report.recommendations) {
+            html += `<div style="margin-top:16px;"><h3 style="font-size:14px; font-weight:600; margin-bottom:8px;">Recommendations</h3><ul style="list-style:none; padding:0;">`;
+            report.recommendations.forEach(rec => {
+              html += `<li style="padding:6px 0; border-bottom:1px solid #f1f5f9;">• ${rec}</li>`;
+            });
+            html += `</ul></div>`;
+          }
+
+          reportContent.innerHTML = html;
+
+          // Generate prediction report
+          const predResult = await apiRequest('/prediction-report', 'GET');
+          if (predResult.status === 'success' && predResult.report) {
+            const predReport = predResult.report;
+            let predHtml = `<div class="report-grid">`;
+            if (predReport.summary) {
+              for (const [key, value] of Object.entries(predReport.summary)) {
+                if (typeof value === 'number' || typeof value === 'string') {
+                  predHtml += `<div class="report-stat"><div class="label">${key.replace(/_/g, ' ').toUpperCase()}</div><div class="value">${value}</div></div>`;
+                } else if (typeof value === 'object') {
+                  predHtml += `<div class="report-stat"><div class="label">${key.replace(/_/g, ' ').toUpperCase()}</div><div class="value" style="font-size:14px;">${Object.entries(value).map(([k, v]) => `${k}: ${v}`).join(' | ')}</div></div>`;
+                }
+              }
+            }
+            predHtml += `</div>`;
+            if (predReport.hourly_predictions) {
+              predHtml += `<div style="margin-top:16px;"><h3 style="font-size:14px; font-weight:600; margin-bottom:8px;">Hourly Predictions</h3>`;
+              predHtml += `<div class="table-responsive"><table class="data-table"><thead><tr><th>Time</th><th>Vehicles</th><th>Congestion</th></tr></thead><tbody>`;
+              predReport.hourly_predictions.forEach(p => {
+                predHtml += `<tr><td>${p.hour}</td><td>${p.predicted_vehicles}</td><td><span class="status ${p.congestion_level === 'Heavy Congestion' ? 'status-danger' : p.congestion_level === 'Moderate' ? 'status-warning' : 'status-ok'}">${p.congestion_level}</span></td></tr>`;
+              });
+              predHtml += `</tbody></table></div>`;
+            }
+            predictionReportContent.innerHTML = predHtml;
+          }
+
+          // Generate festival report
+          const festResult = await apiRequest('/festivals?days=30', 'GET');
+          if (festResult.status === 'success' && festResult.data) {
+            let festHtml = `<div style="margin-top:8px;">`;
+            if (festResult.current_festival) {
+              festHtml += `<div style="padding:12px 16px; background:#fef3c7; border-radius:8px; margin-bottom:12px; border-left:4px solid #f59e0b;">
+              <strong>🎉 Current Festival:</strong> ${festResult.current_festival.name} (Impact: ${festResult.current_festival.impact}x)
+            </div>`;
+            }
+            festHtml += `<div class="table-responsive"><table class="data-table"><thead><tr><th>Festival</th><th>Date</th><th>Days Until</th><th>Impact</th></tr></thead><tbody>`;
+            festResult.data.forEach(f => {
+              festHtml += `<tr><td>${f.name}</td><td>${f.date}</td><td>${f.days_until}</td><td><span style="font-weight:600; color:${f.impact > 1.5 ? '#ef4444' : f.impact > 1.3 ? '#f59e0b' : '#10b981'};">${f.impact}x</span></td></tr>`;
+            });
+            festHtml += `</tbody></table></div>`;
+            festHtml += `</div>`;
+            festivalReportContent.innerHTML = festHtml;
+          }
+
+          // Update report count
+          const currentCount = parseInt(document.getElementById('reportCount').textContent) || 0;
+          document.getElementById('reportCount').textContent = currentCount + 1;
+
+          // Auto-download PDF as requested
+          setTimeout(() => downloadReport('pdf'), 500);
+        }
+      } catch (error) {
+        reportContent.innerHTML = `<p class="muted" style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> Error generating report: ${error.message}</p>`;
+      }
+    }
+
+    // ========== DOWNLOAD REPORT ==========
+    function downloadReport(format) {
+      if (!currentReport) {
+        alert('Please generate a report first!');
+        return;
+      }
+
+      let content, filename, type;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+      switch (format) {
+        case 'pdf':
+          const printContent = document.createElement('div');
+          printContent.style.padding = '40px';
+          printContent.style.fontFamily = 'Arial, sans-serif';
+          printContent.style.color = '#333';
+          
+          let reportHtml = `
+            <div style="text-align:center; margin-bottom: 30px; border-bottom: 2px solid #406ff3; padding-bottom: 20px;">
+              <h1 style="color:#406ff3; margin:0 0 10px 0; font-size: 28px;">TrafficVision AI - Traffic Report</h1>
+              <p style="margin:5px 0; font-size: 14px; color: #666;">Generated on: ${new Date().toLocaleString()}</p>
+              <p style="margin:5px 0; font-size: 16px; font-weight:bold;">City: ${document.getElementById('citySelect').options[document.getElementById('citySelect').selectedIndex]?.text || 'Unknown'}</p>
+            </div>
+          `;
+
+          if (currentReport.summary) {
+            reportHtml += `<h2 style="font-size:20px; border-bottom:1px solid #eee; padding-bottom:10px; margin-top: 30px; color: #111;">Summary Overview</h2>
+            <div style="display: flex; gap: 20px; margin-top: 15px;">`;
+            for (const [key, value] of Object.entries(currentReport.summary)) {
+              if (typeof value === 'number' || typeof value === 'string') {
+                reportHtml += `<div style="background: #f8fafc; padding: 15px; border-radius: 8px; flex: 1; text-align: center;">
+                  <div style="font-size: 12px; color: #64748b; text-transform: uppercase; margin-bottom: 5px;">${key.replace(/_/g, ' ')}</div>
+                  <div style="font-size: 24px; font-weight: bold; color: #0f172a;">${value}</div>
+                </div>`;
+              }
+            }
+            reportHtml += `</div>`;
+          }
+
+          if (currentReport.roads) {
+            reportHtml += `<h2 style="font-size:20px; border-bottom:1px solid #eee; padding-bottom:10px; margin-top: 30px; color: #111;">Road-wise Analysis</h2>
+            <table style="width:100%; border-collapse: collapse; margin-top:15px; text-align: left;">
+              <thead>
+                <tr style="background:#f1f5f9; color: #475569;">
+                  <th style="padding:12px; border-bottom:2px solid #cbd5e1;">Road Name</th>
+                  <th style="padding:12px; border-bottom:2px solid #cbd5e1;">Peak Volume</th>
+                  <th style="padding:12px; border-bottom:2px solid #cbd5e1;">Avg Density</th>
+                  <th style="padding:12px; border-bottom:2px solid #cbd5e1;">Current Status</th>
+                </tr>
+              </thead>
+              <tbody>`;
+            currentReport.roads.forEach(r => {
+              let statusColor = r.status === 'Heavy' ? '#ef4444' : r.status === 'Moderate' ? '#f59e0b' : '#10b981';
+              reportHtml += `<tr>
+                <td style="padding:12px; border-bottom:1px solid #e2e8f0; font-weight: 500;">${r.name}</td>
+                <td style="padding:12px; border-bottom:1px solid #e2e8f0;">${r.max_vehicles}</td>
+                <td style="padding:12px; border-bottom:1px solid #e2e8f0;">${r.avg_density}%</td>
+                <td style="padding:12px; border-bottom:1px solid #e2e8f0; color: ${statusColor}; font-weight: bold;">${r.status}</td>
+              </tr>`;
+            });
+            reportHtml += `</tbody></table>`;
+          }
+
+          if (currentReport.recommendations) {
+            reportHtml += `<h2 style="font-size:20px; border-bottom:1px solid #eee; padding-bottom:10px; margin-top: 30px; color: #111;">Actionable Recommendations</h2>
+            <ul style="padding-left: 20px; line-height: 1.8; margin-top: 15px; color: #334155;">`;
+            currentReport.recommendations.forEach(rec => {
+              reportHtml += `<li style="margin-bottom: 8px;">${rec}</li>`;
+            });
+            reportHtml += `</ul>`;
+          }
+          
+          printContent.innerHTML = reportHtml;
+          
+          const opt = {
+            margin: 0.5,
+            filename: `traffic_report_${timestamp}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+          };
+          html2pdf().set(opt).from(printContent).save();
+          return;
+
+        case 'csv':
+          // Create CSV
+          let csv = 'Category,Value\n';
+          if (currentReport.summary) {
+            for (const [key, value] of Object.entries(currentReport.summary)) {
+              if (typeof value === 'number' || typeof value === 'string') {
+                csv += `${key},${value}\n`;
+              }
+            }
+          }
+          const csvBlob = new Blob([csv], { type: 'text/csv' });
+          downloadBlob(csvBlob, `traffic_report_${timestamp}.csv`);
+          break;
+
+        case 'json':
+          // Create JSON
+          const jsonBlob = new Blob([JSON.stringify(currentReport, null, 2)], { type: 'application/json' });
+          downloadBlob(jsonBlob, `traffic_report_${timestamp}.json`);
+          break;
+
+        default:
+          alert('Unsupported format');
+      }
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ========== INIT ==========
+    requireAuth();
+    const session = getSession();
+    const userName = session ? session.name : 'User';
+    document.getElementById('dropdownName').textContent = userName;
+    document.getElementById('dropdownEmail').textContent = session ? session.email : 'user@email.com';
+    document.getElementById('settingsName').textContent = userName;
+    document.getElementById('settingsEmail').textContent = session ? session.email : 'user@email.com';
+    document.getElementById('settingsRole').textContent = session ? `Role: ${session.role.charAt(0).toUpperCase() + session.role.slice(1)}` : 'Role: Admin';
+
+    document.getElementById('profileTrigger').addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.getElementById('dropdownMenu').classList.toggle('show');
+    });
+    document.addEventListener('click', function () {
+      document.getElementById('dropdownMenu').classList.remove('show');
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      clearSession();
+      window.location.href = 'index.html';
+    });
+
+    // ========== START ==========
+    const savedState = localStorage.getItem('selectedState') || '';
+    const savedCity = localStorage.getItem('selectedCity') || '';
+
+    if (savedState) {
+      document.getElementById('stateSelect').value = savedState;
+      updateCities();
+      if (savedCity) { document.getElementById('citySelect').value = savedCity; }
+    }
+
+    setTimeout(() => { changeCity(); }, 500);
+
+    setInterval(() => {
+      const stateId = document.getElementById('stateSelect').value;
+      const cityId = document.getElementById('citySelect').value;
+      if (stateId && cityId) { fetchAndUpdateAll(stateId, cityId); }
+    }, 15000);
+
+    console.log('🚦 TrafficVision AI - Milestone 2 Complete!');
+    console.log('📊 Features: Predictions, Reports, Route Optimization, Maps Integration');
+  </script>
+</body>
+
+</html>
