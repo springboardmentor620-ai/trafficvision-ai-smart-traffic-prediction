@@ -27,6 +27,19 @@ from app.schemas.user import (
 
 from app.dependencies import get_current_user
 
+from app.constants import (
+    ACTIVE,
+    AUDIT_LOGIN,
+    AUDIT_GOOGLE_LOGIN,
+    AUDIT_REGISTER,
+    AUDIT_ACCOUNT_DELETED,
+)
+
+from app.services.audit_service import (
+    build_audit_log_entry,
+    log_audit_event,
+)
+
 from app.security import (
     hash_password,
     verify_password,
@@ -118,6 +131,21 @@ def register(
 
     try:
 
+        # Flush (not commit) assigns new_user.id without ending the
+        # transaction, so the REGISTER audit entry below can
+        # reference it and still roll back together with the user
+        # row if anything fails before the real commit.
+        db.flush()
+
+        db.add(
+            build_audit_log_entry(
+                action=AUDIT_REGISTER,
+                actor_user=new_user,
+                target_user_id=new_user.id,
+                metadata={"role": new_user.role}
+            )
+        )
+
         db.commit()
 
         db.refresh(new_user)
@@ -190,6 +218,26 @@ def login(
         )
 
     # -----------------------------------------------------
+    # ACCOUNT LIFECYCLE CHECK
+    #
+    # Checked after password verification (not before) so a
+    # wrong password on a suspended account still reports
+    # "Invalid email or password" rather than leaking account
+    # status to someone who doesn't actually own it.
+    # -----------------------------------------------------
+
+    if db_user.status != ACTIVE:
+
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Your account has been suspended."
+                if db_user.status == "suspended"
+                else "Your account has been deactivated."
+            )
+        )
+
+    # -----------------------------------------------------
     # CREATE JWT
     # -----------------------------------------------------
 
@@ -198,6 +246,14 @@ def login(
             "sub": db_user.email,
             "role": db_user.role
         }
+    )
+
+    # Best-effort: never let an audit-logging hiccup turn a
+    # successful login into a failed one.
+    log_audit_event(
+        db,
+        action=AUDIT_LOGIN,
+        actor_user=db_user
     )
 
     return {
@@ -279,29 +335,98 @@ def google_login(
     #
     # IMPORTANT:
     #
-    # Google login DOES NOT create a new account.
+    # Google login and normal registration both create
+    # accounts, and they must not create duplicates of
+    # each other.
     #
-    # The user must already have an account created through
-    # /auth/register.
+    # If no user exists for this verified Google email, that
+    # means one of two things:
+    #   1. This person has genuinely never signed up before, or
+    #   2. Their previous account (this same email) was
+    #      deleted via DELETE /auth/me.
+    #
+    # /auth/register already treats a deleted email as free to
+    # re-register (it deletes the matching DeletedAccount row
+    # and creates a brand-new User). Google login follows the
+    # exact same policy for consistency: a missing User row
+    # always means "create a fresh operator account", never
+    # "resurrect the old one" - the old row and its data are
+    # actually gone, so this is a genuinely new account with a
+    # new id, not the deleted account coming back to life.
     # -----------------------------------------------------
 
     db_user = db.query(User).filter(
         User.email == google_email
     ).first()
 
+    # Tracked for the GOOGLE_LOGIN audit entry's metadata below, so
+    # the audit trail can distinguish "signed up via Google" from
+    # "logged in via Google" without needing a separate action type.
+    is_new_account = False
+
     # -----------------------------------------------------
-    # USER DOES NOT EXIST
+    # NO EXISTING USER -> CREATE A FRESH ACCOUNT
     # -----------------------------------------------------
 
     if not db_user:
 
-        raise HTTPException(
-            status_code=404,
-            detail=(
-                "Account not found. "
-                "Please register first using your email and password."
-            )
+        is_new_account = True
+
+        # Remove any stale deleted-account record for this
+        # email, same as normal registration does, so it can
+        # never block or confuse a future signup.
+        stale_deleted_account = db.query(DeletedAccount).filter(
+            DeletedAccount.email == google_email
+        ).first()
+
+        new_user = User(
+            name=google_name or google_email.split("@")[0],
+            email=google_email,
+
+            # Google accounts have no TrafficVision password.
+            # Store a securely-random hash (never shared with
+            # the user) so POST /auth/login can never
+            # authenticate this account with a guessed/empty
+            # password.
+            password=hash_password(secrets.token_urlsafe(32)),
+
+            # Never trust the client with an admin role.
+            role="operator",
+
+            google_sub=google_sub
         )
+
+        db.add(new_user)
+
+        if stale_deleted_account:
+
+            db.delete(stale_deleted_account)
+
+        try:
+
+            db.commit()
+
+            db.refresh(new_user)
+
+        except IntegrityError:
+
+            db.rollback()
+
+            raise HTTPException(
+                status_code=409,
+                detail="An account with this email already exists."
+            )
+
+        except SQLAlchemyError:
+
+            db.rollback()
+
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to create account."
+            )
+
+        db_user = new_user
 
     # -----------------------------------------------------
     # CHECK GOOGLE SUB
@@ -310,7 +435,7 @@ def google_login(
     # link this verified Google account.
     # -----------------------------------------------------
 
-    if not db_user.google_sub:
+    elif not db_user.google_sub:
 
         db_user.google_sub = google_sub
 
@@ -346,6 +471,29 @@ def google_login(
         )
 
     # -----------------------------------------------------
+    # ACCOUNT LIFECYCLE CHECK
+    #
+    # Applies uniformly to all three branches above: a
+    # brand-new user is always "active" by default so this
+    # is a no-op for signup, but it stops a suspended or
+    # deactivated existing account from getting a token just
+    # because Google authentication succeeded. Google auth
+    # proves *identity*, not *authorization* - it must not be
+    # able to bypass a restriction normal login also enforces.
+    # -----------------------------------------------------
+
+    if db_user.status != ACTIVE:
+
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Your account has been suspended."
+                if db_user.status == "suspended"
+                else "Your account has been deactivated."
+            )
+        )
+
+    # -----------------------------------------------------
     # CREATE TRAFFICVISION JWT
     # -----------------------------------------------------
 
@@ -354,6 +502,15 @@ def google_login(
             "sub": db_user.email,
             "role": db_user.role
         }
+    )
+
+    # Best-effort: never let an audit-logging hiccup turn a
+    # successful Google login into a failed one.
+    log_audit_event(
+        db,
+        action=AUDIT_GOOGLE_LOGIN,
+        actor_user=db_user,
+        metadata={"created_new_account": is_new_account}
     )
 
     return {
@@ -537,6 +694,35 @@ def delete_account(
         # -------------------------------------------------
 
         db.delete(current_user)
+
+        # -------------------------------------------------
+        # AUDIT LOG
+        #
+        # Added to the SAME session/transaction as the
+        # deletion above, not committed separately - if any
+        # earlier step in this try block fails and we hit
+        # one of the except branches below, this entry rolls
+        # back along with everything else, so there is never
+        # an ACCOUNT_DELETED audit row for a deletion that
+        # didn't actually happen (same principle already
+        # applied to the deleted_accounts row in Step 1).
+        #
+        # actor_user_id/target_user_id will end up NULL once
+        # this commits (see AuditLog's ON DELETE SET NULL),
+        # since the user row they'd reference is being
+        # deleted in this same transaction. actor_email is a
+        # plain string, not a foreign key, so it survives and
+        # keeps the record readable.
+        # -------------------------------------------------
+
+        db.add(
+            build_audit_log_entry(
+                action=AUDIT_ACCOUNT_DELETED,
+                actor_email=user_email,
+                target_user_id=user_id,
+                metadata={"email": user_email}
+            )
+        )
 
         # -------------------------------------------------
         # STEP 6

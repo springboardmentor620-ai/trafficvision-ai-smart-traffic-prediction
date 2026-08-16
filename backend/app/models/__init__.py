@@ -5,3 +5,4 @@ from .prediction_history import PredictionHistory
 from .traffic_alert import TrafficAlert
 from .traffic_dataset import TrafficDataset
 from app.models.deleted_account import DeletedAccount
+from app.models.audit_log import AuditLog

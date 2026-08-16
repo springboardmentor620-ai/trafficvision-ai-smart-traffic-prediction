@@ -28,7 +28,7 @@ def create_traffic(
     traffic: TrafficCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-    require_role("admin", "operator")
+    require_role("admin", "operator", "super_admin")
     )
 ):
     new_record = TrafficRecord(
