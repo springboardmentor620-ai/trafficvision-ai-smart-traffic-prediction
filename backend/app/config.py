@@ -27,3 +27,10 @@ FRONTEND_URL = os.getenv(
 
 # Google OAuth
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
+# Admin invitations (Step 3 RBAC) - how long a SUPER_ADMIN's
+# invitation link stays valid before it must be re-sent. Configurable
+# via env, not hardcoded, with a reasonable default.
+ADMIN_INVITATION_EXPIRE_HOURS = int(
+    os.getenv("ADMIN_INVITATION_EXPIRE_HOURS", "48")
+)

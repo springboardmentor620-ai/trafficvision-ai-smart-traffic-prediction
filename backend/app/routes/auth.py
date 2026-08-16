@@ -25,6 +25,8 @@ from app.schemas.user import (
     ResetPasswordRequest,
 )
 
+from app.schemas.admin_invitation import AdminInvitationAccept
+
 from app.dependencies import get_current_user
 
 from app.constants import (
@@ -39,6 +41,8 @@ from app.services.audit_service import (
     build_audit_log_entry,
     log_audit_event,
 )
+
+from app.services import admin_invitation_service
 
 from app.security import (
     hash_password,
@@ -876,3 +880,50 @@ def reset_password(
     return {
         "message": "Password reset successful."
     }
+
+
+# =========================================================
+# ACCEPT ADMIN INVITATION
+#
+# Public endpoint - no login required, same as /register. Unlike
+# /register, this can only ever create a role="admin" account, and
+# only for the exact email address a super_admin already invited
+# (see AdminInvitationAccept - there is deliberately no email field
+# on the request body for the caller to override).
+# =========================================================
+
+@router.post(
+    "/accept-invitation",
+    response_model=UserResponse,
+    status_code=201
+)
+def accept_invitation(
+    payload: AdminInvitationAccept,
+
+    db: Session = Depends(get_db)
+):
+
+    try:
+
+        new_admin = admin_invitation_service.accept_admin_invitation(
+            db,
+            raw_token=payload.token,
+            name=payload.name,
+            password=payload.password
+        )
+
+    except ValueError as error:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    except SQLAlchemyError:
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to accept invitation."
+        )
+
+    return new_admin
