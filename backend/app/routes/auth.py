@@ -43,6 +43,7 @@ from app.services.audit_service import (
 )
 
 from app.services import admin_invitation_service
+from app.services import admin_management_service
 
 from app.security import (
     hash_password,
@@ -596,6 +597,30 @@ def delete_account(
     print(
         f"User email: {current_user.email}"
     )
+
+    # -----------------------------------------------------
+    # LAST SUPER_ADMIN PROTECTION
+    #
+    # Checked before anything else in this function - if this
+    # account is the last active super_admin, deletion is
+    # rejected outright, before the deleted_accounts row or
+    # any of the deletion steps below are ever attempted. A
+    # no-op for any non-super_admin account.
+    # -----------------------------------------------------
+
+    try:
+
+        admin_management_service.assert_not_last_super_admin(
+            db,
+            current_user
+        )
+
+    except ValueError as error:
+
+        raise HTTPException(
+            status_code=409,
+            detail=str(error)
+        )
 
     try:
 
