@@ -29,6 +29,13 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: str
 
+    # Added for Step 5 (admin user management needs to display and
+    # act on this), and incidentally resolves a gap flagged back in
+    # Step 1 testing: GET /auth/me previously returned this schema
+    # too, without status ever being visible in the response despite
+    # existing on the model since migration 001.
+    status: str
+
     class Config:
         from_attributes = True
 

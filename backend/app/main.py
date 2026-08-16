@@ -13,6 +13,7 @@ from app.routes.analytics import router as analytics_router
 from app.routes.alerts import router as alerts_router
 from app.routes.super_admin import router as super_admin_router
 from app.routes.admin_requests import router as admin_requests_router
+from app.routes.admin import router as admin_router
  
 from app.exceptions.handlers import (
     http_exception_handler,
@@ -51,6 +52,7 @@ app.include_router(prediction_router)
 app.include_router(alerts_router)
 app.include_router(super_admin_router)
 app.include_router(admin_requests_router)
+app.include_router(admin_router)
  
  
 @app.get("/")

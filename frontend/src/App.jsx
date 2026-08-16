@@ -15,6 +15,7 @@ import Alerts from "./pages/Alerts";
 import Heatmap from "./pages/Heatmap";
 import Trends from "./pages/Trends";
 import Profile from "./pages/Profile";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -119,8 +120,7 @@ function App() {
                 <Route
                     path="/traffic/add"
                     element={
-                        <ProtectedRoute allowedRoles={["admin"]}>
-                            <TrafficForm />
+                        <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
                         </ProtectedRoute>
                     }
                 />
@@ -139,6 +139,15 @@ function App() {
                     element={
                         <ProtectedRoute allowedRoles={["admin"]}>
                             <EditTraffic />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
+                            <AdminDashboard />
                         </ProtectedRoute>
                     }
                 />

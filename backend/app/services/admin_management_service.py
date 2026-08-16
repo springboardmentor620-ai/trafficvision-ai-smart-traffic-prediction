@@ -1,13 +1,14 @@
-"""Service layer for promote/demote and the admin request/approval
-flow, plus the last-super-admin protection helper reused by account
-deletion. Same pattern as admin_invitation_service.py and
-password_reset_service.py: thin routes, logic here, ValueError for
-any rejected case which the calling route turns into an
-HTTPException.
+"""Service layer for promote/demote, the admin request/approval flow,
+user listing/suspend/restore (Step 5), plus the last-super-admin
+protection helper reused by account deletion. Same pattern as
+admin_invitation_service.py and password_reset_service.py: thin
+routes, logic here, ValueError for any rejected case which the
+calling route turns into an HTTPException.
 """
  
 from datetime import datetime, timezone
  
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
  
@@ -18,10 +19,13 @@ from app.constants import (
     ADMIN,
     SUPER_ADMIN,
     ACTIVE,
+    SUSPENDED,
     AUDIT_USER_PROMOTED,
     AUDIT_USER_DEMOTED,
     AUDIT_ADMIN_REQUEST_APPROVED,
     AUDIT_ADMIN_REQUEST_REJECTED,
+    AUDIT_ACCOUNT_SUSPENDED,
+    AUDIT_ACCOUNT_RESTORED,
 )
 from app.services.audit_service import build_audit_log_entry
  
@@ -381,4 +385,195 @@ def reject_admin_request(
         raise
  
     return request
+ 
+ 
+# =========================================================
+# USER MANAGEMENT (Step 5)
+# =========================================================
+ 
+def list_users(
+    db: Session,
+    search: str = None,
+    role: str = None,
+    status: str = None,
+    page: int = 1,
+    page_size: int = 20
+):
+    """
+    Lists users with optional search (matches name or email,
+    case-insensitive substring) and exact role/status filters, plus
+    pagination. Returns (items, total).
+    """
+ 
+    query = db.query(User)
+ 
+    if search:
+        pattern = f"%{search}%"
+        query = query.filter(
+            or_(User.name.ilike(pattern), User.email.ilike(pattern))
+        )
+ 
+    if role:
+        query = query.filter(User.role == role)
+ 
+    if status:
+        query = query.filter(User.status == status)
+ 
+    total = query.count()
+ 
+    page = max(page, 1)
+    page_size = max(min(page_size, 100), 1)
+ 
+    items = (
+        query
+        .order_by(User.id.asc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+ 
+    return items, total
+ 
+ 
+def get_user(db: Session, user_id: int) -> User:
+    """Fetches a single user by id. Raises ValueError if not found."""
+ 
+    user = db.query(User).filter(User.id == user_id).first()
+ 
+    if not user:
+        raise ValueError("User not found.")
+ 
+    return user
+ 
+ 
+def _assert_can_target_for_suspend_restore(target_user: User, acted_by: User):
+    """
+    Shared authorization guard for suspend_user/restore_user:
+ 
+    - A super_admin can never be targeted through this action at
+      all, by anyone, regardless of who's asking. This is a
+      deliberately stronger guarantee than "protect the LAST
+      super_admin" - no super_admin can be suspended/restored here,
+      full stop. If a super_admin genuinely needs to be suspended,
+      that's a manual database operation, consistent with how
+      super_admin accounts are only ever created manually (see
+      migrations/001_rbac_foundation.sql).
+    - An admin target can only be acted on by a super_admin (matches
+      the spec: "Super Admin can: Suspend/deactivate administrators
+      where appropriate"; "Admins MUST NOT: Perform unrestricted
+      security-critical operations").
+    - An operator target can be acted on by an admin or a
+      super_admin (both already pass require_admin at the route
+      level).
+    - Acting on your own account is never allowed here (an admin
+      suspending themselves would lock themselves out).
+    """
+ 
+    if target_user.id == acted_by.id:
+        raise ValueError(
+            "You cannot suspend or restore your own account."
+        )
+ 
+    if target_user.role == SUPER_ADMIN:
+        raise ValueError(
+            "Super admin accounts cannot be suspended or restored "
+            "through this action."
+        )
+ 
+    if target_user.role == ADMIN and acted_by.role != SUPER_ADMIN:
+        raise ValueError(
+            "Only a super_admin can suspend or restore an admin."
+        )
+ 
+ 
+def suspend_user(db: Session, target_user_id: int, acted_by: User) -> User:
+    """Suspends a user (operator, by an admin or super_admin; admin,
+    by a super_admin only)."""
+ 
+    target_user = db.query(User).filter(
+        User.id == target_user_id
+    ).first()
+ 
+    if not target_user:
+        raise ValueError("User not found.")
+ 
+    _assert_can_target_for_suspend_restore(target_user, acted_by)
+ 
+    if target_user.status == SUSPENDED:
+        raise ValueError("This account is already suspended.")
+ 
+    status_before = target_user.status
+ 
+    target_user.status = SUSPENDED
+ 
+    db.add(
+        build_audit_log_entry(
+            action=AUDIT_ACCOUNT_SUSPENDED,
+            actor_user=acted_by,
+            target_user_id=target_user.id,
+            metadata={
+                "status_before": status_before,
+                "status_after": SUSPENDED
+            }
+        )
+    )
+ 
+    try:
+ 
+        db.commit()
+ 
+        db.refresh(target_user)
+ 
+    except SQLAlchemyError:
+ 
+        db.rollback()
+ 
+        raise
+ 
+    return target_user
+ 
+ 
+def restore_user(db: Session, target_user_id: int, acted_by: User) -> User:
+    """Restores a suspended user back to active (same authorization
+    rules as suspend_user)."""
+ 
+    target_user = db.query(User).filter(
+        User.id == target_user_id
+    ).first()
+ 
+    if not target_user:
+        raise ValueError("User not found.")
+ 
+    _assert_can_target_for_suspend_restore(target_user, acted_by)
+ 
+    if target_user.status != SUSPENDED:
+        raise ValueError("This account is not currently suspended.")
+ 
+    target_user.status = ACTIVE
+ 
+    db.add(
+        build_audit_log_entry(
+            action=AUDIT_ACCOUNT_RESTORED,
+            actor_user=acted_by,
+            target_user_id=target_user.id,
+            metadata={
+                "status_before": SUSPENDED,
+                "status_after": ACTIVE
+            }
+        )
+    )
+ 
+    try:
+ 
+        db.commit()
+ 
+        db.refresh(target_user)
+ 
+    except SQLAlchemyError:
+ 
+        db.rollback()
+ 
+        raise
+ 
+    return target_user
  

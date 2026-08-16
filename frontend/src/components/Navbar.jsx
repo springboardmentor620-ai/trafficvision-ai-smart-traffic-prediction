@@ -106,10 +106,13 @@ function Navbar() {
                 { name: "Trends", path: "/trends" },
                 { name: "Prediction", path: "/prediction" },
                 { name: "History", path: "/prediction/history" },
-                ...(role === "admin"
+                ...(role === "admin" || role === "super_admin"
                     ? [{ name: "Add Traffic", path: "/traffic/add" }]
                     : []),
-                { name: "Traffic Records", path: "/traffic/list" }
+                { name: "Traffic Records", path: "/traffic/list" },
+                ...(role === "admin" || role === "super_admin"
+                    ? [{ name: "🛡️ Admin Dashboard", path: "/admin" }]
+                    : [])
             ].map((item) => (
                 <Link
                     key={item.name}
