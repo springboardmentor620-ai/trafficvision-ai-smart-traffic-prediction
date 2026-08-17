@@ -31,6 +31,65 @@ description_encoder = joblib.load(
 )
 
 
+# --------------------------------------------------------------------------
+# Travel stats (average_speed / travel_time / delay)
+#
+# PredictionHistory has always had these three columns, but nothing ever
+# populated them, so the dashboard's average_speed silently reported 0.
+#
+# Rather than inventing a new formula, this mirrors the calculation that
+# already exists and ships in frontend/src/pages/Prediction.jsx (used
+# there to display "Average Speed", travel time, and delay to the user
+# for the exact same prediction) - same three congestion-tier speed
+# values (60/40/25 km/h), same travel-time formula, same delay
+# definition (minutes lost vs. the 60 km/h free-flow baseline). Keeping
+# this here means the persisted PredictionHistory row matches what the
+# user was already shown, instead of a second, independently-invented
+# calculation drifting from it over time.
+#
+# predicted_traffic (a vehicle-count/volume figure) is never used as a
+# stand-in for speed here - speed is derived only from the congestion
+# tier (Low/Medium/High), which is itself derived from predicted_traffic
+# by the existing classification a few lines below, exactly as the
+# frontend does.
+# --------------------------------------------------------------------------
+
+CONGESTION_AVERAGE_SPEED_KMH = {
+    "Low": 60.0,
+    "Medium": 40.0,
+    "High": 25.0,
+}
+
+# Free-flow baseline used for the delay calculation - matches the
+# frontend's `idealTime`, which uses this same 60 km/h value (the
+# Low-congestion speed above). "delay" means minutes lost compared to
+# covering this distance at Low-congestion speed.
+IDEAL_SPEED_KMH = 60.0
+
+
+def _travel_stats(congestion: str, distance_km):
+    """Returns (average_speed_kmh, travel_time_minutes, delay_minutes)
+    for a prediction, using the same congestion-tier speed assumptions
+    already used by frontend/src/pages/Prediction.jsx to display this
+    exact information for the same prediction."""
+
+    average_speed = CONGESTION_AVERAGE_SPEED_KMH.get(
+        congestion, IDEAL_SPEED_KMH
+    )
+
+    distance_km = distance_km or 0.0
+
+    travel_time = (distance_km / average_speed) * 60
+    ideal_time = (distance_km / IDEAL_SPEED_KMH) * 60
+    delay = travel_time - ideal_time
+
+    return (
+        round(average_speed, 1),
+        round(travel_time, 1),
+        round(delay, 1),
+    )
+
+
 def predict_traffic(data, db, current_user):
 
     print("Supported Holidays:")
@@ -95,6 +154,10 @@ def predict_traffic(data, db, current_user):
 
     route = "Best Route"
 
+    average_speed, travel_time, delay = _travel_stats(
+        congestion, data.distance
+    )
+
     history = PredictionHistory(
         user_id=current_user.id,
 
@@ -119,7 +182,10 @@ def predict_traffic(data, db, current_user):
         predicted_traffic=predicted_value,
         confidence=confidence,
         congestion=congestion,
-        recommended_route=route
+        recommended_route=route,
+        average_speed=average_speed,
+        travel_time=travel_time,
+        delay=delay,
     )
 
     db.add(history)

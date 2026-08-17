@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Literal
 
 class UserCreate(BaseModel):
@@ -52,4 +52,9 @@ class ForgotPasswordRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     token: str
-    new_password: str
+
+    # Minimum length enforced here (Step 6) - previously accepted
+    # even an empty string. Scoped to this schema only; UserCreate's
+    # password field has the same historical gap but that's
+    # registration, not password reset, so left untouched here.
+    new_password: str = Field(min_length=8)

@@ -121,6 +121,7 @@ function App() {
                     path="/traffic/add"
                     element={
                         <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
+                            <TrafficForm />
                         </ProtectedRoute>
                     }
                 />

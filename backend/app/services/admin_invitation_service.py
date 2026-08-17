@@ -9,7 +9,6 @@ etc.) - the calling route turns that into the appropriate HTTPException,
 the same convention password_reset_service's callers already use.
 """
  
-import hashlib
 from datetime import datetime, timedelta, timezone
  
 from sqlalchemy.orm import Session
@@ -22,6 +21,7 @@ from app.utils.email_utils import (
     generate_invitation_token,
     send_admin_invitation_email,
 )
+from app.utils.token_utils import hash_token
 from app.constants import (
     ADMIN,
     ACTIVE,
@@ -30,17 +30,6 @@ from app.constants import (
 )
 from app.services.audit_service import build_audit_log_entry
 from app.config import ADMIN_INVITATION_EXPIRE_HOURS
- 
- 
-def _hash_token(raw_token: str) -> str:
-    """SHA-256 of the raw token. Deliberately not passlib's
-    hash_password() (bcrypt) - that's designed for slow-hashing
-    low-entropy human passwords, which is unnecessary and slower
-    than needed for an already-high-entropy 32-byte secrets.token_urlsafe
-    value. A plain fast hash is standard practice for this kind of
-    lookup token and is what the DB queries against directly."""
- 
-    return hashlib.sha256(raw_token.encode()).hexdigest()
  
  
 def create_admin_invitation(
@@ -79,7 +68,7 @@ def create_admin_invitation(
  
     invitation = AdminInvitation(
         email=email,
-        token_hash=_hash_token(raw_token),
+        token_hash=hash_token(raw_token),
         status="pending",
         invited_by_id=invited_by.id,
         expires_at=datetime.now(timezone.utc) + timedelta(
@@ -173,7 +162,7 @@ def accept_admin_invitation(
     raw_token = raw_token.strip()
  
     invitation = db.query(AdminInvitation).filter(
-        AdminInvitation.token_hash == _hash_token(raw_token)
+        AdminInvitation.token_hash == hash_token(raw_token)
     ).first()
  
     if not invitation:
