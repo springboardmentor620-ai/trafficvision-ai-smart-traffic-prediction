@@ -165,8 +165,7 @@ function DashboardContent() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Car} label="Active vehicles" value={data ? data.total_vehicles.toLocaleString() : "—"} accent="signal" />
-        <StatCard
+            <StatCard icon={Car} label="Recorded vehicles" value={data ? data.total_vehicles.toLocaleString() : "—"} accent="signal" />        <StatCard
           icon={Gauge}
           label="Roads monitored"
           value={data ? String(data.total_roads) : "—"}
@@ -208,7 +207,7 @@ function DashboardContent() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-muted font-mono">
-                        {road.vehicle_count !== null ? `${road.vehicle_count} vehicles` : "No data"}
+                        {road.vehicle_count !== null ? `${road.vehicle_count} recorded` : "No data"}
                       </span>
                       {style && (
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.text} ${style.bg}`}>

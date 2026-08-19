@@ -2,7 +2,8 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-
+from sqlalchemy import Date
+from app.modules.traffic_monitoring.models import TrafficReading
 from app.modules.traffic_monitoring.models import CongestionLevel
 from app.modules.traffic_monitoring.services import get_all_roads, get_latest_reading_per_road
 
@@ -246,7 +247,173 @@ def get_history(db: Session, period: str) -> list[dict]:
     for r in result:
         del r["_sort_key"]
     return result
+# ---------------------------------------------------------------------------
+# WEEKLY ANALYTICS — SUNDAY TO SATURDAY
+# ---------------------------------------------------------------------------
 
+def get_weekly_analytics(db: Session) -> list[dict]:
+    from datetime import timedelta
+    from sqlalchemy import Date
+
+    # Find the latest complete Sunday-Saturday week
+    week_row = (
+        db.query(
+            (
+                func.date_trunc(
+                    "week",
+                    TrafficReading.recorded_at
+                ).cast(Date) - timedelta(days=1)
+            ).label("week_start")
+        )
+        .group_by(
+            func.date_trunc(
+                "week",
+                TrafficReading.recorded_at
+            ).cast(Date)
+        )
+        .having(
+            func.count(
+                func.distinct(
+                    func.date(TrafficReading.recorded_at)
+                )
+            ) == 7
+        )
+        .order_by(
+            (
+                func.date_trunc(
+                    "week",
+                    TrafficReading.recorded_at
+                ).cast(Date) - timedelta(days=1)
+            ).desc()
+        )
+        .first()
+    )
+
+    if not week_row:
+        return []
+
+    week_start = week_row.week_start
+
+    # Convert datetime to date if necessary
+    if hasattr(week_start, "date"):
+        week_start = week_start.date()
+
+    week_end = week_start + timedelta(days=6)
+
+    # Get all readings for this Sunday-Saturday week
+    readings = (
+        db.query(TrafficReading)
+        .filter(
+            func.date(TrafficReading.recorded_at) >= week_start,
+            func.date(TrafficReading.recorded_at) <= week_end,
+        )
+        .all()
+    )
+
+    days = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    ]
+
+    weekly_data = []
+
+    for offset, day_name in enumerate(days):
+        current_date = week_start + timedelta(days=offset)
+
+        day_readings = [
+            r
+            for r in readings
+            if r.recorded_at.date() == current_date
+        ]
+
+        if day_readings:
+            total_vehicles = sum(
+                r.vehicle_count
+                for r in day_readings
+            )
+
+            speeds = [
+                r.avg_speed_kmph
+                for r in day_readings
+                if r.avg_speed_kmph is not None
+            ]
+
+            utilizations = [
+                r.road_capacity_utilization
+                for r in day_readings
+                if r.road_capacity_utilization is not None
+            ]
+
+            avg_speed = (
+                round(
+                    sum(speeds) / len(speeds),
+                    2
+                )
+                if speeds
+                else 0
+            )
+
+            avg_utilization = (
+                round(
+                    sum(utilizations) / len(utilizations),
+                    2
+                )
+                if utilizations
+                else 0
+            )
+
+            congestion = {
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "severe": 0,
+            }
+
+            for r in day_readings:
+                level = str(r.congestion_level).lower()
+
+                if "low" in level:
+                    congestion["low"] += 1
+                elif "moderate" in level:
+                    congestion["moderate"] += 1
+                elif "high" in level:
+                    congestion["high"] += 1
+                elif "severe" in level:
+                    congestion["severe"] += 1
+
+            readings_count = len(day_readings)
+
+        else:
+            total_vehicles = 0
+            avg_speed = 0
+            avg_utilization = 0
+            readings_count = 0
+
+            congestion = {
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "severe": 0,
+            }
+
+        weekly_data.append(
+            {
+                "day": day_name,
+                "date": current_date.isoformat(),
+                "total_vehicles": total_vehicles,
+                "avg_speed_kmph": avg_speed,
+                "avg_utilization_percent": avg_utilization,
+                "readings_count": readings_count,
+                "congestion": congestion,
+            }
+        )
+
+    return weekly_data
 
 # ---------------------------------------------------------------------------
 # ZONE ANALYTICS (richer per-zone breakdown)

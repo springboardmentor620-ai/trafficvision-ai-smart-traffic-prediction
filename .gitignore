@@ -230,3 +230,5 @@ frontend/dist/
 
 # VS Code
 .vscode/
+# Frontend environment variables
+frontend/.env.local

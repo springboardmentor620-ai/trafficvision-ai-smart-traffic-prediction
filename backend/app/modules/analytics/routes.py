@@ -76,3 +76,9 @@ def get_insights(db: Session = Depends(get_db), current_user: User = Depends(get
     (congestion, trends, rankings) — not templated filler.
     """
     return services.generate_insights(db)
+@router.get("/analytics/weekly")
+def get_weekly_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return services.get_weekly_analytics(db)

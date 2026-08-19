@@ -2,6 +2,9 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from jose import jwt
 from sqlalchemy.orm import Session
+import secrets
+from datetime import datetime, timedelta, timezone
+from app.modules.user_management.models import User, PasswordResetToken
 
 from app.config import settings
 from app.modules.user_management.models import User, Role
@@ -104,3 +107,52 @@ def user_to_response_dict(user: User) -> dict:
         "is_active": user.is_active,
         "created_at": user.created_at,
     }
+def create_password_reset_token(db: Session, user: User) -> str:
+    token = secrets.token_urlsafe(32)
+
+    reset_token = PasswordResetToken(
+        user_id=user.id,
+        token=token,
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=30),
+        used=False,
+    )
+
+    db.add(reset_token)
+    db.commit()
+
+    return token
+def reset_password(
+    db: Session,
+    token: str,
+    new_password: str,
+) -> bool:
+
+    reset_token = (
+        db.query(PasswordResetToken)
+        .filter(
+            PasswordResetToken.token == token,
+            PasswordResetToken.used == False,
+        )
+        .first()
+    )
+
+    if not reset_token:
+        return False
+
+    now = datetime.now(timezone.utc)
+
+    if reset_token.expires_at < now:
+        return False
+
+    user = db.query(User).filter(User.id == reset_token.user_id).first()
+
+    if not user:
+        return False
+
+    user.password_hash = hash_password(new_password)
+
+    reset_token.used = True
+
+    db.commit()
+
+    return True

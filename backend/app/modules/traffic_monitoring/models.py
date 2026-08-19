@@ -1,5 +1,4 @@
 import enum
-print(">>> USING UPDATED models.py <<<")
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -33,18 +32,17 @@ class Road(Base):
 
 
 class TrafficReading(Base):
-    """
-    A single point-in-time traffic reading for a road, e.g. coming from
-    a sensor, CCTV feed, or a simulated data generator during development.
-    """
     __tablename__ = "traffic_readings"
-
     id = Column(Integer, primary_key=True, index=True)
     road_id = Column(Integer, ForeignKey("roads.id"), nullable=False)
     vehicle_count = Column(Integer, nullable=False)
     avg_speed_kmph = Column(Float, nullable=True)
     congestion_level = Column(Enum(CongestionLevel), nullable=False)
     recorded_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+    # ---- Enrichment fields from the Bangalore Kaggle dataset ----
+    # All nullable: live/manual/simulated readings simply leave these null.
+    source_congestion_percentage = Column(Float, nullable=True)
     travel_time_index = Column(Float, nullable=True)
     road_capacity_utilization = Column(Float, nullable=True)
     incident_reports = Column(Integer, nullable=True)

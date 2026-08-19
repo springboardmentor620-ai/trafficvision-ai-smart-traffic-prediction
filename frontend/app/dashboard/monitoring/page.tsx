@@ -217,7 +217,9 @@ function MonitoringContent() {
                       <td className="py-2 text-muted">{road.zone ?? "—"}</td>
                       <td className="py-2 text-ink font-mono">{road.vehicle_count ?? "—"}</td>
                       <td className="py-2 text-ink font-mono">
-                        {road.avg_speed_kmph !== null ? `${road.avg_speed_kmph} km/h` : "—"}
+                        {road.avg_speed_kmph !== null
+  ? `${Number(road.avg_speed_kmph).toFixed(2)} km/h`
+  : "—"}
                       </td>
                       <td className="py-2">
                         {style ? (

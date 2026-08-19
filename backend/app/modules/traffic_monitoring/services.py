@@ -26,6 +26,23 @@ def calculate_congestion_level(vehicle_count: int, capacity: int) -> CongestionL
         return CongestionLevel.HIGH
     else:
         return CongestionLevel.SEVERE
+    
+def normalize_congestion_percentage(percentage: float) -> CongestionLevel:
+    """
+    Maps a raw congestion percentage as reported directly by an external
+    dataset onto our CongestionLevel enum. Kept separate from
+    calculate_congestion_level(), which derives a level from
+    vehicle_count/capacity for live/manual/simulated readings.
+    Bands: 0-39 -> LOW, 40-69 -> MODERATE, 70-89 -> HIGH, 90-100 -> SEVERE.
+    """
+    if percentage < 40:
+        return CongestionLevel.LOW
+    elif percentage < 70:
+        return CongestionLevel.MODERATE
+    elif percentage < 90:
+        return CongestionLevel.HIGH
+    else:
+        return CongestionLevel.SEVERE
 
 
 def create_road(db: Session, name: str, zone: str | None, latitude: float | None,

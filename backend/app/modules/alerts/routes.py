@@ -73,3 +73,16 @@ def delete_alert(
     if not deleted:
         raise HTTPException(404, "Alert not found")
     return None
+@router.post("/alerts/generate-severe")
+def generate_severe_alerts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(["admin", "traffic_operator"])
+    ),
+):
+    created_count = services.create_alerts_for_latest_severe_readings(db)
+
+    return {
+        "message": "Severe alerts checked successfully",
+        "alerts_created": created_count,
+    }

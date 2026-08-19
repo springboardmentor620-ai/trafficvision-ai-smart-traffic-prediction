@@ -129,16 +129,18 @@ function AlertsContent() {
   // Load alerts as soon as the page opens, then keep them fresh automatically
   // by polling every 5 seconds — no manual refresh needed.
   useEffect(() => {
-    if (!token) return;
+  if (!token) return;
 
-    fetchAlerts();
+  fetchAlerts();
 
-    const interval = setInterval(() => {
+  const interval = setInterval(() => {
+    if (document.visibilityState === "visible") {
       fetchAlerts();
-    }, 5000);
+    }
+  }, 15000);
 
-    return () => clearInterval(interval);
-  }, [token, fetchAlerts]);
+  return () => clearInterval(interval);
+}, [token, fetchAlerts]);
 
   useEffect(() => {
     if (!token || !canManage) return;

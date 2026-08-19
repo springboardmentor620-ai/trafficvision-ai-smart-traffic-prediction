@@ -74,3 +74,59 @@ def maybe_create_congestion_alert(db: Session, road: Road, reading: TrafficReadi
         severity=AlertSeverity.CRITICAL,
         message=message,
     )
+def create_alerts_for_latest_severe_readings(db: Session) -> int:
+    """
+    Check the latest traffic reading for every road.
+    Automatically create a critical alert when the latest
+    congestion level is severe.
+    """
+    from app.modules.traffic_monitoring.services import get_all_roads
+
+    roads = get_all_roads(db)
+    created_count = 0
+
+    for road in roads:
+        latest_reading = (
+            db.query(TrafficReading)
+            .filter(TrafficReading.road_id == road.id)
+            .order_by(TrafficReading.recorded_at.desc())
+            .first()
+        )
+
+        if not latest_reading:
+            continue
+
+        if latest_reading.congestion_level != CongestionLevel.SEVERE:
+            continue
+
+        existing = (
+            db.query(Alert)
+            .filter(
+                Alert.road_id == road.id,
+                Alert.type == AlertType.CONGESTION,
+                Alert.is_resolved == False,
+            )
+            .first()
+        )
+
+        if existing:
+            continue
+
+        message = (
+            f"🚨 Severe congestion detected on {road.name}. "
+            f"Current vehicles: {latest_reading.vehicle_count}. "
+            f"Average speed: "
+            f"{latest_reading.avg_speed_kmph:.1f} km/h."
+        )
+
+        create_alert(
+            db=db,
+            road_id=road.id,
+            type_=AlertType.CONGESTION,
+            severity=AlertSeverity.CRITICAL,
+            message=message,
+        )
+
+        created_count += 1
+
+    return created_count

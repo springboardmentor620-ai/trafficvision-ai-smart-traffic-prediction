@@ -13,6 +13,8 @@ from app.modules.user_management.schemas import (
     UserResponse,
     ProfileUpdateRequest,
     PasswordChangeRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
 )
 
 router = APIRouter()
@@ -136,3 +138,52 @@ def deactivate_user(
     user.is_active = False
     db.commit()
     return None
+# ---------------------------------------------------------------------------
+# FORGOT PASSWORD / PASSWORD RESET
+# ---------------------------------------------------------------------------
+
+@router.post("/auth/forgot-password")
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    user = services.get_user_by_email(db, payload.email)
+
+    # Do not reveal whether an email exists.
+    if not user:
+        return {
+            "message": "If an account exists with this email, a password reset link has been generated."
+        }
+
+    token = services.create_password_reset_token(db, user)
+
+    # Development mode:
+    # In production, send this link through email.
+    reset_link = f"http://localhost:3000/reset-password?token={token}"
+
+    return {
+        "message": "Password reset link generated.",
+        "reset_link": reset_link,
+    }
+
+
+@router.post("/auth/reset-password")
+def reset_password(
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    success = services.reset_password(
+        db,
+        payload.token,
+        payload.new_password,
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired password reset token",
+        )
+
+    return {
+        "message": "Password has been reset successfully."
+    }

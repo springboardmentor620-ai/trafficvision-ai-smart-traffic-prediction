@@ -112,21 +112,26 @@ def get_prediction_history(db: Session, road_id: int, limit: int = 20) -> list[P
 
 
 def generate_prediction_report(db: Session) -> list[dict]:
-    from app.modules.traffic_monitoring.services import get_all_roads, get_latest_reading_per_road
+    from app.modules.traffic_monitoring.services import (
+        get_all_roads,
+        get_latest_reading_per_road,
+    )
 
     roads = get_all_roads(db)
     latest_readings = get_latest_reading_per_road(db)
 
     report = []
+
     for road in roads:
         reading = latest_readings.get(road.id)
         prediction = get_latest_prediction(db, road.id)
 
         trend = None
+
         if reading and prediction:
-            if prediction.predicted_vehicle_count > reading.vehicle_count * 1.05:
+            if prediction.predicted_vehicle_count > reading.vehicle_count:
                 trend = "increasing"
-            elif prediction.predicted_vehicle_count < reading.vehicle_count * 0.95:
+            elif prediction.predicted_vehicle_count < reading.vehicle_count:
                 trend = "decreasing"
             else:
                 trend = "stable"
@@ -137,8 +142,12 @@ def generate_prediction_report(db: Session) -> list[dict]:
             "zone": road.zone,
             "current_vehicle_count": reading.vehicle_count if reading else None,
             "current_congestion_level": reading.congestion_level if reading else None,
-            "predicted_vehicle_count": prediction.predicted_vehicle_count if prediction else None,
-            "predicted_congestion_level": prediction.predicted_congestion_level if prediction else None,
+            "predicted_vehicle_count": (
+                prediction.predicted_vehicle_count if prediction else None
+            ),
+            "predicted_congestion_level": (
+                prediction.predicted_congestion_level if prediction else None
+            ),
             "predicted_for": prediction.predicted_for if prediction else None,
             "trend": trend,
         })
