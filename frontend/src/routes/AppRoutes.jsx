@@ -1,36 +1,144 @@
 import {
-    Routes,
+    Navigate,
     Route,
-    Navigate
+    Routes
 } from "react-router-dom";
 
-import Landing from "../pages/Landing/Landing";
-import Login from "../pages/Login/Login";
-import Register from "../pages/Register/Register";
 
-import Dashboard from "../pages/Dashboard/Dashboard";
-import Prediction from "../pages/Prediction/Prediction";
-import Reports from "../pages/Reports/Reports";
-import Maps from "../pages/Maps/Maps";
-import Analytics from "../pages/Analytics/Analytics";
-import Alerts from "../pages/Alerts/Alerts";
+import AuthService
+    from "../services/authService";
 
-import AuthService from "../services/authService";
 
+/* =========================================================
+   AUTH PAGES
+========================================================= */
+
+import PublicDashboard
+    from "../pages/PublicDashboard/PublicDashboard";
+
+import Login
+    from "../pages/Login/Login";
+
+import Register
+    from "../pages/Register/Register";
+
+
+/* =========================================================
+   MAIN PAGES
+========================================================= */
+
+import Dashboard
+    from "../pages/Dashboard/Dashboard";
+
+import Alerts
+    from "../pages/Alerts/Alerts";
+
+import Analytics
+    from "../pages/Analytics/Analytics";
+
+import Maps
+    from "../pages/Maps/Maps";
+
+import Prediction
+    from "../pages/Prediction/Prediction";
+
+import Reports
+    from "../pages/Reports/Reports";
+
+import Profile
+    from "../pages/Profile/Profile";
+
+import Settings
+    from "../pages/Settings/Settings";
+
+
+/* =========================================================
+   ADMIN PAGES
+========================================================= */
+
+import UserManagement
+    from "../pages/UserManagement/UserManagement";
+
+import SystemActivity
+    from "../pages/SystemActivity/SystemActivity";
+
+import SystemControls
+    from "../pages/SystemControls/SystemControls";
+
+
+/* =========================================================
+   PROTECTED ROUTE
+========================================================= */
 
 function ProtectedRoute({ children }) {
 
-    return AuthService.isAuthenticated()
+    const authenticated =
+        AuthService.isAuthenticated();
 
-        ? children
 
-        : <Navigate
-            to="/login"
-            replace
-        />;
+    if (!authenticated) {
+
+        return (
+            <Navigate
+                to="/login"
+                replace
+            />
+        );
+
+    }
+
+
+    return children;
 
 }
 
+
+/* =========================================================
+   ADMIN ROUTE
+========================================================= */
+
+function AdminRoute({ children }) {
+
+    const authenticated =
+        AuthService.isAuthenticated();
+
+
+    const role =
+        AuthService.getRole();
+
+
+    if (!authenticated) {
+
+        return (
+            <Navigate
+                to="/login"
+                replace
+            />
+        );
+
+    }
+
+
+    if (role !== "admin") {
+
+        return (
+            <Navigate
+                to="/dashboard"
+                replace
+            />
+        );
+
+    }
+
+
+    return children;
+
+}
+
+
+/* =========================================================
+   APP ROUTES
+========================================================= */
 
 function AppRoutes() {
 
@@ -38,19 +146,22 @@ function AppRoutes() {
 
         <Routes>
 
+
             {/* =================================================
                 PUBLIC ROUTES
             ================================================= */}
 
-            <Route
-                path="/"
-                element={<Landing />}
+            <Route 
+                path="/" 
+                element={<PublicDashboard />} 
             />
+
 
             <Route
                 path="/login"
                 element={<Login />}
             />
+
 
             <Route
                 path="/register"
@@ -59,7 +170,7 @@ function AppRoutes() {
 
 
             {/* =================================================
-                PROTECTED ROUTES
+                PROTECTED — DASHBOARD
             ================================================= */}
 
             <Route
@@ -72,19 +183,9 @@ function AppRoutes() {
             />
 
 
-            {/* MAPS & ROUTES */}
-
-            <Route
-                path="/maps"
-                element={
-                    <ProtectedRoute>
-                        <Maps />
-                    </ProtectedRoute>
-                }
-            />
-
-
-            {/* PREDICTION */}
+            {/* =================================================
+                PROTECTED — PREDICTION
+            ================================================= */}
 
             <Route
                 path="/prediction"
@@ -96,31 +197,23 @@ function AppRoutes() {
             />
 
 
-            {/* ANALYTICS */}
+            {/* =================================================
+                PROTECTED — MAPS
+            ================================================= */}
 
             <Route
-                path="/analytics"
+                path="/maps"
                 element={
                     <ProtectedRoute>
-                        <Analytics />
+                        <Maps />
                     </ProtectedRoute>
                 }
             />
 
 
-            {/* REPORTS */}
-
-            <Route
-                path="/reports"
-                element={
-                    <ProtectedRoute>
-                        <Reports />
-                    </ProtectedRoute>
-                }
-            />
-
-
-            {/* ALERTS */}
+            {/* =================================================
+                PROTECTED — ALERTS
+            ================================================= */}
 
             <Route
                 path="/alerts"
@@ -133,6 +226,104 @@ function AppRoutes() {
 
 
             {/* =================================================
+                PROTECTED — ANALYTICS
+            ================================================= */}
+
+            <Route
+                path="/analytics"
+                element={
+                    <ProtectedRoute>
+                        <Analytics />
+                    </ProtectedRoute>
+                }
+            />
+
+
+            {/* =================================================
+                PROTECTED — REPORTS
+            ================================================= */}
+
+            <Route
+                path="/reports"
+                element={
+                    <ProtectedRoute>
+                        <Reports />
+                    </ProtectedRoute>
+                }
+            />
+
+
+            {/* =================================================
+                PROTECTED — PROFILE
+            ================================================= */}
+
+            <Route
+                path="/profile"
+                element={
+                    <ProtectedRoute>
+                        <Profile />
+                    </ProtectedRoute>
+                }
+            />
+
+
+            {/* =================================================
+                PROTECTED — SETTINGS
+            ================================================= */}
+
+            <Route
+                path="/settings"
+                element={
+                    <ProtectedRoute>
+                        <Settings />
+                    </ProtectedRoute>
+                }
+            />
+
+
+            {/* =================================================
+                ADMIN — USER MANAGEMENT
+            ================================================= */}
+
+            <Route
+                path="/users"
+                element={
+                    <AdminRoute>
+                        <UserManagement />
+                    </AdminRoute>
+                }
+            />
+
+
+            {/* =================================================
+                ADMIN — SYSTEM ACTIVITY
+            ================================================= */}
+
+            <Route
+                path="/system-activity"
+                element={
+                    <AdminRoute>
+                        <SystemActivity />
+                    </AdminRoute>
+                }
+            />
+
+
+            {/* =================================================
+                ADMIN — SYSTEM CONTROLS
+            ================================================= */}
+
+            <Route
+                path="/system-controls"
+                element={
+                    <AdminRoute>
+                        <SystemControls />
+                    </AdminRoute>
+                }
+            />
+
+
+            {/* =================================================
                 FALLBACK
             ================================================= */}
 
@@ -140,7 +331,7 @@ function AppRoutes() {
                 path="*"
                 element={
                     <Navigate
-                        to="/"
+                        to="/dashboard"
                         replace
                     />
                 }

@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime
 
 from app.ml.model_loader import encoders
 from app.ml.model_loader import risk_model
@@ -31,27 +32,37 @@ FEATURE_COLUMNS = [
 
 def prepare_dataframe(request):
 
+    current_date = datetime.now()
+
     data = {
         "city": request.city,
         "state": request.state,
+
         "hour": request.hour,
         "day_of_week": request.day_of_week,
         "is_weekend": request.is_weekend,
+
         "road_type": request.road_type,
         "lanes": request.lanes,
         "traffic_signal": request.traffic_signal,
+
         "weather": request.weather,
         "visibility": request.visibility,
         "temperature": request.temperature,
+
         "traffic_density": request.traffic_density,
         "cause": request.cause,
         "vehicles_involved": request.vehicles_involved,
         "casualties": request.casualties,
+
         "is_peak_hour": request.is_peak_hour,
         "festival": request.festival,
-        "day": 1,
-        "month": 1,
-        "year": 2026
+
+        # Use the actual current date
+        # instead of fixed values.
+        "day": current_date.day,
+        "month": current_date.month,
+        "year": current_date.year
     }
 
     df = pd.DataFrame([data])
@@ -72,12 +83,19 @@ def prepare_dataframe(request):
 
         encoder = encoders[column]
 
-        if df.loc[0, column] in encoder.classes_:
-            df[column] = encoder.transform(df[column])
+        value = str(df.loc[0, column])
+
+        if value in encoder.classes_:
+
+            df[column] = encoder.transform([value])
+
         else:
+
+            # Keep the existing fallback behaviour
+            # for unseen categories.
             df[column] = 0
 
-    # IMPORTANT: Match training feature order exactly
+    # Match the exact feature order used during training.
     df = df[FEATURE_COLUMNS]
 
     return df
@@ -87,11 +105,21 @@ def predict(request):
 
     df = prepare_dataframe(request)
 
+    # =========================================================
+    # SEVERITY PREDICTION
+    # =========================================================
+
     severity_encoded = severity_model.predict(df)[0]
 
-    severity = encoders["accident_severity"].inverse_transform(
+    severity = encoders[
+        "accident_severity"
+    ].inverse_transform(
         [severity_encoded]
     )[0]
+
+    # =========================================================
+    # RISK PREDICTION
+    # =========================================================
 
     risk = float(
         risk_model.predict(df)[0]

@@ -69,6 +69,27 @@ class TrafficAlertRepository:
 
 
     @staticmethod
+    def get_by_id(
+        db: Session,
+        alert_id: int
+    ):
+
+        return (
+
+            db.query(
+                TrafficAlert
+            )
+
+            .filter(
+                TrafficAlert.id == alert_id
+            )
+
+            .first()
+
+        )
+
+
+    @staticmethod
     def deactivate(
         db: Session,
         alert_id: int
@@ -97,5 +118,37 @@ class TrafficAlertRepository:
 
             db.refresh(alert)
 
+
+        return alert
+
+
+    @staticmethod
+    def delete(
+        db: Session,
+        alert_id: int
+    ):
+
+        alert = (
+
+            db.query(
+                TrafficAlert
+            )
+
+            .filter(
+                TrafficAlert.id == alert_id
+            )
+
+            .first()
+
+        )
+
+
+        if alert is None:
+            return None
+
+
+        db.delete(alert)
+
+        db.commit()
 
         return alert

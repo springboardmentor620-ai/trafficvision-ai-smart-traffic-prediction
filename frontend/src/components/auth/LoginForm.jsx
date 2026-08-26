@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import {
     FaEye,
     FaEyeSlash,
@@ -14,12 +14,15 @@ function LoginForm() {
 
     const navigate = useNavigate();
 
+    const [searchParams] = useSearchParams();
+
+    const selectedRole = searchParams.get("role");
+
     const [showPassword, setShowPassword] = useState(false);
 
     const [loading, setLoading] = useState(false);
 
     const [error, setError] = useState("");
-
 
     const [formData, setFormData] = useState({
         email: "",
@@ -44,23 +47,70 @@ function LoginForm() {
         setLoading(true);
         setError("");
 
+
         try {
 
-            await AuthService.login(formData);
+            const data = await AuthService.login(formData);
 
-            navigate("/dashboard");
+            /*
+             * The backend response is the source of truth
+             * for the user's actual role.
+             */
+
+            const actualRole =
+                data?.role ||
+                data?.user?.role ||
+                AuthService.getRole();
+
+
+            /*
+             * If the user came from a specific role button,
+             * make sure the logged-in account matches it.
+             */
+
+            if (
+                selectedRole &&
+                actualRole &&
+                actualRole.toLowerCase() !==
+                selectedRole.toLowerCase()
+            ) {
+
+                AuthService.logout();
+
+                setError(
+                    `This account is registered as ${actualRole}. ` +
+                    `Please use the ${actualRole} login option.`
+                );
+
+                return;
+
+            }
+
+
+            /*
+             * Successful authentication.
+             *
+             * Keep the existing application flow.
+             */
+
+            navigate("/dashboard", {
+                replace: true
+            });
 
         }
 
+
         catch (err) {
 
-            console.error(err);
+            console.error("Login error:", err);
 
             setError(
+                err?.response?.data?.detail ||
                 "Unable to login. Please check your email and password."
             );
 
         }
+
 
         finally {
 
@@ -71,11 +121,82 @@ function LoginForm() {
     }
 
 
+    const roleLabel =
+        selectedRole === "admin"
+            ? "Administrator"
+            : selectedRole === "operator"
+                ? "Operator"
+                : "Traffic Intelligence Platform";
+
+
     return (
+
         <form
             onSubmit={handleSubmit}
             className="w-full"
         >
+
+            {/* ROLE CONTEXT */}
+
+            {selectedRole && (
+
+                <div
+                    className="
+                        mb-6
+                        flex
+                        items-center
+                        justify-between
+                        rounded-xl
+                        border
+                        border-blue-100
+                        bg-blue-50
+                        px-4
+                        py-3
+                    "
+                >
+
+                    <div>
+
+                        <p
+                            className="
+                                text-xs
+                                font-medium
+                                text-slate-500
+                            "
+                        >
+                            Signing in as
+                        </p>
+
+                        <p
+                            className="
+                                mt-0.5
+                                text-sm
+                                font-semibold
+                                text-blue-700
+                            "
+                        >
+                            {roleLabel}
+                        </p>
+
+                    </div>
+
+
+                    <Link
+                        to="/"
+                        className="
+                            text-xs
+                            font-semibold
+                            text-blue-600
+                            hover:text-blue-700
+                        "
+                    >
+                        Change
+                    </Link>
+
+                </div>
+
+            )}
+
 
             {/* ERROR */}
 
@@ -91,6 +212,7 @@ function LoginForm() {
                         px-4
                         py-3
                         text-sm
+                        leading-5
                         text-red-600
                     "
                 >
@@ -126,6 +248,7 @@ function LoginForm() {
                     placeholder="Enter your email"
                     autoComplete="email"
                     required
+                    disabled={loading}
                     className="
                         mt-2
                         h-12
@@ -139,10 +262,14 @@ function LoginForm() {
                         text-slate-900
                         outline-none
                         transition
+
                         focus:border-blue-500
                         focus:bg-white
                         focus:ring-4
                         focus:ring-blue-500/10
+
+                        disabled:cursor-not-allowed
+                        disabled:opacity-60
                     "
                 />
 
@@ -181,6 +308,7 @@ function LoginForm() {
                         placeholder="Enter your password"
                         autoComplete="current-password"
                         required
+                        disabled={loading}
                         className="
                             h-12
                             w-full
@@ -194,16 +322,21 @@ function LoginForm() {
                             text-slate-900
                             outline-none
                             transition
+
                             focus:border-blue-500
                             focus:bg-white
                             focus:ring-4
                             focus:ring-blue-500/10
+
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
                         "
                     />
 
 
                     <button
                         type="button"
+                        disabled={loading}
                         onClick={() =>
                             setShowPassword(!showPassword)
                         }
@@ -213,7 +346,9 @@ function LoginForm() {
                             top-1/2
                             -translate-y-1/2
                             text-slate-400
+                            transition
                             hover:text-slate-700
+                            disabled:opacity-50
                         "
                     >
 
@@ -252,6 +387,7 @@ function LoginForm() {
 
                     <input
                         type="checkbox"
+                        disabled={loading}
                         className="
                             h-4
                             w-4
@@ -266,11 +402,14 @@ function LoginForm() {
 
                 <button
                     type="button"
+                    disabled={loading}
                     className="
                         text-sm
                         font-semibold
                         text-blue-600
+                        transition
                         hover:text-blue-700
+                        disabled:opacity-50
                     "
                 >
                     Forgot password?
@@ -279,7 +418,7 @@ function LoginForm() {
             </div>
 
 
-            {/* BUTTON */}
+            {/* LOGIN BUTTON */}
 
             <div className="mt-7">
 
@@ -295,6 +434,8 @@ function LoginForm() {
                         shadow-[0_10px_25px_rgba(37,99,235,0.20)]
                         transition
                         hover:bg-blue-700
+                        disabled:cursor-not-allowed
+                        disabled:opacity-70
                     "
                 >
 
@@ -313,7 +454,9 @@ function LoginForm() {
                         }
 
                         {!loading && (
-                            <FaArrowRight className="text-xs" />
+                            <FaArrowRight
+                                className="text-xs"
+                            />
                         )}
 
                     </span>
@@ -351,7 +494,10 @@ function LoginForm() {
             </p>
 
         </form>
+
     );
+
 }
+
 
 export default LoginForm;

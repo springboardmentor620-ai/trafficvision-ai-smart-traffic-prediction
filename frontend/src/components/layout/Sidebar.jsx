@@ -7,7 +7,11 @@ import {
     FaUserCircle,
     FaSignOutAlt,
     FaTrafficLight,
-    FaChartLine
+    FaChartLine,
+    FaCog,
+    FaUsers,
+    FaClipboardList,
+    FaServer
 } from "react-icons/fa";
 
 import { NavLink, useNavigate } from "react-router-dom";
@@ -23,7 +27,6 @@ const mainMenus = [
         path: "/dashboard"
     },
 
-    // Map comes BEFORE Prediction
     {
         title: "Maps & Routes",
         icon: <FaMapMarkedAlt />,
@@ -57,9 +60,36 @@ const mainMenus = [
 ];
 
 
+const adminMenus = [
+
+    {
+        title: "User Management",
+        icon: <FaUsers />,
+        path: "/users"
+    },
+
+    {
+        title: "System Activity",
+        icon: <FaClipboardList />,
+        path: "/system-activity"
+    },
+
+    {
+        title: "System Controls",
+        icon: <FaServer />,
+        path: "/system-controls"
+    }
+
+];
+
+
 function Sidebar() {
 
     const navigate = useNavigate();
+
+    const role = AuthService.getRole();
+
+    const isAdmin = role === "admin";
 
 
     function handleLogout() {
@@ -95,7 +125,9 @@ function Sidebar() {
             "
         >
 
-            {/* ================= BRAND ================= */}
+            {/* =====================================================
+                BRAND
+            ===================================================== */}
 
             <div
                 className="
@@ -128,6 +160,7 @@ function Sidebar() {
                             h-11
                             w-11
                             shrink-0
+
                             items-center
                             justify-center
 
@@ -161,6 +194,7 @@ function Sidebar() {
                             TrafficVision
                         </h1>
 
+
                         <p
                             className="
                                 truncate
@@ -182,7 +216,9 @@ function Sidebar() {
             </div>
 
 
-            {/* ================= MENU ================= */}
+            {/* =====================================================
+                MAIN MENU
+            ===================================================== */}
 
             <div
                 className="
@@ -240,13 +276,11 @@ function Sidebar() {
 
                                 ${
                                     isActive
-
                                         ? `
                                             bg-blue-600
                                             text-white
                                             shadow-sm
                                           `
-
                                         : `
                                             text-slate-600
 
@@ -285,7 +319,109 @@ function Sidebar() {
                 </nav>
 
 
-                {/* ================= ACCOUNT ================= */}
+                {/* =================================================
+                    ADMINISTRATION
+                ================================================= */}
+
+                {isAdmin && (
+
+                    <>
+                        <p
+                            className="
+                                mb-3
+                                mt-9
+                                px-3
+
+                                text-[10px]
+                                font-semibold
+                                uppercase
+                                tracking-[0.18em]
+
+                                text-slate-400
+                            "
+                        >
+                            Administration
+                        </p>
+
+
+                        <nav className="space-y-1.5">
+
+                            {adminMenus.map((menu) => (
+
+                                <NavLink
+                                    key={menu.path}
+                                    to={menu.path}
+
+                                    className={({ isActive }) => `
+
+                                        flex
+                                        min-h-[45px]
+                                        w-full
+
+                                        items-center
+                                        gap-3
+
+                                        rounded-xl
+
+                                        px-4
+
+                                        text-sm
+                                        font-medium
+
+                                        transition-all
+                                        duration-200
+
+                                        ${
+                                            isActive
+                                                ? `
+                                                    bg-blue-600
+                                                    text-white
+                                                    shadow-sm
+                                                  `
+                                                : `
+                                                    text-slate-600
+
+                                                    hover:bg-slate-100
+                                                    hover:text-slate-900
+
+                                                    dark:text-slate-300
+                                                    dark:hover:bg-slate-800
+                                                    dark:hover:text-white
+                                                  `
+                                        }
+
+                                    `}
+                                >
+
+                                    <span
+                                        className="
+                                            flex
+                                            w-5
+                                            shrink-0
+                                            justify-center
+                                        "
+                                    >
+                                        {menu.icon}
+                                    </span>
+
+
+                                    <span className="truncate">
+                                        {menu.title}
+                                    </span>
+
+                                </NavLink>
+
+                            ))}
+
+                        </nav>
+                    </>
+
+                )}
+
+
+                {/* =================================================
+                    ACCOUNT
+                ================================================= */}
 
                 <p
                     className="
@@ -305,69 +441,145 @@ function Sidebar() {
                 </p>
 
 
-                <NavLink
-                    to="/profile"
+                <nav className="space-y-1.5">
 
-                    className={({ isActive }) => `
+                    {/* PROFILE */}
 
-                        flex
-                        min-h-[45px]
-                        w-full
+                    <NavLink
+                        to="/profile"
 
-                        items-center
-                        gap-3
+                        className={({ isActive }) => `
 
-                        rounded-xl
-
-                        px-4
-
-                        text-sm
-                        font-medium
-
-                        transition-all
-
-                        ${
-                            isActive
-
-                                ? `
-                                    bg-blue-600
-                                    text-white
-                                  `
-
-                                : `
-                                    text-slate-600
-
-                                    hover:bg-slate-100
-                                    hover:text-slate-900
-
-                                    dark:text-slate-300
-                                    dark:hover:bg-slate-800
-                                    dark:hover:text-white
-                                  `
-                        }
-
-                    `}
-                >
-
-                    <span
-                        className="
                             flex
-                            w-5
-                            shrink-0
-                            justify-center
-                        "
+                            min-h-[45px]
+                            w-full
+
+                            items-center
+                            gap-3
+
+                            rounded-xl
+
+                            px-4
+
+                            text-sm
+                            font-medium
+
+                            transition-all
+                            duration-200
+
+                            ${
+                                isActive
+                                    ? `
+                                        bg-blue-600
+                                        text-white
+                                        shadow-sm
+                                      `
+                                    : `
+                                        text-slate-600
+
+                                        hover:bg-slate-100
+                                        hover:text-slate-900
+
+                                        dark:text-slate-300
+                                        dark:hover:bg-slate-800
+                                        dark:hover:text-white
+                                      `
+                            }
+
+                        `}
                     >
-                        <FaUserCircle />
-                    </span>
 
-                    Profile
+                        <span
+                            className="
+                                flex
+                                w-5
+                                shrink-0
+                                justify-center
+                            "
+                        >
+                            <FaUserCircle />
+                        </span>
 
-                </NavLink>
+
+                        <span>
+                            Profile
+                        </span>
+
+                    </NavLink>
+
+
+                    {/* SETTINGS */}
+
+                    <NavLink
+                        to="/settings"
+
+                        className={({ isActive }) => `
+
+                            flex
+                            min-h-[45px]
+                            w-full
+
+                            items-center
+                            gap-3
+
+                            rounded-xl
+
+                            px-4
+
+                            text-sm
+                            font-medium
+
+                            transition-all
+                            duration-200
+
+                            ${
+                                isActive
+                                    ? `
+                                        bg-blue-600
+                                        text-white
+                                        shadow-sm
+                                      `
+                                    : `
+                                        text-slate-600
+
+                                        hover:bg-slate-100
+                                        hover:text-slate-900
+
+                                        dark:text-slate-300
+                                        dark:hover:bg-slate-800
+                                        dark:hover:text-white
+                                      `
+                            }
+
+                        `}
+                    >
+
+                        <span
+                            className="
+                                flex
+                                w-5
+                                shrink-0
+                                justify-center
+                            "
+                        >
+                            <FaCog />
+                        </span>
+
+
+                        <span>
+                            Settings
+                        </span>
+
+                    </NavLink>
+
+                </nav>
 
             </div>
 
 
-            {/* ================= LOGOUT ================= */}
+            {/* =====================================================
+                LOGOUT
+            ===================================================== */}
 
             <div
                 className="
@@ -425,7 +637,10 @@ function Sidebar() {
                         <FaSignOutAlt />
                     </span>
 
-                    Logout
+
+                    <span>
+                        Logout
+                    </span>
 
                 </button>
 

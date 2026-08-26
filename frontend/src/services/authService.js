@@ -1,84 +1,82 @@
 import api from "./api";
 
+
 const AuthService = {
 
     async login(credentials) {
 
         const response = await api.post(
-
             "/auth/login",
-
             credentials
-
         );
 
         const data = response.data;
 
+
         /*
-         * Store the authentication token.
+         * Store JWT access token.
          */
 
         if (data?.access_token) {
 
             localStorage.setItem(
-
                 "token",
-
                 data.access_token
-
             );
 
         }
 
+
         /*
-         * Some backend responses may include
-         * user information or role.
-         *
-         * We store it only if it actually exists.
-         * No dummy role is created.
+         * Store complete user information
+         * when provided by the backend.
          */
 
         if (data?.user) {
 
             localStorage.setItem(
-
                 "user",
-
                 JSON.stringify(data.user)
-
             );
 
         }
 
-        if (data?.role) {
+
+        /*
+         * Store the actual role returned
+         * by the backend.
+         */
+
+        const role =
+            data?.role ||
+            data?.user?.role;
+
+        if (role) {
 
             localStorage.setItem(
-
                 "role",
-
-                data.role
-
+                role
             );
 
         }
+
 
         return data;
 
     },
 
+
     async register(user) {
 
         const response = await api.post(
-
             "/auth/register",
-
             user
-
         );
 
         return response.data;
 
     },
+
 
     logout() {
 
@@ -90,20 +88,21 @@ const AuthService = {
 
     },
 
+
     isAuthenticated() {
 
         return Boolean(
-
             localStorage.getItem("token")
-
         );
 
     },
+
 
     getUser() {
 
         const user =
             localStorage.getItem("user");
+
 
         if (!user) {
 
@@ -111,11 +110,13 @@ const AuthService = {
 
         }
 
+
         try {
 
             return JSON.parse(user);
 
         }
+
         catch {
 
             return null;
@@ -124,6 +125,7 @@ const AuthService = {
 
     },
 
+
     getRole() {
 
         return localStorage.getItem("role");
@@ -131,5 +133,6 @@ const AuthService = {
     }
 
 };
+
 
 export default AuthService;
