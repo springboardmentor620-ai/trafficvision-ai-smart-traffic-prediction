@@ -16,13 +16,13 @@ The system follows a scalable client-server architecture consisting of:
 - FastAPI backend
 - PostgreSQL database
 - Machine Learning prediction service
-- Google Maps Platform integration
+- Interactive Leaflet & Canvas traffic visualization
+- Background real-time traffic simulation service
+- Multi-container Docker Compose deployment
 
-Currently, the application provides secure JWT-based authentication, Role-Based Access Control (RBAC), live traffic monitoring, AI-powered congestion prediction using a trained Random Forest Regression model, interactive Google Maps traffic visualization, AI-assisted route recommendation, comprehensive analytics dashboards, historical traffic analytics, intelligent traffic alerts, PDF report generation, AI-generated traffic insights, congestion analytics, route optimization, and real-time administrative monitoring tools.
+Currently, the application provides secure JWT-based authentication, 2-Step OTP email verification, Google OAuth integration, Role-Based Access Control (RBAC), live traffic monitoring, AI-powered congestion prediction using a trained Random Forest Regression model, interactive map visualization, AI-assisted route recommendation, comprehensive analytics dashboards, multi-tier historical traffic analytics, intelligent emergency traffic alerts with automated SMTP email dispatch, 6-camera CCTV canvas intersection monitoring, PDF report generation, AI-generated traffic insights, route optimization, and real-time administrative monitoring tools.
 
 The machine learning pipeline includes dataset preprocessing, feature engineering, model comparison, hyperparameter tuning, model serialization using Joblib, and deployment through FastAPI REST APIs.
-
-The project continues to evolve with upcoming features including intelligent route optimization, real-time traffic alerts, analytics dashboards, cloud deployment, and large-scale multi-city traffic monitoring.
 
 ## 🚧 Project Status
 
@@ -32,55 +32,64 @@ The project continues to evolve with upcoming features including intelligent rou
 
 **Completed Milestone:** Milestone 3: Week 5 & 6 — Alerts, Analytics & AI Insights
 
+**Completed Milestone:** Milestone 4: Week 7 & 8 — Testing, Deployment & Documentation
+
 ---
 
 ### ✅ Completed
 
 #### Core System
 
-- Project architecture and folder structure
+- Project architecture and modular folder structure
 - Backend setup using FastAPI
 - Frontend setup using React (Vite)
 - PostgreSQL database integration
 - SQLAlchemy ORM configuration
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-- User Registration & Login
-- Protected API endpoints
+- JWT Authentication & OAuth2 Password Flow
+- 2-Step OTP Security for Login and Registration
+- Google OAuth Sign-In & Instant Provisioning
+- Password Reset via Email OTP
+- Fake / Disposable Email Registration Defense
+- Role-Based Access Control (RBAC: Admin, Traffic Operator, Commuter)
+- User Management Center (CRUD accounts & role assignments)
+- Background Live Traffic Simulation Engine
+- Automated High Congestion SMTP Email Alert Dispatch
+- Telegram-Style Seamless Circular Reveal Dark Mode Transition
+- Docker Containerization (Frontend, Backend, DB, Simulator)
+- Protected API endpoints & CORS middleware
 - Frontend–Backend–Database connectivity
-- Historical Traffic Analytics Module
+- Historical Traffic Analytics Module (Low, Moderate, High risk distributions)
 - Traffic Alert Management System
 - Prediction History Management
-- Report Generation System
+- PDF Report Generation System
 
 #### Dashboard
 
 - Live Traffic Monitoring Dashboard
-- Traffic Summary Cards
-- Traffic Trend Chart
-- Live Traffic Data Table
-- Dashboard Layout
-- Dashboard Components
-- Dashboard Refactoring
-- Role-specific dashboards
-- Public Navigation Bar
-- Improved Login UI
-- Improved Register UI
-- Historical Analytics Dashboard
-- Traffic Distribution Dashboard
-- Traffic Summary Dashboard
+- Traffic Summary Cards with live synchronization
+- Traffic Trend Chart (Recharts)
+- Live Traffic Data Table with search and pagination
+- Dashboard Layout & Responsive Sidebar
+- Role-specific dashboards (Admin, Traffic Operator, Commuter)
+- Public Navigation Bar & Landing Page
+- 2-Step Login & Registration Interface
+- Forgot Password & Reset UI
+- Historical Analytics Dashboard with Multi-tier Risk Breakdown
+- Traffic Distribution Dashboard (Pie & Bar charts)
 - AI Insights Dashboard
 - Alert Monitoring Dashboard
-- PDF Report Dashboard
+- 6-Camera CCTV Intersection Surveillance Console
+- PDF Report Generation & Export Dashboard
+- Route Optimization & A* Bypass Planner
 
 #### Machine Learning
 
-- Dataset Selection
+- Dataset Selection & Ingestion
 - Data Quality Assessment
 - Missing Value Analysis
 - Duplicate Analysis
 - Exploratory Data Analysis (EDA)
-- Feature Engineering
+- Feature Engineering (Traffic Category, Speed, Capacity Utilization, Weather, Incidents)
 - Data Preprocessing Pipeline
 - Decision Tree Model
 - Random Forest Model
@@ -88,70 +97,69 @@ The project continues to evolve with upcoming features including intelligent rou
 - Gradient Boosting Model
 - Model Performance Comparison
 - Hyperparameter Tuning
-- Final Random Forest Model
+- Final Random Forest Model Selection
 - Model Serialization using Joblib
 
 #### Artificial Intelligence
 
-- FastAPI Prediction API
-- Swagger Prediction Endpoint Testing
+- FastAPI Prediction API (`/prediction/predict`)
+- Real-time Multi-factor Congestion Inference
 - AI Congestion Prediction Dashboard
 - Interactive Prediction Form
-- AI Prediction Cards
-- AI Recommendation Panel
-- AI Traffic Alerts
+- AI Prediction Cards & Velocity Gauges
+- AI Recommendation Panel & Action Directives
+- Automated AI Emergency Alerts
 - Prediction History Tracking
-- AI Congestion Analytics
-- Historical Prediction Analytics
-- AI Traffic Insights
+- AI Congestion Analytics & Historical Correlations
+- Multi-tier Risk Categorization (Low, Moderate, High)
+- Alternate Route Recommendation
 
-#### Google Maps Integration
+#### Map & Route Visualization
 
-- Google Maps JavaScript API
-- Interactive Traffic Heat Map
-- Dynamic Traffic Markers
-- Color-coded Congestion Indicators
-- Traffic Statistics Cards
-- AI Route Planner
-- AI Route Recommendation Engine
-- 10 Bangalore Traffic Locations
-- Dynamic Location Selection
-- Intelligent Route Recommendation
+- Interactive Leaflet Map & OpenStreetMap Tiles
+- Dynamic Traffic Markers across 18+ Bengaluru Corridors
+- Color-coded Congestion Velocity Indicators
+- Live Corridor Information Popups
+- Real-time Traffic Heat Map Layer
+- AI Route Planner with Interactive Origin & Destination Pickers
+- A* Algorithm Bypass Route Computation
+- Step-by-Step Navigation & Travel Time Estimation
 
-#### Development
+#### Surveillance & Edge Simulation
 
-- Git Version Control
-- GitHub Repository
-- Modular Folder Structure
-- README Documentation
-- Report Generation APIs
-- Historical Analytics APIs
-- Alert Management APIs
-- Prediction History APIs
-- Modular Service Layer
+- 6 Strategic Intersection Camera Nodes
+- HTML5 Canvas Computer Vision Rendering Engine
+- 5 Simulated Vehicle Classifications (Car, Bus, Auto, Bike, Truck)
+- YOLO-Style AI Bounding Boxes with Confidence & Velocity Tags
+- Dynamic Density & Speed Regulation based on Congestion Status
+- Multi-Camera Grid and Detailed Single-Camera Inspector Modes
+
+#### Development & DevOps
+
+- Git Version Control & GitHub Repository
+- Multi-container Docker Compose Architecture
+- Nginx Web Server configuration
+- Modular Service Layer Architecture
+- Swagger UI & ReDoc API Documentation
+- Structured Error Handling & Input Validation
 
 ---
 
 ### 🚧 Currently In Progress
 
-- Multi-city Traffic Dataset Expansion
-- Advanced Dashboard UI Enhancement
-- Responsive Design Improvements
-- Performance Optimization
-- Cloud Deployment Preparation
+- Multi-City and Pan-India Traffic Dataset Expansion
+- Hardware Edge Telemetry Streaming Integration
+- Automated Adaptive Traffic Signal Phasing Interface
+- Cloud CI/CD Automated Staging Deployment
 
 ---
 
 ### 📅 Upcoming Milestones
 
-- Multi-State Traffic Coverage
-- Real-Time Traffic Streaming
-- Smart Traffic Signal Optimization
-- Live Traffic Notifications
-- Docker Containerization
-- Cloud Deployment
-- CI/CD Pipeline
-- Multi-City Intelligent Traffic Management
+- Multi-State Real-Time Traffic Mesh
+- Physical IoT Road Sensor Telemetry Streaming
+- Distributed Edge AI Acceleration (ONNX / TensorRT)
+- Municipal Traffic Management Cloud Deployment
 
 ## 🎯 Project Objectives
 
@@ -159,257 +167,197 @@ The primary objectives of TrafficVision AI are:
 
 - Develop a scalable full-stack Smart Traffic Management System.
 - Monitor traffic conditions in real time through an interactive dashboard.
-- Implement secure user authentication using JWT.
-- Enforce Role-Based Access Control (RBAC) for different user roles.
+- Implement secure user authentication using JWT, 2-Step OTP email verification, and Google OAuth.
+- Enforce Role-Based Access Control (RBAC) for Admin, Operator, and Commuter roles.
 - Build a modular and maintainable backend using FastAPI and SQLAlchemy.
 - Integrate a PostgreSQL database for reliable data storage and retrieval.
-- Establish seamless communication between the frontend, backend, and database.
-- Provide a foundation for future AI-based traffic prediction and route optimization.
-- Follow industry-standard software development practices, including Git version control, documentation, and modular project architecture.
-- Develop an AI-powered traffic congestion prediction system using Machine Learning.
-- Generate intelligent traffic alerts based on congestion prediction thresholds.
-- Provide historical traffic analytics for trend analysis and decision making.
-- Generate downloadable PDF traffic reports for administrators and traffic authorities.
-- Maintain prediction history to support future traffic analysis and model evaluation.
-- Deliver AI-driven recommendations and alternate route suggestions to reduce congestion.
+- Establish seamless communication between frontend, backend, simulator, and database.
+- Predict traffic congestion dynamically using a trained Random Forest Regression model.
+- Generate intelligent traffic alerts and dispatch automated emergency emails when severe congestion occurs.
+- Provide historical traffic analytics for trend analysis, risk distribution, and administrative decision-making.
+- Generate downloadable PDF traffic reports for administrators and municipal authorities.
+- Deliver AI-driven recommendations and alternate route suggestions to minimize urban delays.
+- Package the entire system into portable Docker containers for streamlined deployment.
 
 ## ✨ Features
 
 ### ✅ Current Features
 
-### 🔐 Authentication
+### 🔐 Authentication & Security
 
-- JWT Authentication
-- OAuth2 Password Flow
-- Role-Based Access Control (RBAC)
-- User Registration
-- User Login
-- Protected Routes
-- User Profile
-- Secure Logout
+- JWT (JSON Web Token) Access Authentication
+- 2-Step OTP Verification for Account Registration
+- 2-Step OTP Verification for Account Login
+- Google OAuth 2.0 Sign-In and Automatic Provisioning
+- Password Reset Flow with 6-Digit Email OTP Verification
+- Disposable & Fake Email Domain Defense
+- Role-Based Access Control (RBAC: Admin, Traffic Operator, Commuter)
+- Password Hashing using Bcrypt
+- User Profile Management & Password Updates
+- Admin User Management Center (Create, Update, Role Assignment, Deletion)
 
-### 🛠 Backend
+### 🛠 Backend Architecture
 
-- FastAPI REST API
-- PostgreSQL database integration
-- SQLAlchemy ORM
-- Pydantic Validation
-- Environment variable configuration using `.env`
-- Modular project architecture
-- Protected API endpoints
-- Traffic Management APIs
-- Prediction APIs
-- Prediction History APIs
-- Analytics APIs
-- Alert Management APIs
-- Report Generation APIs
-- Road Management APIs
-- Zone Management APIs
-- Notification APIs
-- Route Optimization APIs
-- Historical Analytics APIs
+- FastAPI High-Performance REST API
+- PostgreSQL Relational Database
+- SQLAlchemy ORM with Connection Pooling
+- Pydantic Schema Validation & Type Safety
+- Environment Variable Configuration via `.env`
+- Modular Service Layer & Router Architecture
+- Background Traffic Simulation Worker
+- Asynchronous SMTP Email Dispatch Service (OTP & Incident Alerts)
+- CORS Middleware Configuration
 
-### 💻 Frontend
+### 💻 Frontend User Experience
 
-- React + Vite application
-- React Router navigation
-- Axios API integration
-- Responsive Dashboard Layout
-- Modern Home Page
-- Modern Login Page
-- Modern Register Page
-- Dashboard Components
+- React + Vite Single Page Application
+- React Router Client-Side Routing
+- Telegram-Style Seamless Circular Reveal Dark Mode Transition
+- Responsive Collapsible Hover Sidebar
+- Clean Modern UI Design System with Dynamic CSS Tokens
+- Axios API Layer with Bearer Token Interceptors
+- Public Landing Page with Feature Showcases
+- Interactive Auth Forms with Auto-Advancing OTP Inputs
 
-### 🚦 Traffic Dashboard
+### 🚦 Traffic Dashboard & Analytics
 
-- Live Traffic Monitoring
-- Traffic Summary Cards
-- Traffic Trend Chart
-- Live Traffic Data Table
-- Dashboard Layout
-- Dashboard Header
-- Dashboard Cards
-- Dashboard Content
-- Role-specific Dashboards
-- Historical Analytics Dashboard
-- Traffic Analytics Summary
-- Congestion Distribution
-- Traffic Trend Analytics
-- AI Insights Dashboard
-- Prediction History
-- Traffic Alerts Panel
-- Report Download
+- Live Network Overview with Summary Cards
+- Real-time Traffic Velocity & Volume Charts (Recharts)
+- Live Traffic Data Table with Search and Filtering
+- Role-Specific Tailored Consoles for Admin, Operator, and Commuter
+- Historical Analytics Center with Low, Moderate, and High Risk Distribution
+- Corridor Volume Rankings & Congestion Pie Distribution Charts
+- Downloadable Official PDF Traffic Reports (ReportLab)
+- Real-Time Alert Ticker & Incident Status Management
 
-### 🤖 Artificial Intelligence
+### 🤖 Machine Learning & AI
 
-- Random Forest Congestion Prediction
-- Machine Learning Prediction API
-- AI Congestion Prediction Dashboard
-- Interactive Prediction Form
-- Live Prediction Results
-- AI Recommendation Panel
-- Prediction Confidence Score
-- Alternate Route Recommendation
-- AI Traffic Insights
-- Prediction History Tracking
+- Random Forest Congestion Regression Engine
+- Real-time Traffic Feature Prediction API
+- Multi-factor Input Analysis (Volume, Speed, Road Capacity, Weather, Roadwork, Incidents)
+- Dynamic Prediction Level Mapping (Low < 30%, Moderate 30-69%, High ≥ 70%)
+- AI Operational Recommendations & Detour Suggestions
+- Prediction History Logging & Trend Analytics
 
-### 🗺️ Google Maps
+### 🗺️ Interactive Maps & Route Navigation
 
-- Interactive Google Map
-- Color-coded Traffic Markers
-- Live Congestion Visualization
-- AI Route Planner
-- Origin & Destination Selection
-- Intelligent Route Recommendation
-- Traffic Heat Map
-- Traffic Statistics Cards
-- 10 Smart Traffic Locations
+- Interactive Leaflet Map with Custom Marker Clusters
+- 18+ Arterial Corridors mapped across Bengaluru
+- Color-Coded Congestion Status (Green: Normal, Yellow: Moderate, Red: Heavy)
+- AI Route Planner with Origin & Destination Selection
+- A* Algorithm Shortest & Least-Congested Route Calculation
+- Estimated Travel Time, Distance, and Live Delay Feedback
 
-### 🧠 Machine Learning
+### 📹 CCTV Surveillance Module
 
-- Dataset Cleaning
-- Data Quality Assessment
-- Feature Engineering
-- Data Preprocessing
-- Model Training
-- Model Comparison
-- Hyperparameter Tuning
-- Random Forest Model
-- FastAPI Prediction API
-- Joblib Model Deployment
-- Prediction History Storage
-- Real-time Inference
-- AI Recommendation Generation
-- Model Deployment with FastAPI
+- 6 Arterial Intersection Camera Feeds
+- HTML5 Canvas 2D Computer Vision Rendering Loop
+- 5 Vehicle Classifications (Car, City Bus, Auto-Rickshaw, 2-Wheeler, Truck)
+- YOLO-Style Bounding Boxes with Live Speeds & AI Confidence Ratings
+- Speed Limit Monitoring and Lane-by-Lane Density Gauges
+- Grid View and Single-Camera Inspector Modes
 
-### ⚙ Development
+### 🐳 DevOps & Deployment
 
-- Git Version Control
-- GitHub Repository
-- Modular Folder Structure
-- README Documentation
-- Swagger API Documentation
-- Service Layer Architecture
-- Modular Router Architecture
-- Analytics Module
-- Reports Module
-- Alerts Module
-- Notification Module
+- Docker Containerization with Multi-Stage Builds
+- Docker Compose Orchestration (Frontend, Backend, DB, Simulator)
+- Nginx Production Static Asset Server
+- Automated Database Initialization & Seeding
 
 ---
 
 ### 🚀 Planned Features
 
-- Live Sensor Integration
-- Multi-city Traffic Expansion
-- Docker Containerization
-- Cloud Deployment
-- CI/CD Pipeline
+- Hardware IoT Sensor Stream Ingestion
+- Multi-City and Pan-India Road Expansion
+- Automated Cloud CI/CD Pipelines
+- Distributed Edge Model Deployment
 
 ## 🛠️ Technology Stack
 
-| Category              | Technologies                                |
-| --------------------- | ------------------------------------------- |
-| **Frontend**          | React, Vite, React Router, Axios            |
-| **Backend**           | FastAPI, SQLAlchemy, Pydantic               |
-| **Database**          | PostgreSQL                                  |
-| **Authentication**    | JWT, OAuth2 Password Flow, Passlib (bcrypt) |
-| **Machine Learning**  | Scikit-learn, Pandas, NumPy, Joblib         |
-| **Visualization**     | Google Maps JavaScript API, Recharts        |
-| **Reports**           | ReportLab (PDF Generation)                  |
-| **API Documentation** | Swagger UI, ReDoc                           |
-| **Development Tools** | Git, GitHub, VS Code, pgAdmin               |
-| **Configuration**     | Python Virtual Environment, python-dotenv   |
+| Category | Technologies |
+| --- | --- |
+| **Frontend** | React, Vite, React Router, Axios |
+| **Backend** | FastAPI, SQLAlchemy, Pydantic, Uvicorn |
+| **Database** | PostgreSQL |
+| **Authentication** | JWT, OAuth2, Google Identity OAuth, Passlib (bcrypt), OTP |
+| **Machine Learning** | Scikit-learn, Pandas, NumPy, Joblib |
+| **Visualization** | Leaflet, React-Leaflet, Recharts, HTML5 Canvas 2D |
+| **Email & Alerts** | Python SMTPLib, Email MIMEMultipart |
+| **Reports** | ReportLab (PDF Generation) |
+| **DevOps & Containers** | Docker, Docker Compose, Nginx |
+| **API Documentation** | Swagger UI, ReDoc |
+| **Development Tools** | Git, GitHub, VS Code, pgAdmin |
 
 ## 📊 Machine Learning Workflow
 
 TrafficVision AI follows a complete end-to-end Machine Learning pipeline for intelligent traffic congestion prediction and AI-assisted route recommendation.
 
-1. Dataset Collection
-2. Data Quality Assessment
+1. Dataset Collection & Ingestion
+2. Data Quality Assessment & Missing Value Handling
 3. Exploratory Data Analysis (EDA)
-4. Missing Value Handling
-5. Duplicate Data Removal
-6. Feature Engineering
-7. Data Preprocessing
-8. Model Training
-9. Model Comparison
-10. Hyperparameter Tuning
-11. Final Random Forest Model Selection
-12. Model Serialization using Joblib
-13. FastAPI Prediction API Development
-14. Swagger API Testing
-15. React Prediction Dashboard Integration
-16. Google Maps Integration
-17. AI Traffic Heat Map
-18. Color-coded Congestion Visualization
-19. AI Route Planner
-20. AI Route Recommendation Engine
-21. Travel Time Estimation
-22. Delay Prediction
-23. AI Confidence & Route Quality Analysis
-24. Multi-location Traffic Prediction
-25. Prediction History Storage
-26. Historical Traffic Analytics
-27. Traffic Alert Generation
-28. AI Traffic Insights Generation
-29. Traffic Report Generation (PDF)
-30. Route Optimization API
-31. Notification Management
-32. Road & Zone Management
-33. Analytics Dashboard Integration
-34. End-to-End AI Traffic Management Workflow
+4. Duplicate Data Removal & Outlier Filtering
+5. Feature Engineering (Derived Traffic Category, Speed-to-Capacity ratios, Environmental indices)
+6. Feature Encoding & Normalization Pipeline
+7. Multi-Model Training (Decision Tree, Random Forest, Extra Trees, Gradient Boosting)
+8. Cross-Validation & Model Performance Comparison
+9. Hyperparameter Tuning using Grid Search
+10. Final Random Forest Model Selection
+11. Model Serialization using Joblib (`best_model.pkl`)
+12. FastAPI Prediction API Development (`/prediction/predict`)
+13. Interactive React Prediction Workspace Integration
+14. Real-time Live Prediction & History Storage
+15. Multi-tier Risk Analysis (Low, Moderate, High)
+16. Automated AI Threshold Alert Generation & Emergency Email Notification
+17. Alternate Route & Bypass Recommendation Generation
+18. End-to-End Autonomous AI Traffic Flow Control
 
 ## 🏗️ System Architecture
 
 ```mermaid
 flowchart TD
 
-    A[👤 User]
+    A[👤 User / Admin / Operator / Commuter]
 
-    A --> B[React Frontend]
+    A --> B[React + Vite Frontend]
 
-    B --> C[Dashboard]
+    B --> C[Navigation & Dashboards]
 
-    C --> D[AI Prediction Form]
-    C --> E[Google Maps]
-    C --> F[Route Planner]
-    C --> G[Analytics Dashboard]
-    C --> H[Alerts Dashboard]
-    C --> I[Reports Dashboard]
+    C --> D[AI Prediction Workspace]
+    C --> E[Interactive Traffic Map - Leaflet]
+    C --> F[CCTV 6-Camera Surveillance Canvas]
+    C --> G[A* Route Optimization Planner]
+    C --> H[Analytics & Historical Charts]
+    C --> I[Alerts & Emergency Center]
+    C --> J[PDF Reports Export]
 
-    D --> J[Axios API Client]
-    F --> J
-    G --> J
-    H --> J
-    I --> J
+    D --> K[Axios API Client]
+    E --> K
+    G --> K
+    H --> K
+    I --> K
+    J --> K
 
-    J --> K[FastAPI Backend]
+    K --> L[FastAPI Backend Engine]
 
-    K --> L[JWT Authentication]
-    K --> M[Traffic APIs]
-    K --> N[Prediction APIs]
-    K --> O[Analytics APIs]
-    K --> P[Alert APIs]
-    K --> Q[Report APIs]
-    K --> R[Notification APIs]
-    K --> S[Road APIs]
-    K --> T[Zone APIs]
+    L --> M[JWT & 2-Step OTP Auth]
+    L --> N[Google OAuth Verification]
+    L --> O[Traffic & Telemetry APIs]
+    L --> P[AI Prediction APIs]
+    L --> Q[Analytics & History APIs]
+    L --> R[Alert & Emergency APIs]
+    L --> S[PDF Report Generation APIs]
+    L --> T[User Management APIs]
 
-    N --> U[Random Forest Model]
-    U --> V[Joblib Model]
+    P --> U[Random Forest ML Model - Joblib]
 
-    K --> W[SQLAlchemy ORM]
-    W --> X[(PostgreSQL Database)]
+    L --> V[SQLAlchemy ORM Connection Pool]
+    V --> W[(PostgreSQL Database)]
 
-    X --> W
+    R --> X[SMTP Email Alert Service]
+    M --> X
 
-    E --> Y[Google Maps JavaScript API]
-
-    N --> C
-    O --> C
-    P --> C
-    Q --> C
+    Y[🚦 Background Simulator Worker] --> L
 ```
 
 ## 📁 Project Structure
@@ -437,881 +385,611 @@ trafficvision-ai-smart-traffic-prediction/
 │   │   ├── 06_model_comparison.ipynb               # Model comparison
 │   │   └── 07_hyperparameter_tuning.ipynb          # Hyperparameter tuning
 │   │
-│   ├── src/
-│   │   ├── eda.py                                  # EDA helper functions
-│   │   ├── feature_engineering.py                  # Feature engineering
-│   │   ├── preprocessing.py                        # Data preprocessing
-│   │   └── quality.py                              # Dataset quality utilities
+│   └── src/
+│       ├── eda.py                                  # EDA helper functions
+│       ├── feature_engineering.py                  # Feature engineering pipeline
+│       ├── preprocessing.py                        # Data preprocessing utilities
+│       └── quality.py                              # Dataset quality utilities
 │
 ├── backend/
 │   ├── app/
 │   │   ├── config/
-│   │   │   └── auth.py                             # JWT configuration
+│   │   │   └── auth.py                             # JWT & Security configuration
 │   │   │
 │   │   ├── constants/
-│   │   │   └── roles.py                            # User role definitions
+│   │   │   ├── roles.py                            # Role definitions (admin, operator, commuter)
+│   │   │   └── traffic.py                          # Traffic categories & threshold constants
 │   │   │
 │   │   ├── database/
-│   │   │   ├── base.py                             # SQLAlchemy base
-│   │   │   └── connection.py                       # Database connection
+│   │   │   ├── base.py                             # SQLAlchemy Base class
+│   │   │   └── connection.py                       # PostgreSQL connection pool
 │   │   │
 │   │   ├── dependencies/
-│   │   │   └── auth.py                             # Authentication dependencies
+│   │   │   └── auth.py                             # Authentication & RBAC dependencies
 │   │   │
 │   │   ├── ml/
-│   │   │   ├── best_model.pkl                      # ML model
-│   │   │   └── predictor.py                        # Prediction engine
+│   │   │   ├── best_model.pkl                      # Serialized ML model
+│   │   │   └── predictor.py                        # ML Inference wrapper
 │   │   │
 │   │   ├── models/
-│   │   │   ├── alert.py                            # Alert model
-│   │   │   ├── notification.py                     # Notification model
-│   │   │   ├── prediction_history.py               # Prediction history model
-│   │   │   ├── report.py                           # Report model
-│   │   │   ├── road.py                             # Road model
-│   │   │   ├── traffic.py                          # Traffic model
-│   │   │   ├── user.py                             # User model
-│   │   │   └── zone.py                             # Zone model
+│   │   │   ├── alert.py                            # Alert SQLAlchemy model
+│   │   │   ├── notification.py                     # Notification SQLAlchemy model
+│   │   │   ├── prediction_history.py               # Prediction history SQLAlchemy model
+│   │   │   ├── report.py                           # Report SQLAlchemy model
+│   │   │   ├── road.py                             # Road SQLAlchemy model
+│   │   │   ├── traffic.py                          # Traffic SQLAlchemy model
+│   │   │   ├── user.py                             # User SQLAlchemy model
+│   │   │   └── zone.py                             # Zone SQLAlchemy model
 │   │   │
 │   │   ├── routers/
-│   │   │   ├── alerts.py                           # Alert APIs
-│   │   │   ├── analytics.py                        # Analytics APIs
-│   │   │   ├── history.py                          # History APIs
-│   │   │   ├── notifications.py                    # Notification APIs
-│   │   │   ├── prediction.py                       # AI Prediction APIs
-│   │   │   ├── prediction_history.py               # Prediction history APIs
-│   │   │   ├── reports.py                          # Report APIs
-│   │   │   ├── roads.py                            # Road management APIs
-│   │   │   ├── routes.py                           # Route recommendation APIs
-│   │   │   ├── traffic.py                          # Traffic APIs
-│   │   │   ├── user.py                             # User APIs
-│   │   │   └── zones.py                            # Zone APIs
+│   │   │   ├── alerts.py                           # Alert management endpoints
+│   │   │   ├── analytics.py                        # Analytics summary endpoints
+│   │   │   ├── history.py                          # General history endpoints
+│   │   │   ├── notifications.py                    # Notification endpoints
+│   │   │   ├── prediction.py                       # AI prediction endpoints
+│   │   │   ├── prediction_history.py               # Prediction history endpoints
+│   │   │   ├── reports.py                          # PDF report endpoints
+│   │   │   ├── roads.py                            # Road inventory CRUD endpoints
+│   │   │   ├── routes.py                           # Route recommendation endpoints
+│   │   │   ├── traffic.py                          # Live traffic telemetry endpoints
+│   │   │   ├── user.py                             # Auth, OTP, Google OAuth & User endpoints
+│   │   │   └── zones.py                            # Zone topology CRUD endpoints
 │   │   │
 │   │   ├── schemas/
-│   │   │   ├── alert.py                               # Alert request & response schemas
-│   │   │   ├── notification.py                        # Notification schemas
-│   │   │   ├── prediction.py                          # Prediction request & response schemas
-│   │   │   ├── prediction_history.py                  # Prediction history schemas
-│   │   │   ├── report.py                              # Report schemas
-│   │   │   ├── road.py                                # Road management schemas
-│   │   │   ├── traffic.py                             # Traffic data schemas
-│   │   │   ├── user.py                                # User authentication & profile schemas
-│   │   │   └── zone.py                                # Zone management schemas
+│   │   │   ├── alert.py                            # Alert Pydantic schemas
+│   │   │   ├── notification.py                     # Notification Pydantic schemas
+│   │   │   ├── prediction.py                       # Prediction Pydantic schemas
+│   │   │   ├── prediction_history.py               # Prediction history Pydantic schemas
+│   │   │   ├── report.py                           # Report Pydantic schemas
+│   │   │   ├── road.py                             # Road Pydantic schemas
+│   │   │   ├── traffic.py                          # Traffic Pydantic schemas
+│   │   │   ├── user.py                             # User & Auth Pydantic schemas
+│   │   │   └── zone.py                             # Zone Pydantic schemas
 │   │   │
 │   │   ├── services/
-│   │   │   ├── alert_service.py                       # Alert business logic
-│   │   │   ├── analytics_service.py                   # Analytics calculations & statistics
-│   │   │   ├── history_service.py                     # Historical traffic data service
-│   │   │   ├── notification_service.py                # Notification management service
-│   │   │   ├── prediction_history_service.py          # Prediction history management
-│   │   │   ├── report_service.py                      # Report generation service
-│   │   │   ├── road_service.py                        # Road management service
-│   │   │   ├── route_service.py                       # Route optimization service
-│   │   │   ├── traffic_service.py                     # Live traffic management service
-│   │   │   └── zone_service.py
+│   │   │   ├── alert_service.py                    # Alert business logic & trigger rules
+│   │   │   ├── analytics_service.py                # Analytics aggregation service
+│   │   │   ├── email_service.py                    # SMTP email dispatch service
+│   │   │   ├── history_service.py                  # Historical traffic data service
+│   │   │   ├── notification_service.py             # User notification service
+│   │   │   ├── otp_service.py                      # 2-Step OTP security service
+│   │   │   ├── prediction_history_service.py       # Prediction history service
+│   │   │   ├── report_service.py                   # Report metadata service
+│   │   │   ├── road_service.py                     # Road management service
+│   │   │   ├── route_service.py                    # A* route optimization service
+│   │   │   ├── traffic_service.py                  # Real-time traffic service
+│   │   │   └── zone_service.py                     # Zone management service
 │   │   │
 │   │   ├── utils/
-│   │   │   ├── pdf_generator.py                    # PDF report generation
-│   │   │   └── security.py                         # JWT & password hashing
+│   │   │   ├── email_validator.py                  # Email authenticity & disposable domain filter
+│   │   │   ├── pdf_generator.py                    # ReportLab PDF generation utility
+│   │   │   └── security.py                         # Bcrypt hashing & JWT utility
 │   │   │
-│   │   └── main.py                                 # FastAPI application
+│   │   └── main.py                                 # FastAPI application entry point
 │   │
-│   ├── .env                                           # Backend environment variables
-│   ├── .env.example                                   # Sample backend configuration
-│   ├── requirements.txt                               # Python backend dependencies
-│   └── simulator.py                                # Traffic data simulator
+│   ├── .dockerignore                               # Docker build ignore rules
+│   ├── .env                                        # Backend environment variables
+│   ├── .env.example                                # Sample backend configuration
+│   ├── Dockerfile                                  # Backend Docker build specification
+│   ├── requirements.txt                            # Python backend dependencies
+│   ├── seed_users.py                               # Database seed utility for default users
+│   └── simulator.py                                # Dynamic real-time traffic simulator
 │
 ├── frontend/
 │   ├── public/
-│   │   ├── favicon.svg                                # Website favicon
-│   │   └── icons.svg                                  # SVG icon collection
+│   │   ├── favicon.svg                             # Website favicon
+│   │   ├── icons.svg                               # SVG icon collection
+│   │   └── logo.svg                                # Vector brand logo
 │   │
 │   ├── src/
-│   │   ├── assets/
-│   │   │   ├── hero.png                               # Homepage hero image
-│   │   │   ├── react.svg                              # React logo
-│   │   │   └── vite.svg                               # Vite logo
+│   │   ├── assets/                                 # Static graphic assets
 │   │   │
 │   │   ├── components/
-│   │   │   ├── alerts/
-│   │   │   │   └── AlertCard.jsx                      # Alert display component
-│   │   │   │
-│   │   │   ├── analytics/
-│   │   │   │   ├── AIInsights.jsx                     # AI-generated traffic insights
-│   │   │   │   ├── AnalyticsCard.jsx                  # Analytics summary card
-│   │   │   │   ├── BusyRoadChart.jsx                  # Busy roads visualization
-│   │   │   │   ├── CongestionPieChart.jsx             # Congestion distribution chart
-│   │   │   │   ├── RoadRankingTable.jsx               # Road ranking table
-│   │   │   │   └── TrafficTrendChart.jsx              # Traffic trend visualization
-│   │   │   │
+│   │   │   ├── alerts/                             # Alert UI components
+│   │   │   ├── analytics/                          # Analytics chart & summary components
 │   │   │   ├── common/
-│   │   │   │   └── NotificationPanel.jsx              # Notification panel component
-│   │   │   │
-│   │   │   ├── dashboard/
-│   │   │   │   ├── AdminLayout.jsx                    # Admin dashboard layout
-│   │   │   │   ├── DashboardCards.jsx                 # Dashboard statistics cards
-│   │   │   │   ├── DashboardContent.jsx               # Dashboard main content
-│   │   │   │   ├── DashboardHeader.jsx                # Dashboard header
-│   │   │   │   ├── DashboardLayout.jsx                # Common dashboard layout
-│   │   │   │   ├── PredictionPanel.jsx                # AI prediction interface
-│   │   │   │   ├── RoutePlanner.jsx                   # Route planning component
-│   │   │   │   ├── RouteRecommendation.jsx            # AI route recommendations
-│   │   │   │   └── TrafficMap.jsx                     # Interactive traffic map
-│   │   │   │
-│   │   │   ├── roads/
-│   │   │   │   ├── RoadCard.jsx                       # Road information card
-│   │   │   │   └── RoadForm.jsx                       # Road management form
-│   │   │   │
-│   │   │   ├── zones/
-│   │   │   │   ├── ZoneCard.jsx                       # Zone information card
-│   │   │   │   └── ZoneForm.jsx                       # Zone management form
-│   │   │   │
-│   │   │   ├── FeaturesSection.jsx                    # Homepage features section
-│   │   │   ├── HeroSection.jsx                        # Homepage hero banner
-│   │   │   ├── HowItWorksSection.jsx                  # Workflow explanation section
-│   │   │   ├── Navbar.jsx                             # Dashboard navigation bar
-│   │   │   ├── ProtectedRoute.jsx                     # Authentication route protection
-│   │   │   ├── PublicNavbar.jsx                       # Public website navigation
-│   │   │   ├── RoleProtectedRoute.jsx                 # Role-based access protection
-│   │   │   ├── Sidebar.jsx                            # Dashboard sidebar
-│   │   │   ├── TrafficCard.jsx                        # Traffic summary card
-│   │   │   ├── TrafficChart.jsx                       # Live traffic chart
-│   │   │   └── TrafficTable.jsx                       # Traffic information table
+│   │   │   │   ├── GoogleAuthButton.jsx            # Google OAuth button component
+│   │   │   │   ├── Logo.jsx                        # Brand logo component
+│   │   │   │   └── NotificationPanel.jsx           # Notification drawer component
+│   │   │   ├── dashboard/                          # Dashboard & Map components
+│   │   │   ├── maps/                               # Map presentation components
+│   │   │   ├── reports/                            # Report UI components
+│   │   │   ├── roads/                              # Road management forms & cards
+│   │   │   ├── zones/                              # Zone management forms & cards
+│   │   │   ├── FeaturesSection.jsx                 # Homepage features section
+│   │   │   ├── HeroSection.jsx                     # Homepage hero banner
+│   │   │   ├── HowItWorksSection.jsx               # Workflow section
+│   │   │   ├── Navbar.jsx                          # Dashboard navigation bar
+│   │   │   ├── ProtectedRoute.jsx                  # Route authentication guard
+│   │   │   ├── PublicNavbar.jsx                    # Public website navigation bar
+│   │   │   ├── RoleProtectedRoute.jsx              # RBAC route authorization guard
+│   │   │   ├── RoleShowcaseSection.jsx             # Role capabilities showcase
+│   │   │   ├── Sidebar.jsx                         # Collapsible hover sidebar
+│   │   │   ├── TrafficCard.jsx                     # Stat summary card
+│   │   │   ├── TrafficChart.jsx                    # Velocity trend chart
+│   │   │   └── TrafficTable.jsx                    # Live traffic records table
+│   │   │
+│   │   ├── constants/                              # Frontend static constants
+│   │   │
+│   │   ├── context/
+│   │   │   ├── SidebarContext.jsx                  # Sidebar state context
+│   │   │   └── ThemeContext.jsx                    # Telegram-style theme transition context
 │   │   │
 │   │   ├── pages/
 │   │   │   ├── admin/
-│   │   │   │   ├── Alerts.jsx                         # Alert management page
-│   │   │   │   ├── Analytics.jsx                      # Analytics dashboard
-│   │   │   │   ├── Dashboard.jsx                      # Admin dashboard
-│   │   │   │   ├── HistoricalAnalytics.jsx            # Historical traffic analytics
-│   │   │   │   ├── Reports.jsx                        # Reports page
-│   │   │   │   ├── RoadManagement.jsx                 # Road management page
-│   │   │   │   ├── RouteOptimization.jsx              # Route optimization page
-│   │   │   │   ├── Settings.jsx                       # System settings page
-│   │   │   │   ├── TrafficMonitoring.jsx              # Live traffic monitoring
-│   │   │   │   └── ZoneManagement.jsx                 # Zone management page
+│   │   │   │   ├── Alerts.jsx                      # Alerts & Incident center
+│   │   │   │   ├── Analytics.jsx                   # Deep traffic analytics
+│   │   │   │   ├── Dashboard.jsx                   # Admin root dashboard
+│   │   │   │   ├── HistoricalAnalytics.jsx         # Multi-tier historical analytics & audit
+│   │   │   │   ├── Reports.jsx                     # PDF reports center
+│   │   │   │   ├── RoadManagement.jsx              # Road inventory management
+│   │   │   │   ├── RouteOptimization.jsx           # A* route planner & detour engine
+│   │   │   │   ├── Settings.jsx                    # Profile & system governance page
+│   │   │   │   ├── TrafficMonitoring.jsx           # 6-Camera CCTV surveillance console
+│   │   │   │   ├── UserManagement.jsx              # User administration & role governance
+│   │   │   │   └── ZoneManagement.jsx              # Traffic zone topology
 │   │   │   │
 │   │   │   ├── commuter/
-│   │   │   │   └── Dashboard.jsx                      # Commuter dashboard
+│   │   │   │   ├── CityTrafficMap.jsx              # Commuter interactive city traffic map
+│   │   │   │   └── Dashboard.jsx                   # Commuter live mobility portal
 │   │   │   │
 │   │   │   ├── operator/
-│   │   │   │   ├── Dashboard.jsx                      # Traffic operator dashboard
-│   │   │   │   └── Prediction.jsx                     # Prediction page
+│   │   │   │   ├── Dashboard.jsx                   # Traffic operator console
+│   │   │   │   └── Prediction.jsx                  # AI prediction workspace
 │   │   │   │
-│   │   │   ├── Home.jsx                               # Landing page
-│   │   │   ├── Login.jsx                              # User login page
-│   │   │   └── Register.jsx                           # User registration page
+│   │   │   ├── ForgotPassword.jsx                  # 2-Step OTP password reset page
+│   │   │   ├── Home.jsx                            # Public landing page
+│   │   │   ├── Login.jsx                           # 2-Step OTP login & Google OAuth page
+│   │   │   └── Register.jsx                        # 2-Step OTP registration & Google OAuth page
 │   │   │
-│   │   ├── services/
-│   │   │   ├── alerts.js                              # Alert API service
-│   │   │   ├── analytics.js                           # Analytics API service
-│   │   │   ├── api.js                                 # Axios configuration
-│   │   │   ├── auth.js                                # Authentication API
-│   │   │   ├── history.js                             # Historical data API service
-│   │   │   ├── mapPrediction.js                       # Google Maps prediction API service
-│   │   │   ├── notifications.js                       # Notification API service
-│   │   │   ├── prediction.js                          # Prediction API service
-│   │   │   ├── predictionHistory.js                   # Prediction history API service
-│   │   │   ├── report.js                              # Report API service
-│   │   │   ├── roads.js                               # Road management API service
-│   │   │   ├── routes.js                              # Route optimization API service
-│   │   │   ├── traffic.js                             # Traffic monitoring API service
-│   │   │   ├── user.js                                # User API service
-│   │   │   └── zones.js                               # Zone management API service
-│   │   │
-│   │   ├── styles/
-│   │   │   ├── chart.css                              # Charts styling
-│   │   │   ├── global.css                             # Global application styles
-│   │   │   ├── HeroSection.css                        # Hero section styles
-│   │   │   ├── Home.css                               # Homepage styles
-│   │   │   ├── HowItWorks.css                         # Workflow section styles
-│   │   │   ├── Login.css                              # Login page styles
-│   │   │   ├── map.css                                # Interactive map styles
-│   │   │   ├── navbar.css                             # Navigation bar styles
-│   │   │   ├── prediction.css                         # Prediction page styles
-│   │   │   ├── Register.css                           # Registration page styles
-│   │   │   ├── sidebar.css                            # Sidebar styles
-│   │   │   ├── trafficcard.css                        # Traffic card styles
-│   │   │   └── traffictable.css                       # Traffic table styles
-│   │   │
-│   │   ├── App.jsx                                    # Root React component
-│   │   └── main.jsx                                   # React application entry point
+│   │   ├── services/                               # Axios API service modules
+│   │   ├── styles/                                 # Modular CSS stylesheets
+│   │   ├── App.jsx                                 # Application routes & layout root
+│   │   └── main.jsx                                # React application entry point
 │   │
-│   ├── .env                                           # Frontend environment variables
-│   ├── .gitignore                                     # Frontend Git ignore rules
-│   ├── eslint.config.js                               # ESLint configuration
-│   ├── index.html                                     # HTML entry page
-│   ├── package.json                                   # Frontend dependencies
-│   ├── package-lock.json                              # Locked dependency versions
-│   └── vite.config.js                                 # Vite configuration
+│   ├── .dockerignore                               # Frontend Docker ignore rules
+│   ├── .env                                        # Frontend environment variables
+│   ├── .env.example                                # Sample frontend configuration
+│   ├── Dockerfile                                  # Frontend multi-stage Nginx Dockerfile
+│   ├── eslint.config.js                            # ESLint configuration
+│   ├── index.html                                  # HTML entry page
+│   ├── nginx.conf                                  # Production Nginx configuration
+│   ├── package.json                                # Frontend dependencies
+│   ├── package-lock.json                           # Locked dependency versions
+│   └── vite.config.js                              # Vite build configuration
 │
-├── .gitignore                                         # Repository ignore rules
-├── LICENSE                                            # MIT License
-├── project_structure.txt                              # Project directory snapshot
-└── README.md
+├── docker-compose.yml                              # Multi-container Docker orchestration
+├── LICENSE                                         # MIT License
+├── project_structure.txt                           # Project directory snapshot
+└── README.md                                       # Main documentation
 ```
 
 ## 🚀 Getting Started
 
-Follow the steps below to set up and run **TrafficVision AI** on your local machine.
+Follow the steps below to set up and run **TrafficVision AI** on your local machine using either **Docker Compose** (Recommended) or manual local setup.
 
 ### 📋 Prerequisites
 
-Before running the project, ensure the following software is installed on your system.
-
-| Software           | Recommended Version |
-| ------------------ | ------------------- |
-| Python             | 3.12 or later       |
-| Node.js            | 20.x LTS or later   |
-| PostgreSQL         | 16 or later         |
-| Git                | Latest Version      |
-| Visual Studio Code | Latest Version      |
-
-### Recommended VS Code Extensions
-
-- Python
-- Pylance
-- ESLint
-- Prettier
-- PostgreSQL (optional)
+| Software | Recommended Version |
+| --- | --- |
+| Docker & Docker Desktop | Latest Version |
+| Python | 3.11 or later |
+| Node.js | 20.x LTS or later |
+| PostgreSQL | 16 or later |
+| Git | Latest Version |
 
 ---
 
-### ⚙️ Backend Setup
+### 🐳 Running with Docker Compose (Recommended)
 
-1. Clone the repository.
+1. Clone the repository and navigate into the project directory:
 
 ```bash
 git clone https://github.com/springboardmentor620-ai/trafficvision-ai-smart-traffic-prediction.git
-```
-
-2. Navigate into the project directory.
-
-```bash
 cd trafficvision-ai-smart-traffic-prediction
 ```
 
-3. Navigate to the backend folder.
+2. Build and start all multi-container services in detached mode:
+
+```bash
+docker compose up -d --build
+```
+
+3. Access the services:
+- **Frontend Web Application**: `http://localhost:3000` (or `http://localhost:5173` if running locally)
+- **FastAPI Backend & Swagger UI**: `http://localhost:8000/docs`
+- **PostgreSQL Database**: Port `5432`
+
+---
+
+### ⚙️ Manual Local Setup
+
+#### Backend Setup
+
+1. Navigate to the backend folder:
 
 ```bash
 cd backend
 ```
 
-4. Create a Python virtual environment.
+2. Create and activate a Python virtual environment:
 
 ```bash
 python -m venv venv
 ```
 
-5. Activate the virtual environment.
-
-**Windows (PowerShell)**
-
+**Windows (PowerShell)**:
 ```powershell
 venv\Scripts\Activate.ps1
 ```
 
-**Windows (Command Prompt)**
-
-```cmd
-venv\Scripts\activate
-```
-
-**Linux/macOS**
-
+**Linux/macOS**:
 ```bash
 source venv/bin/activate
 ```
 
-6. Install backend dependencies.
+3. Install backend dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-### 🗄️ Database Setup
-
-1. Start PostgreSQL.
-
-2. Create a new database.
-
-```sql
-CREATE DATABASE trafficvision_db;
-```
-
-3. Verify the database using **pgAdmin** or the PostgreSQL terminal.
-
-4. Configure the backend `.env` file.
-
-Example:
+4. Configure the backend `.env` file:
 
 ```env
-DATABASE_URL=postgresql://<username>:<password>@localhost:5432/trafficvision_db
-SECRET_KEY=your_secret_key_here
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/trafficvision_db
+SECRET_KEY=trafficvision_super_secret_jwt_key_2026
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+SIMULATOR_INTERVAL_SECONDS=5
 ```
 
-5. Database tables will be created automatically when the FastAPI server starts for the first time.
+5. Start the FastAPI backend server:
+
+```bash
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+6. In a separate terminal, start the background traffic simulator:
+
+```bash
+cd backend
+python simulator.py
+```
 
 ---
 
-### 💻 Frontend Setup
+#### Frontend Setup
 
-Open another terminal.
-
-Navigate to the frontend folder.
+1. In a new terminal, navigate to the frontend folder:
 
 ```bash
 cd frontend
 ```
 
-Install dependencies.
+2. Install dependencies:
 
 ```bash
 npm install
 ```
 
-Run the development server.
+3. Start the Vite development server:
 
 ```bash
 npm run dev
 ```
 
-Open your browser.
+4. Open your browser:
 
 ```text
 http://localhost:5173
 ```
-
----
-
-### 🔐 Environment Variables
-
-Backend (`backend/.env`)
-
-```env
-DATABASE_URL=postgresql://<username>:<password>@localhost:5432/trafficvision_db
-SECRET_KEY=your_secret_key_here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
-
-Frontend (`frontend/.env`)
-
-```env
-VITE_API_URL=http://localhost:8000
-```
-
-> **Important:** Never commit your `.env` files. They are already excluded using `.gitignore`.
-
----
-
-### ▶️ Running the Application
-
-Start the backend.
-
-```bash
-cd backend
-python -m uvicorn app.main:app --reload
-```
-
-Backend URL
-
-```text
-http://localhost:8000
-```
-
-Start the frontend.
-
-```bash
-cd frontend
-npm run dev
-```
-
-Frontend URL
-
-```text
-http://localhost:5173
-```
-
-Once both services are running, open:
-
-```text
-http://localhost:5173
-```
-
----
-
-### 📖 API Documentation
-
-FastAPI automatically generates API documentation.
-
-#### Swagger UI
-
-```text
-http://localhost:8000/docs
-```
-
-#### ReDoc
-
-```text
-http://localhost:8000/redoc
-```
-
-The documentation allows you to:
-
-- View available APIs
-- Test endpoints directly
-- Inspect request and response schemas
-- Verify JWT authentication
-- Explore backend services
 
 ## 🌐 API Overview
 
-The TrafficVision AI backend provides REST APIs for authentication, user management, traffic prediction, traffic monitoring, analytics, alerts, notifications, reports, roads, routes, zones, and prediction history.
+The TrafficVision AI backend exposes modular REST APIs across 12 domain routers for authentication, traffic telemetry, AI predictions, analytics, alerts, reports, roads, routes, zones, notifications, and user administration.
 
-### 🔐 Authentication APIs
+### 🔐 Authentication & Security APIs
 
-| Method | Endpoint    | Access | Description                                         |
-| ------ | ----------- | ------ | --------------------------------------------------- |
-| POST   | `/register` | Public | Register a new user                                 |
-| POST   | `/login`    | Public | Authenticate a user and generate a JWT access token |
-
----
-
-### 👤 User APIs
-
-| Method | Endpoint | Access        | Description                                     |
-| ------ | -------- | ------------- | ----------------------------------------------- |
-| GET    | `/me`    | Authenticated | Retrieve the currently logged-in user's profile |
-| GET    | `/users` | Admin Only    | Retrieve the list of registered users           |
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| POST | `/register` | Public | Standard commuter registration |
+| POST | `/login` | Public | Standard OAuth2 username/password login |
+| POST | `/auth/send-register-otp` | Public | Validates email domain and dispatches 6-digit registration OTP |
+| POST | `/auth/verify-register-otp` | Public | Verifies 6-digit OTP and creates verified commuter account |
+| POST | `/auth/login-step1` | Public | Validates credentials and sends 2-Step verification OTP |
+| POST | `/auth/login-verify-otp` | Public | Verifies 2-Step OTP and returns signed JWT access token |
+| POST | `/auth/forgot-password` | Public | Sends password reset OTP code to registered email |
+| POST | `/auth/reset-password` | Public | Verifies reset OTP and updates user's password |
+| POST | `/auth/google-auth` | Public | Authenticates via Google OAuth 2.0 credential |
 
 ---
 
-### 🤖 Prediction APIs
+### 👤 User Administration APIs
 
-| Method | Endpoint              | Access        | Description                                                         |
-| ------ | --------------------- | ------------- | ------------------------------------------------------------------- |
-| POST   | `/prediction/predict` | Authenticated | Predict traffic congestion using the trained machine learning model |
-
----
-
-### 🚦 Traffic APIs
-
-| Method | Endpoint           | Access        | Description                             |
-| ------ | ------------------ | ------------- | --------------------------------------- |
-| GET    | `/traffic/live`    | Authenticated | Retrieve current traffic information    |
-| GET    | `/traffic/history` | Authenticated | Retrieve historical traffic information |
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/me` | Authenticated | Retrieve current user's profile |
+| PUT | `/me` | Authenticated | Update current user's name or password |
+| GET | `/users` | Admin Only | Retrieve list of all registered users |
+| POST | `/admin/users` | Admin Only | Create user account with specified role |
+| PUT | `/admin/users/{user_id}` | Admin Only | Update name, email, password, or role of user |
+| DELETE | `/admin/users/{user_id}` | Admin Only | Delete user account (prevents self-lockout) |
+| POST | `/admin/users/cleanup-fake-emails` | Admin Only | Purge accounts with disposable/fake email domains |
 
 ---
 
-### 🗺️ Zone APIs
+### 🤖 AI Prediction APIs
 
-| Method | Endpoint           | Access           | Description            |
-| ------ | ------------------ | ---------------- | ---------------------- |
-| GET    | `/zones`           | Authenticated    | Retrieve traffic zones |
-| POST   | `/zones`           | Admin/Authorized | Create a traffic zone  |
-| PUT    | `/zones/{zone_id}` | Admin/Authorized | Update a traffic zone  |
-| DELETE | `/zones/{zone_id}` | Admin/Authorized | Delete a traffic zone  |
-
----
-
-### 🛣️ Road APIs
-
-| Method | Endpoint           | Access           | Description               |
-| ------ | ------------------ | ---------------- | ------------------------- |
-| GET    | `/roads`           | Authenticated    | Retrieve registered roads |
-| POST   | `/roads`           | Admin/Authorized | Create a road             |
-| PUT    | `/roads/{road_id}` | Admin/Authorized | Update a road             |
-| DELETE | `/roads/{road_id}` | Admin/Authorized | Delete a road             |
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| POST | `/prediction/predict` | Authenticated | Run Random Forest congestion prediction |
+| GET | `/prediction/history` | Authenticated | Retrieve recent prediction logs |
+| GET | `/prediction/trends` | Authenticated | Retrieve prediction trends |
+| GET | `/prediction-history` | Authenticated | Retrieve stored prediction history records |
 
 ---
 
-### 🚨 Alert APIs
+### 🚦 Live Traffic Telemetry APIs
 
-| Method | Endpoint             | Access        | Description             |
-| ------ | -------------------- | ------------- | ----------------------- |
-| GET    | `/alerts`            | Authenticated | Retrieve traffic alerts |
-| POST   | `/alerts`            | Authorized    | Create a traffic alert  |
-| PUT    | `/alerts/{alert_id}` | Authorized    | Update an alert         |
-| DELETE | `/alerts/{alert_id}` | Authorized    | Delete an alert         |
-
----
-
-### 🔔 Notification APIs
-
-| Method | Endpoint                           | Access        | Description                 |
-| ------ | ---------------------------------- | ------------- | --------------------------- |
-| GET    | `/notifications`                   | Authenticated | Retrieve user notifications |
-| PUT    | `/notifications/{notification_id}` | Authenticated | Update notification status  |
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/traffic` | Authenticated | Retrieve real-time traffic volume, speed, and status |
 
 ---
 
 ### 📊 Analytics APIs
 
-| Method | Endpoint     | Access        | Description                |
-| ------ | ------------ | ------------- | -------------------------- |
-| GET    | `/analytics` | Authenticated | Retrieve traffic analytics |
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/analytics/summary` | Authenticated | Retrieve aggregated network metrics & congestion counts |
 
 ---
 
-### 📜 Prediction History APIs
+### 🚨 Alert & Emergency APIs
 
-| Method | Endpoint              | Access        | Description                             |
-| ------ | --------------------- | ------------- | --------------------------------------- |
-| GET    | `/prediction-history` | Authenticated | Retrieve previous AI prediction records |
-| POST   | `/prediction-history` | Authenticated | Store a prediction result               |
-
----
-
-### 📈 History APIs
-
-| Method | Endpoint   | Access        | Description                         |
-| ------ | ---------- | ------------- | ----------------------------------- |
-| GET    | `/history` | Authenticated | Retrieve historical traffic records |
-
----
-
-### 🧭 Route APIs
-
-| Method | Endpoint  | Access        | Description                           |
-| ------ | --------- | ------------- | ------------------------------------- |
-| POST   | `/routes` | Authenticated | Generate or process route information |
-| GET    | `/routes` | Authenticated | Retrieve available route information  |
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/alerts` | Authenticated | Retrieve active and resolved traffic alerts |
+| POST | `/alerts` | Authorized | Create a traffic alert & trigger email notifications |
+| PUT | `/alerts/{alert_id}` | Authorized | Update alert status (e.g. resolve alert) |
+| DELETE | `/alerts/{alert_id}` | Authorized | Remove an alert record |
 
 ---
 
 ### 📄 Report APIs
 
-| Method | Endpoint   | Access        | Description                        |
-| ------ | ---------- | ------------- | ---------------------------------- |
-| GET    | `/reports` | Authenticated | Retrieve generated traffic reports |
-| POST   | `/reports` | Authorized    | Generate a traffic report          |
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/reports/download` | Authenticated | Generate and download official PDF traffic report |
+
+---
+
+### 🛣️ Road Inventory APIs
+
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/roads` | Authenticated | Retrieve all monitored corridors |
+| POST | `/roads` | Admin/Operator | Register a new road corridor |
+| GET | `/roads/{road_id}` | Authenticated | Retrieve road details by ID |
+| PUT | `/roads/{road_id}` | Admin/Operator | Update road metadata |
+| DELETE | `/roads/{road_id}` | Admin/Operator | Remove a road from monitoring |
+| GET | `/roads/zone/{zone_id}` | Authenticated | Retrieve roads by municipal zone |
+
+---
+
+### 🗺️ Zone Topology APIs
+
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/zones` | Authenticated | Retrieve traffic zones |
+| POST | `/zones` | Admin/Operator | Create a new traffic zone |
+| GET | `/zones/{zone_id}` | Authenticated | Retrieve zone details |
+| PUT | `/zones/{zone_id}` | Admin/Operator | Update zone information |
+| DELETE | `/zones/{zone_id}` | Admin/Operator | Delete a zone |
+
+---
+
+### 🧭 Route Optimization APIs
+
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/routes` | Authenticated | Retrieve optimized route suggestions |
+
+---
+
+### 🔔 Notification APIs
+
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/notifications` | Authenticated | Retrieve user notification inbox |
+| POST | `/notifications` | Authorized | Dispatch a notification |
+| PUT | `/notifications/{notification_id}` | Authenticated | Mark notification as read |
+| DELETE | `/notifications/{notification_id}` | Authenticated | Delete a notification |
+
+---
+
+### 📈 Historical Telemetry APIs
+
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| GET | `/history` | Authenticated | Retrieve historical traffic telemetry records |
 
 ---
 
 ### 📚 API Documentation
 
-For the complete list of available endpoints, request parameters, response schemas, authentication requirements, and interactive testing, use the automatically generated FastAPI documentation:
+FastAPI automatically serves interactive API documentation:
 
-**Swagger UI**
-
-```text
-http://localhost:8000/docs
-```
-
-**ReDoc**
-
-```text
-http://localhost:8000/redoc
-```
-
-These interfaces allow you to:
-
-- View all available API endpoints.
-- Test APIs directly from the browser.
-- Inspect request and response schemas.
-- Verify authentication and authorization workflows.
-- Test protected endpoints using JWT authentication.
-- Review API request parameters and response formats.
-  Note: The Swagger UI documentation reflects the actual routes registered by the running FastAPI application.
+- **Swagger UI**: `http://localhost:8000/docs`
+- **ReDoc**: `http://localhost:8000/redoc`
 
 ## 📅 Development Progress
 
-```md
-## 📅 Development Progress
-
-The development of **TrafficVision AI** has been carried out in multiple phases, with each phase focusing on a major aspect of the system before progressing to the next.
+The development of **TrafficVision AI** has been completed across multiple structured engineering phases:
 
 ---
 
-### 🚀 Phase 1: Project Initialization
+### 🚀 Phase 1: Project Initialization & Core Architecture
 
 **Status: ✅ Completed**
 
-- Selected the project technology stack.
-- Created the GitHub repository.
-- Designed the overall project architecture.
-- Configured the development environment.
-- Installed Python, PostgreSQL, pgAdmin, Node.js, and Git.
-- Created the frontend and backend folder structure.
-- Created Python virtual environments.
-- Installed backend and frontend dependencies.
+- Selected project technology stack (React, Vite, FastAPI, PostgreSQL, Scikit-learn).
+- Created GitHub repository and designed client-server architecture.
+- Configured backend and frontend folder structure and environment configurations.
+- Established Git workflow and dependency management.
 
 ---
 
-### 🗄️ Phase 2: Backend & Database Development
+### 🗄️ Phase 2: Backend, Database & Service Architecture
 
 **Status: ✅ Completed**
 
-- Developed the FastAPI backend.
-- Connected FastAPI with PostgreSQL.
-- Configured SQLAlchemy ORM.
-- Created database models.
-- Configured database connectivity.
-- Implemented automatic database table creation.
-- Developed REST APIs.
-- Created backend services for traffic, zones, roads, routes, alerts, notifications, analytics, reports, and prediction history.
-- Tested backend APIs.
+- Developed FastAPI backend with modular routers and schemas.
+- Configured PostgreSQL connection pool with SQLAlchemy ORM models.
+- Implemented automatic database initialization and seeding.
+- Created service layers for traffic, predictions, alerts, analytics, reports, roads, and zones.
 
 ---
 
-### 🔐 Phase 3: Authentication & Authorization
+### 🔐 Phase 3: Authentication, 2-Step OTP & RBAC Security
 
 **Status: ✅ Completed**
 
-- User Registration.
-- User Login.
-- Password Hashing using bcrypt.
-- JWT Authentication.
-- OAuth2 Password Flow.
-- Role-Based Access Control (RBAC).
-- Protected API Endpoints.
-- Token Validation.
-- Authentication Dependencies.
-- Role-specific route protection.
-- Logout Functionality.
+- Implemented JWT token generation, validation, and refresh.
+- Built 2-Step OTP email verification for registration and login.
+- Integrated Google OAuth 2.0 sign-in and automated profile provisioning.
+- Implemented secure password reset via 6-digit email OTP.
+- Implemented disposable and fake email domain filtering.
+- Implemented Role-Based Access Control (Admin, Operator, Commuter) with route guards.
 
 ---
 
-### 💻 Phase 4: Frontend Development
+### 💻 Phase 4: Frontend UI, Theming & Navigation
 
 **Status: ✅ Completed**
 
-- Created the React application using Vite.
-- Configured React Router.
-- Integrated Axios for API communication.
-- Implemented Protected Routes.
-- Implemented Role Protected Routes.
-- Created Public Navigation Bar.
-- Created Dashboard Navigation.
-- Created Sidebar Navigation.
-- Developed Login and Registration pages.
-- Connected frontend services with backend APIs.
-- Implemented JWT token handling.
-- Implemented role-based frontend navigation.
-- Added responsive UI styling.
+- Built React application using Vite and React Router.
+- Implemented Telegram-style seamless circular reveal dark mode transitions.
+- Designed collapsible hover sidebar and role-specific navigation bars.
+- Built clean, responsive auth pages with interactive OTP input fields.
 
 ---
 
-### 📊 Phase 5: Dashboard Development
+### 📊 Phase 5: Dashboards, Analytics & Reporting
 
 **Status: ✅ Completed**
 
-- Designed the dashboard layout.
-- Created dashboard cards.
-- Added dashboard header.
-- Integrated live traffic APIs.
-- Added traffic summary cards.
-- Added traffic trend visualization.
-- Added live traffic data table.
-- Added traffic map visualization.
-- Added notification panel.
-- Implemented dashboard layouts for different user roles.
-- Displayed authenticated user information.
-- Refactored dashboard components into reusable React components.
+- Created Admin, Operator, and Commuter dashboard portals.
+- Developed real-time summary cards synchronized across consoles.
+- Built Historical Analytics dashboard with Low, Moderate, and High risk distribution charts.
+- Implemented PDF report generation and download using ReportLab.
+- Built Alert management center and real-time notification feeds.
 
 ---
 
-### 🤖 Phase 6: AI & Machine Learning
+### 🤖 Phase 6: Machine Learning & Predictive Modeling
 
 **Status: ✅ Completed**
 
-- Dataset evaluation.
-- Data quality assessment.
-- Exploratory Data Analysis (EDA).
-- Data cleaning.
-- Feature engineering.
-- Data preprocessing.
-- Created preprocessing utilities.
-- Trained Random Forest model.
-- Trained Decision Tree model.
-- Trained Extra Trees model.
-- Trained Gradient Boosting model.
-- Compared machine learning models.
-- Performed hyperparameter tuning.
-- Selected the best-performing model.
-- Serialized the trained model using Joblib.
-- Integrated the trained model with FastAPI.
-- Created the prediction engine.
-- Created the prediction API.
-- Tested predictions through Swagger UI.
+- Performed exploratory data analysis (EDA), cleaning, and feature engineering.
+- Trained and evaluated Decision Tree, Extra Trees, Gradient Boosting, and Random Forest models.
+- Performed hyperparameter tuning and selected best Random Forest model.
+- Serialized trained model with Joblib and deployed in FastAPI prediction pipeline.
+- Added automated AI alert trigger when high congestion is detected.
 
 ---
 
-### 🗺️ Phase 7: Traffic Visualization & Route Recommendation
+### 🗺️ Phase 7: Map Navigation, Route Optimization & CCTV Surveillance
 
 **Status: ✅ Completed**
 
-- Google Maps integration.
-- AI congestion prediction panel.
-- Interactive traffic map.
-- Color-coded traffic markers.
-- Live traffic information windows.
-- Multiple Bangalore traffic zones.
-- Traffic congestion visualization.
-- Route planner.
-- Route recommendation interface.
-- AI-based route recommendation.
-- Frontend prediction integration.
-- Road and zone management interfaces.
+- Built interactive Leaflet map with 18+ Bengaluru arterial corridor markers.
+- Implemented A* shortest and least-congested route optimization planner.
+- Built 6-camera CCTV intersection surveillance console with HTML5 Canvas.
+- Implemented YOLO-style AI bounding box overlays with live confidence and velocity tags.
+- Built dynamic vehicle flow regulation based on corridor congestion status.
 
 ---
 
-### 🚧 Phase 8: Upcoming Features
+### 🐳 Phase 8: Containerization & Production Deployment
 
-**Status: 🔄 Planned**
+**Status: ✅ Completed**
 
-- Route Optimization Engine.
-- Live Traffic Streaming.
-- Advanced Analytics Dashboard.
-- Historical Traffic Reports.
-- Notifications and alert improvements.
-- Docker Deployment.
-- Cloud Deployment.
-- Production monitoring.
+- Created multi-stage Dockerfiles for frontend (Nginx) and backend (FastAPI).
+- Configured multi-container Docker Compose stack (frontend, backend, db, simulator).
+- Optimized database connection pooling and backend performance.
+- Validated end-to-end automated tests across all services.
 
 ## 🛠️ Problems Faced & Solutions
 
-During the development of TrafficVision AI, several technical challenges were encountered and resolved. Documenting these issues helps future contributors understand the development process and provides troubleshooting guidance.
+During the development of TrafficVision AI, several technical challenges were encountered and resolved.
 
-| Problem                                                      | Solution                                                                                                                       |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| Python environment setup and PATH configuration              | Installed Python correctly, configured the virtual environment, and verified the Python installation.                          |
-| PostgreSQL connection issues                                 | Configured PostgreSQL correctly and verified the database connection before integrating it with FastAPI.                       |
-| SQLAlchemy database configuration                            | Organized the database layer into a dedicated module and configured session management.                                        |
-| Missing database driver (`psycopg`)                          | Installed the required PostgreSQL driver and updated the database connection string.                                           |
-| Environment variable management                              | Moved sensitive configuration values to a `.env` file using `python-dotenv`.                                                   |
-| CORS errors between React and FastAPI                        | Configured FastAPI CORS middleware to allow frontend requests during development.                                              |
-| OAuth2 authentication (422 Validation Error)                 | Updated the frontend login request to use the correct `OAuth2PasswordRequestForm` format.                                      |
-| JWT authentication issues                                    | Implemented secure token generation, validation, and protected API endpoints.                                                  |
-| Frontend–Backend communication                               | Configured Axios with a reusable API service and verified backend connectivity.                                                |
-| Dashboard data integration                                   | Replaced static frontend data with live data retrieved from backend APIs.                                                      |
-| Large dashboard component became difficult to maintain       | Refactored the dashboard into reusable React components following component-based architecture.                                |
-| Machine learning model accuracy                              | Compared multiple ML models and selected Random Forest after hyperparameter tuning.                                            |
-| Feature engineering complexity                               | Created a reusable preprocessing pipeline.                                                                                     |
-| Integrating ML model with FastAPI                            | Serialized model using Joblib and created prediction endpoint.                                                                 |
-| Google Maps integration                                      | Configured Maps API and rendered interactive traffic markers.                                                                  |
-| Dynamic traffic visualization                                | Implemented color-coded congestion markers and info windows.                                                                   |
-| Route recommendation logic                                   | Built AI-based route planner using congestion predictions.                                                                     |
-| Responsive dashboard layout                                  | Improved UI using reusable CSS and flexible layouts.                                                                           |
-| Missing Python packages during backend development           | Installed the required packages inside the backend virtual environment and verified the dependency installation.               |
-| `uvicorn` command not recognized                             | Ran Uvicorn through the active Python environment using `python -m uvicorn`.                                                   |
-| `bcrypt` compatibility error                                 | Resolved the package compatibility issue and verified password hashing functionality.                                          |
-| FastAPI indentation and syntax errors                        | Corrected Python indentation, imports, function definitions, and router structure.                                             |
-| Frontend blank page after modifying React files              | Restored the required React imports, component structure, and application entry-point configuration.                           |
-| Vite development server errors                               | Corrected frontend imports, dependencies, and component references before restarting the development server.                   |
-| React component import/export errors                         | Corrected component exports, imports, and file paths to match the React project structure.                                     |
-| JWT token not included in protected requests                 | Configured the Axios API layer to attach the JWT access token to authenticated requests.                                       |
-| Authentication state lost after page refresh                 | Restored the authenticated user state using the stored authentication token and user information.                              |
-| Live traffic information required automatic updates          | Implemented periodic data refresh to keep dashboard traffic information updated.                                               |
-| Traffic chart organization became difficult                  | Created dedicated reusable chart components and separated chart-specific styling from the main dashboard.                      |
-| Traffic table data required consistent API mapping           | Standardized traffic data handling between backend API responses and frontend traffic components.                              |
-| ML model input features differed from training data          | Standardized feature engineering and preprocessing between model training and prediction.                                      |
-| ML model loading in the backend                              | Integrated the serialized model into the backend ML module and created a dedicated prediction loader.                          |
-| Route planning required congestion information               | Connected route planning with congestion prediction results to support traffic-aware recommendations.                          |
-| Increasing number of API services became difficult to manage | Organized frontend API communication into separate service modules for different application features.                         |
-| Growing number of pages increased navigation complexity      | Organized frontend pages according to Admin, Traffic Operator, and Commuter roles.                                             |
-| Local development files appeared in the project              | Updated Git ignore rules to exclude virtual environments, cache files, environment files, and generated development files.     |
-| Large frontend dependency directory should not be committed  | Excluded `node_modules` from version control while retaining `package.json` and `package-lock.json` for dependency management. |
-| Project architecture became difficult to document            | Maintained `project_structure.txt` and updated the README with the current project architecture.                               |
+| Problem | Solution |
+| --- | --- |
+| Python environment setup and PATH configuration | Configured virtual environment and verified PATH bindings. |
+| Missing PostgreSQL database driver | Configured `psycopg2-binary` and verified SQLAlchemy connection strings. |
+| CORS errors between React and FastAPI | Configured FastAPI `CORSMiddleware` with allowed origins and credentials. |
+| OAuth2 authentication format mismatch | Standardized login requests to use `OAuth2PasswordRequestForm` with fallback JSON support. |
+| Dark mode transition popping | Implemented View Transitions API with circular radial reveal from click coordinates. |
+| Moderate-only predictions in history | Updated simulator to generate realistic multi-factor feature distributions (Volume, Speed, Capacity). |
+| Disposable/fake email registrations | Implemented domain blacklist and format validation in backend and frontend. |
+| Operator vs. Admin dashboard metric discrepancies | Synchronized `DashboardCards.jsx` to fetch directly from `/analytics/summary`. |
+| OTP delivery in development environments | Built dual-mode OTP service supporting SMTP email dispatch and local Docker logging. |
+| CCTV stream restrictions on public feeds | Built high-fidelity Canvas 2D simulation with interchangeable RTSP/HLS stream interfaces. |
+| Large bundle sizes on frontend build | Split vendor chunks and optimized Vite build configuration. |
+| Database connection exhaust under load | Configured SQLAlchemy connection pool with `pool_size=20` and `max_overflow=30`. |
 
 ## 🧪 Testing
 
-The following components have been tested during development to verify that the TrafficVision AI application works correctly across the backend, database, authentication, frontend, machine learning, traffic visualization, and route recommendation modules.
+The following comprehensive tests have been conducted across the backend, database, authentication, machine learning, and frontend modules to verify system reliability:
 
-| Component                    | Status    | Testing Method                                                            |
-| ---------------------------- | --------- | ------------------------------------------------------------------------- |
-| Backend API                  | ✅ Passed | Tested using FastAPI Swagger UI (`/docs`)                                 |
-| PostgreSQL Database          | ✅ Passed | Verified database connectivity, table creation, and CRUD operations       |
-| User Registration            | ✅ Passed | Successfully created and stored new user accounts                         |
-| User Login                   | ✅ Passed | Verified authentication and JWT access token generation                   |
-| JWT Authentication           | ✅ Passed | Verified token validation and authenticated API requests                  |
-| Protected Routes             | ✅ Passed | Verified unauthenticated users cannot access protected resources          |
-| Role-Based Access Control    | ✅ Passed | Tested Admin, Traffic Operator, and Commuter role permissions             |
-| Frontend–Backend Integration | ✅ Passed | Verified Axios communication between React and FastAPI                    |
-| Dashboard                    | ✅ Passed | Verified dashboard loading and traffic data presentation                  |
-| Role-Based Dashboards        | ✅ Passed | Verified Admin, Traffic Operator, and Commuter dashboard access           |
-| Live Traffic Data            | ✅ Passed | Verified traffic data retrieval and display in dashboard components       |
-| Traffic Charts               | ✅ Passed | Verified traffic trend and congestion visualizations                      |
-| Traffic Data Table           | ✅ Passed | Verified traffic records are displayed correctly                          |
-| Zone Management              | ✅ Passed | Tested zone creation, retrieval, update, and management workflows         |
-| Road Management              | ✅ Passed | Tested road management and road-related API operations                    |
-| Traffic Prediction API       | ✅ Passed | Verified congestion prediction requests and responses                     |
-| ML Model Integration         | ✅ Passed | Verified loading and inference using the serialized Random Forest model   |
-| Prediction History           | ✅ Passed | Verified prediction results are stored and retrieved correctly            |
-| Analytics                    | ✅ Passed | Verified analytics data retrieval and dashboard visualization             |
-| Historical Traffic Analytics | ✅ Passed | Verified historical traffic data retrieval and analysis                   |
-| Alerts                       | ✅ Passed | Verified traffic alert creation, retrieval, and display                   |
-| Notifications                | ✅ Passed | Verified notification retrieval and frontend notification panel           |
-| Reports                      | ✅ Passed | Verified report generation and report-related API functionality           |
-| Google Maps Integration      | ✅ Passed | Verified interactive map rendering and traffic location display           |
-| Traffic Heat Map             | ✅ Passed | Verified color-coded congestion visualization on the map                  |
-| Traffic Information Windows  | ✅ Passed | Verified traffic information display for map markers                      |
-| Route Planner                | ✅ Passed | Tested origin and destination selection and route planning workflow       |
-| AI Route Recommendation      | ✅ Passed | Verified route recommendations using traffic congestion information       |
-| Authentication Flow          | ✅ Passed | Verified login, token storage, protected routes, and logout functionality |
-| Responsive Dashboard Layout  | ✅ Passed | Tested dashboard layout across different screen sizes and resolutions     |
+| Component / Feature | Test Scope | Status | Testing Method |
+| --- | --- | --- | --- |
+| **2-Step OTP Registration** | Email validation, OTP dispatch, code verification, account creation | ✅ Passed | Automated API test suite & Form submission |
+| **2-Step OTP Login** | Credential check, OTP generation, 2FA code verification, JWT issuance | ✅ Passed | Automated Python script & Interactive UI |
+| **Google OAuth 2.0** | Token exchange, automated user provisioning, session establishment | ✅ Passed | Google Identity client & Auth API verification |
+| **Password Reset Flow** | Email OTP dispatch, verification, bcrypt password update, re-login | ✅ Passed | Automated API test & Forgot Password UI |
+| **Fake Email Defense** | Disposable domain rejection (`mailinator`, `tempmail`, etc.) | ✅ Passed | Blacklist validation test (HTTP 400 rejection) |
+| **Role-Based Access Control** | Admin, Operator, Commuter route protection & permission barriers | ✅ Passed | Protected route guards & unauthorized access tests |
+| **AI ML Prediction Engine** | Random Forest model inference, confidence scores, recommendations | ✅ Passed | Swagger UI (`/prediction/predict`) & batch test |
+| **Dynamic Telemetry Simulator** | Multi-tier risk generation (Low <30%, Mod 30-69%, High ≥70%) | ✅ Passed | Simulator loop verification & history assertions |
+| **High Congestion Email Alerts** | Emergency alert creation and asynchronous SMTP email dispatch | ✅ Passed | High congestion trigger test & SMTP service check |
+| **6-Camera CCTV Surveillance** | Canvas 2D rendering, YOLO bounding boxes, vehicle class tracking | ✅ Passed | Browser rendering test & stream speed scaling |
+| **Route Optimization Engine** | A* algorithm shortest path & congestion-aware detour calculation | ✅ Passed | Route optimization API & interactive map planner |
+| **Historical Analytics Sync** | Live 5-second polling of distribution pie charts & velocity graphs | ✅ Passed | Real-time telemetry feed verification |
+| **Console Synchronization** | Metric consistency between Admin Dashboard and Operator Console | ✅ Passed | Dashboard summary API consistency assertion |
+| **PDF Report Generation** | PDF structure, traffic audit tables, and download streaming | ✅ Passed | `/reports/download` endpoint & PDF inspection |
+| **Docker Compose Stack** | Frontend (Nginx), Backend, PostgreSQL, and Simulator health | ✅ Passed | `docker compose up --build` healthcheck validation |
+| **Theme Switching Engine** | Telegram-style circular wipe animation (Light ↔ Dark) | ✅ Passed | Browser View Transitions API verification |
 
 ## 🗺️ Roadmap
 
-The following enhancements are planned for future phases of TrafficVision AI:
+The following enhancements are planned for future versions of TrafficVision AI:
 
-### 🎨 User Interface
+### 🎨 User Interface & Experience
 
-- Dark Mode Support
-- Mobile Responsive Improvements
-- Advanced Dashboard Customization
-- Accessibility Improvements
-- Enhanced User Experience and Navigation
+- Mobile Progressive Web App (PWA) support
+- Multi-language localization (Kannada, Hindi, English)
+- Voice-assisted commuter navigation
 
-### 🚦 Traffic Management
+### 🚦 Advanced Traffic Management
 
-- Real-Time Traffic Sensor Integration
-- Live Traffic Streaming using WebSockets
-- Advanced Incident Reporting
-- Automated Traffic Alert Generation
-- Advanced Zone and Road Monitoring
-- Historical Traffic Pattern Monitoring
+- Physical IoT radar and inductive loop sensor telemetry streaming
+- Adaptive traffic signal timing hardware controllers
+- Automated incident detection via live RTSP video stream ingestion
 
-### 🤖 Artificial Intelligence
+### 🤖 Machine Learning & AI
 
-- Real-Time Congestion Prediction
-- Advanced Traffic Forecasting
-- Travel Time Prediction
-- Smart Route Optimization
-- Adaptive Route Recommendation
-- Advanced Traffic Pattern Analysis
-- Continuous Model Retraining with New Traffic Data
+- Deep Learning traffic prediction (LSTM / Transformer time-series models)
+- City-wide origin-destination matrix simulation
+- Continuous model retraining on newly collected traffic streams
 
-### 📊 Analytics & Reporting
+### ☁️ Cloud & Infrastructure
 
-- Advanced Historical Traffic Analytics
-- Interactive Analytics Filters
-- Advanced AI-Generated Traffic Insights
-- Automated Report Scheduling
-- Export Reports in Additional Formats
-- Comparative Traffic Analysis
-
-### ☁️ Deployment & DevOps
-
-- Docker Containerization
-- Cloud Deployment
-- CI/CD Pipeline
-- Production Environment Configuration
-- Automated Database Backups
-- Application Monitoring and Logging
-
-### 🔒 Security & Performance
-
-- Refresh Token Authentication
-- Rate Limiting
-- Advanced API Monitoring
-- Database Query Optimization
-- Caching for Frequently Requested Traffic Data
-- Security Hardening and Production Authentication Configuration
+- Kubernetes deployment (Helm charts)
+- CI/CD automated testing and deployment pipeline
+- Multi-region high availability database replication
 
 ## 📄 License
 
@@ -1330,10 +1008,4 @@ Special thanks to:
 - The internship mentors for providing project guidance, technical requirements, and continuous support.
 - The open-source community for maintaining the libraries, frameworks, and development tools used in this project.
 - The developers and maintainers of FastAPI, React, PostgreSQL, SQLAlchemy, Vite, and other open-source technologies used throughout the application.
-- The contributors and maintainers of the Python machine learning ecosystem that supported dataset processing, model development, training, evaluation, and inference.
-- OpenAI ChatGPT for technical guidance, debugging assistance, architecture discussions, problem-solving, and documentation support throughout the development process.
-```
-
-```
-
-```
+- The contributors and maintainers of the Python machine learning ecosystem (Scikit-learn, Pandas, NumPy, Joblib).

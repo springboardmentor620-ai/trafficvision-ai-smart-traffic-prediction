@@ -2,7 +2,7 @@ import pandas as pd
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_db
@@ -15,6 +15,16 @@ from app.schemas.prediction import (
 
 from app.services.alert_service import AlertService
 from app.services.prediction_history_service import save_prediction
+
+from app.constants.traffic import (
+    WEATHER_ENCODING,
+    get_traffic_category,
+    CONGESTION_THRESHOLD_LOW,
+    CONGESTION_THRESHOLD_MODERATE,
+    PREDICTION_LEVEL_LOW,
+    PREDICTION_LEVEL_MODERATE,
+    PREDICTION_LEVEL_HIGH,
+)
 
 router = APIRouter(
     prefix="/prediction",
@@ -30,25 +40,26 @@ def predict_congestion(
     data: PredictionRequest,
     db: Session = Depends(get_db)
 ):
+    # ── Validate weather string ──────────────────────────────────────────────
+    # Accepted values: Clear, Overcast, Fog, Rain, Windy
+    # These are the ONLY strings the training pipeline encoded.
+    if data.Weather not in WEATHER_ENCODING:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Invalid weather value '{data.Weather}'. "
+                f"Must be one of: {list(WEATHER_ENCODING.keys())}"
+            )
+        )
 
     today = datetime.now()
 
-    weather_map = {
-        "Clear": 0,
-        "Cloudy": 1,
-        "Rain": 2,
-        "Fog": 3,
-        "Storm": 4
-    }
-
-    traffic_volume = data.Traffic_Volume
-
-    if traffic_volume < 15000:
-        category = "Low"
-    elif traffic_volume < 35000:
-        category = "Medium"
-    else:
-        category = "High"
+    # ── Derive Traffic Category from Traffic Volume ──────────────────────────
+    # Uses identical bin boundaries as FeatureEngineering.traffic_category():
+    # pd.cut(bins=[0, 15000, 30000, 50000, 100000],
+    #         labels=['Low', 'Moderate', 'Heavy', 'Severe'])
+    # The model's OneHotEncoder was trained only on these four strings.
+    category = get_traffic_category(data.Traffic_Volume)
 
     df = pd.DataFrame([{
 
@@ -78,6 +89,8 @@ def predict_congestion(
 
         "Pedestrian and Cyclist Count": data.Pedestrian_and_Cyclist_Count,
 
+        # Date features are always derived server-side from the current time.
+        # The client cannot supply these — they are ignored if submitted.
         "Year": today.year,
 
         "Month": today.month,
@@ -86,7 +99,9 @@ def predict_congestion(
 
         "DayOfWeek": today.weekday(),
 
-        "Weather": weather_map[data.Weather],
+        # Correct encoding: Clear=0, Overcast=1, Fog=2, Rain=3, Windy=4
+        # Matches FeatureEngineering.encode_weather() exactly.
+        "Weather": WEATHER_ENCODING[data.Weather],
 
         "Roadwork": int(data.Roadwork)
 
@@ -94,34 +109,29 @@ def predict_congestion(
 
     prediction = float(predict(df))
 
-    if prediction < 30:
+    # ── Map continuous score to prediction level ─────────────────────────────
+    if prediction < CONGESTION_THRESHOLD_LOW:
 
-        level = "Low"
-
-        confidence = 96.5
+        level = PREDICTION_LEVEL_LOW
 
         recommendation = (
-        "Traffic flowing normally. Continue current signal timing."
+            "Traffic flowing normally. Continue current signal timing."
         )
 
-    elif prediction < 70:
+    elif prediction < CONGESTION_THRESHOLD_MODERATE:
 
-        level = "Moderate"
-
-        confidence = 93.2
+        level = PREDICTION_LEVEL_MODERATE
 
         recommendation = (
-        "Increase green signal timing by 10% and monitor traffic."
+            "Increase green signal timing by 10% and monitor traffic."
         )
 
     else:
 
-        level = "High"
-
-        confidence = 95.4
+        level = PREDICTION_LEVEL_HIGH
 
         recommendation = (
-        "Deploy traffic police, extend green signal timing and divert vehicles."
+            "Deploy traffic police, extend green signal timing and divert vehicles."
         )
 
     alternate_routes = {
@@ -164,18 +174,14 @@ def predict_congestion(
         recommendation=recommendation
     )
 
-    if prediction >= 70:
-
+    if prediction >= CONGESTION_THRESHOLD_MODERATE:
+        alert_type = "Incident" if data.Incident_Reports > 0 else ("Roadwork" if data.Roadwork else "Congestion")
         AlertService.create_alert(
-
             db=db,
-
             road=data.Road_Intersection_Name,
-
             congestion=prediction,
-
             recommendation=recommendation,
-
+            alert_type=alert_type,
         )
 
     return PredictionResponse(
@@ -183,8 +189,6 @@ def predict_congestion(
         congestion_prediction=prediction,
 
         prediction_level=level,
-
-        confidence=confidence,
 
         recommended_action=recommendation,
 

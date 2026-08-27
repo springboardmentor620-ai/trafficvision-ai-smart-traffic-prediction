@@ -6,8 +6,11 @@ export const getAlerts = async () => {
 };
 
 export const resolveAlert = async (id) => {
-    const response = await api.put(
-        `/alerts/${id}/resolve`
-    );
-    return response.data;
+  const response = await api.put(`/alerts/${id}/resolve`);
+  return response.data;
+};
+
+export const testSmtpDispatch = async (payload = {}) => {
+  const response = await api.post("/alerts/test-smtp", payload);
+  return response.data;
 };

@@ -20,214 +20,240 @@ trafficvision-ai-smart-traffic-prediction/
 │   │   ├── 06_model_comparison.ipynb               # Model comparison
 │   │   └── 07_hyperparameter_tuning.ipynb          # Hyperparameter tuning
 │   │
-│   ├── src/
-│   │   ├── eda.py                                  # EDA helper functions
-│   │   ├── feature_engineering.py                  # Feature engineering
-│   │   ├── preprocessing.py                        # Data preprocessing
-│   │   └── quality.py                              # Dataset quality utilities
+│   └── src/
+│       ├── eda.py                                  # EDA helper functions
+│       ├── feature_engineering.py                  # Feature engineering pipeline
+│       ├── preprocessing.py                        # Data preprocessing utilities
+│       └── quality.py                              # Dataset quality utilities
 │
 ├── backend/
 │   ├── app/
 │   │   ├── config/
-│   │   │   └── auth.py                             # JWT configuration
+│   │   │   └── auth.py                             # JWT & Security configuration
 │   │   │
 │   │   ├── constants/
-│   │   │   └── roles.py                            # User role definitions
+│   │   │   ├── roles.py                            # Role definitions (admin, operator, commuter)
+│   │   │   └── traffic.py                          # Traffic categories & threshold constants
 │   │   │
 │   │   ├── database/
-│   │   │   ├── base.py                             # SQLAlchemy base
-│   │   │   └── connection.py                       # Database connection
+│   │   │   ├── base.py                             # SQLAlchemy Base class
+│   │   │   └── connection.py                       # PostgreSQL connection pool
 │   │   │
 │   │   ├── dependencies/
-│   │   │   └── auth.py                             # Authentication dependencies
+│   │   │   └── auth.py                             # Authentication & RBAC dependencies
 │   │   │
 │   │   ├── ml/
-│   │   │   ├── best_model.pkl                      # ML model
-│   │   │   └── predictor.py                        # Prediction engine
+│   │   │   ├── best_model.pkl                      # Serialized ML model
+│   │   │   └── predictor.py                        # ML inference engine
 │   │   │
 │   │   ├── models/
-│   │   │   ├── alert.py                            # Alert model
-│   │   │   ├── notification.py                     # Notification model
-│   │   │   ├── prediction_history.py               # Prediction history model
-│   │   │   ├── report.py                           # Report model
-│   │   │   ├── road.py                             # Road model
-│   │   │   ├── traffic.py                          # Traffic model
-│   │   │   ├── user.py                             # User model
-│   │   │   └── zone.py                             # Zone model
+│   │   │   ├── alert.py                            # Alert database model
+│   │   │   ├── notification.py                     # Notification database model
+│   │   │   ├── prediction_history.py               # Prediction history database model
+│   │   │   ├── report.py                           # Report database model
+│   │   │   ├── road.py                             # Road corridor database model
+│   │   │   ├── traffic.py                          # Traffic telemetry database model
+│   │   │   ├── user.py                             # User profile & credential database model
+│   │   │   └── zone.py                             # Zone database model
 │   │   │
 │   │   ├── routers/
-│   │   │   ├── alerts.py                           # Alert APIs
-│   │   │   ├── analytics.py                        # Analytics APIs
-│   │   │   ├── history.py                          # History APIs
-│   │   │   ├── notifications.py                    # Notification APIs
-│   │   │   ├── prediction.py                       # AI Prediction APIs
-│   │   │   ├── prediction_history.py               # Prediction history APIs
-│   │   │   ├── reports.py                          # Report APIs
-│   │   │   ├── roads.py                            # Road management APIs
-│   │   │   ├── routes.py                           # Route recommendation APIs
-│   │   │   ├── traffic.py                          # Traffic APIs
-│   │   │   ├── user.py                             # User APIs
-│   │   │   └── zones.py                            # Zone APIs
+│   │   │   ├── alerts.py                           # Alert management endpoints
+│   │   │   ├── analytics.py                        # Analytics summary endpoints
+│   │   │   ├── history.py                          # General history endpoints
+│   │   │   ├── notifications.py                    # Notification endpoints
+│   │   │   ├── prediction.py                       # AI prediction endpoints
+│   │   │   ├── prediction_history.py               # Prediction history endpoints
+│   │   │   ├── reports.py                          # PDF report download endpoints
+│   │   │   ├── roads.py                            # Road inventory CRUD endpoints
+│   │   │   ├── routes.py                           # Route recommendation endpoints
+│   │   │   ├── traffic.py                          # Live traffic telemetry endpoints
+│   │   │   ├── user.py                             # Auth, OTP, Google OAuth & User admin endpoints
+│   │   │   └── zones.py                            # Zone topology CRUD endpoints
 │   │   │
 │   │   ├── schemas/
-│   │   │   ├── alert.py                               # Alert request & response schemas
-│   │   │   ├── notification.py                        # Notification schemas
-│   │   │   ├── prediction.py                          # Prediction request & response schemas
-│   │   │   ├── prediction_history.py                  # Prediction history schemas
-│   │   │   ├── report.py                              # Report schemas
-│   │   │   ├── road.py                                # Road management schemas
-│   │   │   ├── traffic.py                             # Traffic data schemas
-│   │   │   ├── user.py                                # User authentication & profile schemas
-│   │   │   └── zone.py                                # Zone management schemas
+│   │   │   ├── alert.py                            # Alert Pydantic schemas
+│   │   │   ├── notification.py                     # Notification Pydantic schemas
+│   │   │   ├── prediction.py                       # Prediction Pydantic schemas
+│   │   │   ├── prediction_history.py               # Prediction history Pydantic schemas
+│   │   │   ├── report.py                           # Report Pydantic schemas
+│   │   │   ├── road.py                             # Road Pydantic schemas
+│   │   │   ├── traffic.py                          # Traffic Pydantic schemas
+│   │   │   ├── user.py                             # User & Auth Pydantic schemas
+│   │   │   └── zone.py                             # Zone Pydantic schemas
 │   │   │
 │   │   ├── services/
-│   │   │   ├── alert_service.py                       # Alert business logic
-│   │   │   ├── analytics_service.py                   # Analytics calculations & statistics
-│   │   │   ├── history_service.py                     # Historical traffic data service
-│   │   │   ├── notification_service.py                # Notification management service
-│   │   │   ├── prediction_history_service.py          # Prediction history management
-│   │   │   ├── report_service.py                      # Report generation service
-│   │   │   ├── road_service.py                        # Road management service
-│   │   │   ├── route_service.py                       # Route optimization service
-│   │   │   ├── traffic_service.py                     # Live traffic management service
-│   │   │   └── zone_service.py
+│   │   │   ├── alert_service.py                    # Alert business logic & email trigger rules
+│   │   │   ├── analytics_service.py                # Analytics aggregation service
+│   │   │   ├── email_service.py                    # SMTP email dispatch service for OTP & alerts
+│   │   │   ├── history_service.py                  # Historical traffic data service
+│   │   │   ├── notification_service.py             # User notification service
+│   │   │   ├── otp_service.py                      # 2-Step OTP security service
+│   │   │   ├── prediction_history_service.py       # Prediction history service
+│   │   │   ├── report_service.py                   # Report metadata service
+│   │   │   ├── road_service.py                     # Road management service
+│   │   │   ├── route_service.py                    # A* route optimization service
+│   │   │   ├── traffic_service.py                  # Real-time traffic telemetry service
+│   │   │   └── zone_service.py                     # Zone management service
 │   │   │
 │   │   ├── utils/
-│   │   │   ├── pdf_generator.py                    # PDF report generation
-│   │   │   └── security.py                         # JWT & password hashing
+│   │   │   ├── email_validator.py                  # Email authenticity & disposable domain filter
+│   │   │   ├── pdf_generator.py                    # ReportLab PDF generation utility
+│   │   │   └── security.py                         # Bcrypt hashing & JWT utility
 │   │   │
-│   │   └── main.py                                 # FastAPI application
+│   │   └── main.py                                 # FastAPI application entry point
 │   │
-│   ├── .env                                           # Backend environment variables
-│   ├── .env.example                                   # Sample backend configuration
-│   ├── requirements.txt                               # Python backend dependencies
-│   └── simulator.py                                # Traffic data simulator
+│   ├── .dockerignore                               # Docker build ignore rules
+│   ├── .env                                        # Backend environment variables
+│   ├── .env.example                                # Sample backend configuration
+│   ├── Dockerfile                                  # Backend Docker build specification
+│   ├── requirements.txt                            # Python backend dependencies
+│   ├── seed_users.py                               # Database seed utility for default users
+│   └── simulator.py                                # Dynamic real-time traffic simulator
 │
 ├── frontend/
 │   ├── public/
-│   │   ├── favicon.svg                                # Website favicon
-│   │   └── icons.svg                                  # SVG icon collection
+│   │   ├── favicon.svg                             # Website favicon
+│   │   ├── icons.svg                               # SVG icon collection
+│   │   └── logo.svg                                # Vector brand logo
 │   │
 │   ├── src/
 │   │   ├── assets/
-│   │   │   ├── hero.png                               # Homepage hero image
-│   │   │   ├── react.svg                              # React logo
-│   │   │   └── vite.svg                               # Vite logo
+│   │   │   ├── hero.png                            # Landing page hero visual
+│   │   │   ├── react.svg                           # React logo
+│   │   │   └── vite.svg                            # Vite logo
 │   │   │
 │   │   ├── components/
 │   │   │   ├── alerts/
-│   │   │   │   └── AlertCard.jsx                      # Alert display component
+│   │   │   │   └── AlertCard.jsx                   # Alert display card
 │   │   │   │
 │   │   │   ├── analytics/
-│   │   │   │   ├── AIInsights.jsx                     # AI-generated traffic insights
-│   │   │   │   ├── AnalyticsCard.jsx                  # Analytics summary card
-│   │   │   │   ├── BusyRoadChart.jsx                  # Busy roads visualization
-│   │   │   │   ├── CongestionPieChart.jsx             # Congestion distribution chart
-│   │   │   │   ├── RoadRankingTable.jsx               # Road ranking table
-│   │   │   │   └── TrafficTrendChart.jsx              # Traffic trend visualization
+│   │   │   │   ├── AIInsights.jsx                  # AI traffic insights display
+│   │   │   │   ├── AnalyticsCard.jsx               # Analytics metric summary card
+│   │   │   │   ├── BusyRoadChart.jsx               # Busy road volume ranking chart
+│   │   │   │   ├── CongestionPieChart.jsx          # Congestion distribution pie chart
+│   │   │   │   ├── RoadRankingTable.jsx            # Road ranking & speed table
+│   │   │   │   └── TrafficTrendChart.jsx           # Time-series velocity trend chart
 │   │   │   │
 │   │   │   ├── common/
-│   │   │   │   └── NotificationPanel.jsx              # Notification panel component
+│   │   │   │   ├── GoogleAuthButton.jsx            # Google OAuth sign-in component
+│   │   │   │   ├── Logo.jsx                        # Brand logo component
+│   │   │   │   └── NotificationPanel.jsx           # Notification drawer component
 │   │   │   │
 │   │   │   ├── dashboard/
-│   │   │   │   ├── AdminLayout.jsx                    # Admin dashboard layout
-│   │   │   │   ├── DashboardCards.jsx                 # Dashboard statistics cards
-│   │   │   │   ├── DashboardContent.jsx               # Dashboard main content
-│   │   │   │   ├── DashboardHeader.jsx                # Dashboard header
-│   │   │   │   ├── DashboardLayout.jsx                # Common dashboard layout
-│   │   │   │   ├── PredictionPanel.jsx                # AI prediction interface
-│   │   │   │   ├── RoutePlanner.jsx                   # Route planning component
-│   │   │   │   ├── RouteRecommendation.jsx            # AI route recommendations
-│   │   │   │   └── TrafficMap.jsx                     # Interactive traffic map
+│   │   │   │   ├── AdminLayout.jsx                 # Admin & Operator shared dashboard frame
+│   │   │   │   ├── DashboardCards.jsx              # Dashboard statistics summary cards
+│   │   │   │   ├── DashboardContent.jsx            # Dashboard main content wrapper
+│   │   │   │   ├── DashboardHeader.jsx             # Dashboard title & breadcrumb header
+│   │   │   │   ├── DashboardLayout.jsx             # Base dashboard container
+│   │   │   │   ├── PredictionPanel.jsx             # AI prediction interface panel
+│   │   │   │   ├── RoutePlanner.jsx                # Route planning origin/destination picker
+│   │   │   │   ├── RouteRecommendation.jsx         # AI route recommendation display
+│   │   │   │   └── TrafficMap.jsx                  # Interactive Leaflet traffic map
+│   │   │   │
+│   │   │   ├── maps/                               # Map display helpers
+│   │   │   ├── reports/                            # Report viewer helpers
 │   │   │   │
 │   │   │   ├── roads/
-│   │   │   │   ├── RoadCard.jsx                       # Road information card
-│   │   │   │   └── RoadForm.jsx                       # Road management form
+│   │   │   │   ├── RoadCard.jsx                    # Road information card
+│   │   │   │   └── RoadForm.jsx                    # Road management creation/edit modal
 │   │   │   │
 │   │   │   ├── zones/
-│   │   │   │   ├── ZoneCard.jsx                       # Zone information card
-│   │   │   │   └── ZoneForm.jsx                       # Zone management form
+│   │   │   │   ├── ZoneCard.jsx                    # Zone information card
+│   │   │   │   └── ZoneForm.jsx                    # Zone management creation/edit modal
 │   │   │   │
-│   │   │   ├── FeaturesSection.jsx                    # Homepage features section
-│   │   │   ├── HeroSection.jsx                        # Homepage hero banner
-│   │   │   ├── HowItWorksSection.jsx                  # Workflow explanation section
-│   │   │   ├── Navbar.jsx                             # Dashboard navigation bar
-│   │   │   ├── ProtectedRoute.jsx                     # Authentication route protection
-│   │   │   ├── PublicNavbar.jsx                       # Public website navigation
-│   │   │   ├── RoleProtectedRoute.jsx                 # Role-based access protection
-│   │   │   ├── Sidebar.jsx                            # Dashboard sidebar
-│   │   │   ├── TrafficCard.jsx                        # Traffic summary card
-│   │   │   ├── TrafficChart.jsx                       # Live traffic chart
-│   │   │   └── TrafficTable.jsx                       # Traffic information table
+│   │   │   ├── FeaturesSection.jsx                 # Landing page features showcase
+│   │   │   ├── HeroSection.jsx                     # Landing page hero banner
+│   │   │   ├── HowItWorksSection.jsx               # Workflow explanation section
+│   │   │   ├── Navbar.jsx                          # Authenticated navigation bar
+│   │   │   ├── ProtectedRoute.jsx                  # Authentication route guard
+│   │   │   ├── PublicNavbar.jsx                    # Public website navigation bar
+│   │   │   ├── RoleProtectedRoute.jsx              # RBAC role authorization guard
+│   │   │   ├── RoleShowcaseSection.jsx             # Role capability cards section
+│   │   │   ├── Sidebar.jsx                         # Collapsible hover sidebar
+│   │   │   ├── TrafficCard.jsx                     # Individual traffic statistic card
+│   │   │   ├── TrafficChart.jsx                    # Live traffic velocity line chart
+│   │   │   └── TrafficTable.jsx                    # Live traffic telemetry table
+│   │   │
+│   │   ├── constants/                              # Frontend route and role constants
+│   │   │
+│   │   ├── context/
+│   │   │   ├── SidebarContext.jsx                  # Hover sidebar state context
+│   │   │   └── ThemeContext.jsx                    # Telegram-style circular theme context
 │   │   │
 │   │   ├── pages/
 │   │   │   ├── admin/
-│   │   │   │   ├── Alerts.jsx                         # Alert management page
-│   │   │   │   ├── Analytics.jsx                      # Analytics dashboard
-│   │   │   │   ├── Dashboard.jsx                      # Admin dashboard
-│   │   │   │   ├── HistoricalAnalytics.jsx            # Historical traffic analytics
-│   │   │   │   ├── Reports.jsx                        # Reports page
-│   │   │   │   ├── RoadManagement.jsx                 # Road management page
-│   │   │   │   ├── RouteOptimization.jsx              # Route optimization page
-│   │   │   │   ├── Settings.jsx                       # System settings page
-│   │   │   │   ├── TrafficMonitoring.jsx              # Live traffic monitoring
-│   │   │   │   └── ZoneManagement.jsx                 # Zone management page
+│   │   │   │   ├── Alerts.jsx                      # Alerts & Incident management center
+│   │   │   │   ├── Analytics.jsx                   # Deep traffic analytics dashboard
+│   │   │   │   ├── Dashboard.jsx                   # Admin root dashboard
+│   │   │   │   ├── HistoricalAnalytics.jsx         # Multi-tier historical analytics & audit
+│   │   │   │   ├── Reports.jsx                     # PDF report generator & export page
+│   │   │   │   ├── RoadManagement.jsx              # Road inventory management page
+│   │   │   │   ├── RouteOptimization.jsx           # A* route planner & detour engine
+│   │   │   │   ├── Settings.jsx                    # Profile & system governance page
+│   │   │   │   ├── TrafficMonitoring.jsx           # 6-Camera CCTV surveillance console
+│   │   │   │   ├── UserManagement.jsx              # User administration & role governance
+│   │   │   │   └── ZoneManagement.jsx              # Traffic zone topology page
 │   │   │   │
 │   │   │   ├── commuter/
-│   │   │   │   └── Dashboard.jsx                      # Commuter dashboard
+│   │   │   │   ├── CityTrafficMap.jsx              # Commuter interactive city traffic map
+│   │   │   │   └── Dashboard.jsx                   # Commuter live mobility portal
 │   │   │   │
 │   │   │   ├── operator/
-│   │   │   │   ├── Dashboard.jsx                      # Traffic operator dashboard
-│   │   │   │   └── Prediction.jsx                     # Prediction page
+│   │   │   │   ├── Dashboard.jsx                   # Traffic operator console
+│   │   │   │   └── Prediction.jsx                  # AI prediction workspace
 │   │   │   │
-│   │   │   ├── Home.jsx                               # Landing page
-│   │   │   ├── Login.jsx                              # User login page
-│   │   │   └── Register.jsx                           # User registration page
+│   │   │   ├── ForgotPassword.jsx                  # 2-Step OTP password reset page
+│   │   │   ├── Home.jsx                            # Public landing page
+│   │   │   ├── Login.jsx                           # 2-Step OTP login & Google OAuth page
+│   │   │   └── Register.jsx                        # 2-Step OTP registration & Google OAuth page
 │   │   │
 │   │   ├── services/
-│   │   │   ├── alerts.js                              # Alert API service
-│   │   │   ├── analytics.js                           # Analytics API service
-│   │   │   ├── api.js                                 # Axios configuration
-│   │   │   ├── auth.js                                # Authentication API
-│   │   │   ├── history.js                             # Historical data API service
-│   │   │   ├── mapPrediction.js                       # Google Maps prediction API service
-│   │   │   ├── notifications.js                       # Notification API service
-│   │   │   ├── prediction.js                          # Prediction API service
-│   │   │   ├── predictionHistory.js                   # Prediction history API service
-│   │   │   ├── report.js                              # Report API service
-│   │   │   ├── roads.js                               # Road management API service
-│   │   │   ├── routes.js                              # Route optimization API service
-│   │   │   ├── traffic.js                             # Traffic monitoring API service
-│   │   │   ├── user.js                                # User API service
-│   │   │   └── zones.js                               # Zone management API service
+│   │   │   ├── alerts.js                           # Alert API service
+│   │   │   ├── analytics.js                        # Analytics API service
+│   │   │   ├── api.js                              # Axios instance with auth interceptors
+│   │   │   ├── auth.js                             # Auth, OTP, Google OAuth & password reset API
+│   │   │   ├── history.js                          # Historical telemetry API service
+│   │   │   ├── mapPrediction.js                    # Map prediction API service
+│   │   │   ├── notifications.js                    # Notification API service
+│   │   │   ├── prediction.js                       # AI prediction API service
+│   │   │   ├── predictionHistory.js                # Prediction history API service
+│   │   │   ├── report.js                           # Report download API service
+│   │   │   ├── roads.js                            # Road management API service
+│   │   │   ├── routes.js                           # Route optimization API service
+│   │   │   ├── traffic.js                          # Traffic telemetry API service
+│   │   │   ├── user.js                             # User management API service
+│   │   │   └── zones.js                            # Zone management API service
 │   │   │
 │   │   ├── styles/
-│   │   │   ├── chart.css                              # Charts styling
-│   │   │   ├── global.css                             # Global application styles
-│   │   │   ├── HeroSection.css                        # Hero section styles
-│   │   │   ├── Home.css                               # Homepage styles
-│   │   │   ├── HowItWorks.css                         # Workflow section styles
-│   │   │   ├── Login.css                              # Login page styles
-│   │   │   ├── map.css                                # Interactive map styles
-│   │   │   ├── navbar.css                             # Navigation bar styles
-│   │   │   ├── prediction.css                         # Prediction page styles
-│   │   │   ├── Register.css                           # Registration page styles
-│   │   │   ├── sidebar.css                            # Sidebar styles
-│   │   │   ├── trafficcard.css                        # Traffic card styles
-│   │   │   └── traffictable.css                       # Traffic table styles
+│   │   │   ├── chart.css                           # Charts styling
+│   │   │   ├── global.css                          # Global application styles & design tokens
+│   │   │   ├── HeroSection.css                     # Hero section styles
+│   │   │   ├── Home.css                            # Landing page styles
+│   │   │   ├── HowItWorks.css                      # How-it-works section styles
+│   │   │   ├── Login.css                           # Login page styles
+│   │   │   ├── map.css                             # Interactive map styles
+│   │   │   ├── navbar.css                          # Navigation bar styles
+│   │   │   ├── prediction.css                      # Prediction page styles
+│   │   │   ├── Register.css                        # Registration page styles
+│   │   │   ├── sidebar.css                         # Sidebar styles
+│   │   │   ├── trafficcard.css                     # Traffic card styles
+│   │   │   └── traffictable.css                    # Traffic table styles
 │   │   │
-│   │   ├── App.jsx                                    # Root React component
-│   │   └── main.jsx                                   # React application entry point
+│   │   ├── App.jsx                                 # Application routes & layout root
+│   │   └── main.jsx                                # React application entry point
 │   │
-│   ├── .env                                           # Frontend environment variables
-│   ├── .gitignore                                     # Frontend Git ignore rules
-│   ├── eslint.config.js                               # ESLint configuration
-│   ├── index.html                                     # HTML entry page
-│   ├── package.json                                   # Frontend dependencies
-│   ├── package-lock.json                              # Locked dependency versions
-│   └── vite.config.js                                 # Vite configuration
+│   ├── .dockerignore                               # Frontend Docker ignore rules
+│   ├── .env                                        # Frontend environment variables
+│   ├── .env.example                                # Sample frontend configuration
+│   ├── Dockerfile                                  # Frontend multi-stage Nginx Dockerfile
+│   ├── eslint.config.js                            # ESLint configuration
+│   ├── index.html                                  # HTML entry page
+│   ├── nginx.conf                                  # Production Nginx server configuration
+│   ├── package.json                                # Frontend dependencies
+│   ├── package-lock.json                           # Locked dependency versions
+│   └── vite.config.js                              # Vite configuration
 │
-├── .gitignore                                         # Repository ignore rules
-├── LICENSE                                            # MIT License
-├── project_structure.txt                              # Project directory snapshot
-└── README.md
+├── docker-compose.yml                              # Multi-container Docker orchestration
+├── LICENSE                                         # MIT License
+├── project_structure.txt                           # Complete project directory tree
+└── README.md                                       # Main documentation

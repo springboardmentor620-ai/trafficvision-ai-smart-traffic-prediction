@@ -15,6 +15,8 @@ class AlertResponse(BaseModel):
 
     road: str
 
+    alert_type: str = "Congestion"
+
     status: str
 
     created_at: datetime

@@ -43,9 +43,12 @@ class TrafficService:
 
                 "average_speed": item.average_speed,
 
+                "speed_limit": item.road.speed_limit or 60,
+
             })
 
         return result
+
 
     @staticmethod
     def get_by_id(db: Session, traffic_id: int):

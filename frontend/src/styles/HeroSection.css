@@ -1,108 +1,349 @@
-/* ===========================
-   Hero Section
-=========================== */
+/* =========================================================
+   TrafficVision AI - Futuristic Enterprise Hero Section
+   ========================================================= */
 
 .hero {
-  min-height: calc(100vh - 80px);
-
+  min-height: calc(100vh - 76px);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 60px 80px;
+  background: var(--bg-page);
+  gap: 60px;
+  position: relative;
+  overflow: hidden;
+}
 
-  padding: 80px 80px;
+/* Ambient hero glowing orbs */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -120px;
+  left: 20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
 
-  background: linear-gradient(135deg, #f8fbff 0%, #eaf3ff 100%);
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: -150px;
+  right: 5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hero-left {
-  flex: 1;
-  max-width: 600px;
+  flex: 1.1;
+  max-width: 640px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px;
+  background: var(--primary-light);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 24px;
+  backdrop-filter: blur(8px);
+  letter-spacing: 0.3px;
+}
+
+.pulse-beacon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--success);
+  box-shadow: 0 0 10px var(--success);
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
 }
 
 .hero-left h1 {
-  font-size: 3.5rem;
-  line-height: 1.2;
-  color: #0f172a;
-  margin-bottom: 25px;
+  font-size: 3.2rem;
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin-bottom: 22px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.hero-left h1 .gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero-left p {
-  font-size: 1.15rem;
-  line-height: 1.8;
-  color: #64748b;
-  margin-bottom: 40px;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 34px;
 }
 
 .hero-buttons {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
 }
 
-.hero-buttons button {
-  padding: 14px 32px;
-
+.hero-btn-primary {
+  padding: 14px 30px;
+  background: var(--gradient-brand);
+  color: #ffffff;
   border: none;
-  border-radius: 10px;
-
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-
-  font-size: 16px;
-  font-weight: 600;
-
-  transition: 0.3s ease;
+  box-shadow: var(--shadow-glow);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.25s ease;
+  text-decoration: none;
 }
 
-/* ===========================
-   Hero Right Section
-=========================== */
+.hero-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+.hero-btn-secondary {
+  padding: 14px 26px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.hero-btn-secondary:hover {
+  background: var(--bg-surface-secondary);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.hero-trust-chips {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.hero-trust-chips span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* =========================================================
+   Hero Right Section - Live Telemetry Simulator Widget
+   ========================================================= */
 
 .hero-right {
   flex: 1;
-
   display: flex;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
-.dashboard-preview {
-  width: 420px;
-
-  background: white;
-
+.telemetry-preview-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-surface);
   border-radius: 20px;
-
-  padding: 30px;
-
-  box-shadow: 0 20px 50px rgba(37, 99, 235, 0.15);
-
-  border: 1px solid #e2e8f0;
+  padding: 28px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  position: relative;
 }
 
-.dashboard-preview h3 {
-  margin-bottom: 25px;
-
-  color: #2563eb;
-
-  font-size: 22px;
+.telemetry-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.preview-card {
-  background: #f8fafc;
+.telemetry-card-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  padding: 18px 20px;
+.telemetry-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--success);
+  text-transform: uppercase;
+}
 
+.corridor-item {
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-
-  margin-bottom: 18px;
-
-  font-weight: 500;
-
-  color: #334155;
-
-  transition: all 0.3s ease;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  transition: all 0.25s ease;
 }
 
-.preview-card:hover {
-  transform: translateX(8px);
+.corridor-item:hover {
+  transform: translateX(4px);
+  border-color: var(--border-focus);
+}
 
-  background: #dbeafe;
+.corridor-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.corridor-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.corridor-status-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.corridor-status-tag.optimal {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.corridor-status-tag.reroute {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.corridor-status-tag.moderate {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.corridor-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.telemetry-forecast-box {
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: var(--primary-light);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.forecast-icon {
+  font-size: 24px;
+}
+
+.forecast-text h5 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 2px 0;
+}
+
+.forecast-text p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* =========================================================
+   Responsive Breakpoints
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .hero {
+    flex-direction: column;
+    padding: 50px 30px;
+    text-align: center;
+  }
+
+  .hero-left {
+    max-width: 100%;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
+  .hero-trust-chips {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-left h1 {
+    font-size: 2.3rem;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-btn-primary, .hero-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
 }

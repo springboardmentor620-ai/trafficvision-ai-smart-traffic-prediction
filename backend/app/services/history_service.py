@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.models.traffic import Traffic
+from app.models.road import Road
 
 
 class HistoryService:
@@ -9,15 +10,16 @@ class HistoryService:
     @staticmethod
     def traffic_history(db: Session):
 
-        roads = db.query(Traffic).all()
+        roads = db.query(Traffic).join(Road).all()
 
         history = []
 
         for road in roads:
-
+            road_name = road.road.name if road.road else f"Road #{road.road_id}"
             history.append({
 
-                "road": road.road,
+                "road": road_name,
+                "name": road_name,
 
                 "vehicles": road.vehicles,
 
@@ -28,6 +30,7 @@ class HistoryService:
             })
 
         return history
+
 
     @staticmethod
     def summary(db: Session):

@@ -29,3 +29,9 @@ class Traffic(Base):
     average_speed = Column(Integer, nullable=False)
 
     road = relationship("Road")
+    
+    def __str__(self):
+        return self.road.name if self.road else f"Traffic #{self.id}"
+
+    def __repr__(self):
+        return self.road.name if self.road else f"Traffic #{self.id}"

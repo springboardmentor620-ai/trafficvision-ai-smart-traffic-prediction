@@ -8,7 +8,9 @@ function DashboardHeader({ title, subtitle }) {
       <h1
         style={{
           marginBottom: "5px",
-          fontSize: "30px",
+          fontSize: "28px",
+          fontWeight: "700",
+          color: "var(--text-primary)",
         }}
       >
         {title}
@@ -16,8 +18,8 @@ function DashboardHeader({ title, subtitle }) {
 
       <p
         style={{
-          color: "#666",
-          fontSize: "16px",
+          color: "var(--text-muted)",
+          fontSize: "15px",
         }}
       >
         {subtitle}

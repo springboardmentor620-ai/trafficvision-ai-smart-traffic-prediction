@@ -1,110 +1,78 @@
-/* ===========================
-   Register Page
-=========================== */
+/* =========================================================
+   TrafficVision AI - Register Page Styling
+   ========================================================= */
 
-.register-container {
-  min-height: calc(100vh - 80px);
+@import "./Login.css";
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background: linear-gradient(135deg, #f8fbff 0%, #eaf3ff 100%);
-
-  padding: 40px 20px;
-}
-
-.register-card {
-  width: 100%;
-  max-width: 500px;
-
-  background: white;
-
-  padding: 40px;
-
-  border-radius: 16px;
-
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-}
-
-.register-card h1 {
-  text-align: center;
-  color: #2563eb;
-  margin-bottom: 10px;
-}
-
-.register-card p {
-  text-align: center;
-  color: #64748b;
-  margin-bottom: 30px;
-}
-
-.form-group {
+.password-strength-container {
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
-
-  margin-bottom: 20px;
+  gap: 4px;
 }
 
-.form-group label {
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #334155;
-}
-
-.form-group input,
-.form-group select {
-  padding: 12px 15px;
-
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-
-  font-size: 15px;
-
-  outline: none;
-
-  transition: border-color 0.3s;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: #2563eb;
-}
-
-.register-card button {
+.password-strength-bar {
+  height: 4px;
   width: 100%;
+  background: var(--bg-surface-secondary);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
 
-  padding: 14px;
+.strength-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
 
-  background: #2563eb;
-  color: white;
+.strength-fill.weak {
+  width: 25%;
+  background-color: var(--danger);
+}
 
-  border: none;
-  border-radius: 8px;
+.strength-fill.fair {
+  width: 50%;
+  background-color: var(--warning);
+}
 
-  font-size: 16px;
-  font-weight: 600;
+.strength-fill.good {
+  width: 75%;
+  background-color: #38bdf8;
+}
 
+.strength-fill.strong {
+  width: 100%;
+  background-color: var(--success);
+}
+
+.strength-label-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.terms-agreement-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.terms-agreement-group input[type="checkbox"] {
+  margin-top: 2px;
+  accent-color: var(--primary);
   cursor: pointer;
-
-  transition: background 0.3s;
 }
 
-.register-card button:hover {
-  background: #1d4ed8;
-}
-
-.auth-link {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.auth-link a {
-  color: #2563eb;
+.terms-agreement-group a {
+  color: var(--primary);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
 }
 
-.auth-link a:hover {
+.terms-agreement-group a:hover {
   text-decoration: underline;
 }

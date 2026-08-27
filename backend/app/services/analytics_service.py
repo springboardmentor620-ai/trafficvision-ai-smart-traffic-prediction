@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.models.traffic import Traffic
+from app.models.road import Road
 
 
 class AnalyticsService:
@@ -57,28 +58,59 @@ class AnalyticsService:
     @staticmethod
     def busiest_roads(db: Session):
 
-        return (
+        rows = (
             db.query(Traffic)
+            .join(Road)
             .order_by(Traffic.vehicles.desc())
             .limit(10)
             .all()
         )
 
+        return [
+            {
+                "id": r.id,
+                "road_id": r.road_id,
+                "road": r.road.name if r.road else f"Road #{r.road_id}",
+                "name": r.road.name if r.road else f"Road #{r.road_id}",
+                "city": r.road.city if r.road else "",
+                "status": r.status,
+                "vehicles": r.vehicles,
+                "average_speed": r.average_speed,
+            }
+            for r in rows
+        ]
+
     @staticmethod
     def fastest_roads(db: Session):
 
-        return (
+        rows = (
             db.query(Traffic)
+            .join(Road)
             .order_by(Traffic.average_speed.desc())
             .limit(10)
             .all()
         )
+
+        return [
+            {
+                "id": r.id,
+                "road_id": r.road_id,
+                "road": r.road.name if r.road else f"Road #{r.road_id}",
+                "name": r.road.name if r.road else f"Road #{r.road_id}",
+                "city": r.road.city if r.road else "",
+                "status": r.status,
+                "vehicles": r.vehicles,
+                "average_speed": r.average_speed,
+            }
+            for r in rows
+        ]
 
     @staticmethod
     def traffic_trend(db: Session):
 
         roads = (
             db.query(Traffic)
+            .join(Road)
             .order_by(Traffic.id)
             .all()
         )
@@ -86,9 +118,13 @@ class AnalyticsService:
         trend = []
 
         for index, road in enumerate(roads, start=1):
+            road_name = road.road.name if road.road else f"Road {index}"
             trend.append({
-                "label": f"Road {index}",
+                "label": road_name,
+                "road": road_name,
                 "vehicles": road.vehicles,
+                "average_speed": road.average_speed,
+                "status": road.status,
             })
 
         return trend
@@ -96,7 +132,10 @@ class AnalyticsService:
     @staticmethod
     def ai_insights(db: Session):
 
-        roads = db.query(Traffic).all()
+        roads = db.query(Traffic).join(Road).all()
+
+        if not roads:
+            return ["No traffic telemetry data currently available."]
 
         insights = []
 
@@ -108,15 +147,25 @@ class AnalyticsService:
             )
 
         busiest = max(roads, key=lambda x: x.vehicles)
+        busiest_name = (
+            busiest.road.name
+            if (busiest.road and hasattr(busiest.road, "name"))
+            else f"Road #{busiest.road_id}"
+        )
 
         insights.append(
-            f"{busiest.road} is currently the busiest road with {busiest.vehicles} vehicles."
+            f"{busiest_name} is currently the busiest road with {busiest.vehicles} vehicles."
         )
 
         fastest = max(roads, key=lambda x: x.average_speed)
+        fastest_name = (
+            fastest.road.name
+            if (fastest.road and hasattr(fastest.road, "name"))
+            else f"Road #{fastest.road_id}"
+        )
 
         insights.append(
-            f"{fastest.road} has the highest average speed of {fastest.average_speed} km/h."
+            f"{fastest_name} has the highest average speed of {fastest.average_speed} km/h."
         )
 
         avg = sum(r.average_speed for r in roads) / len(roads)
@@ -130,4 +179,4 @@ class AnalyticsService:
                 "Traffic conditions are generally stable."
             )
 
-        return insights
+        return insights

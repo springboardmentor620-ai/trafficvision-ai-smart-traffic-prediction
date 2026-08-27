@@ -1,359 +1,402 @@
 import { useState } from "react";
 import { predictCongestion } from "../../services/prediction";
-
+import { WEATHER_OPTIONS } from "../../constants/traffic";
 import "../../styles/prediction.css";
 
-function PredictionPanel({
+function PredictionPanel({ predictionResult, setPredictionResult }) {
+  const areas = [
+    "Indiranagar",
+    "Whitefield",
+    "Koramangala",
+    "Electronic City",
+    "M.G. Road",
+    "Jayanagar",
+    "Hebbal",
+    "Yeshwanthpur",
+    "Marathahalli",
+    "HSR Layout",
+  ];
 
-    predictionResult,
+  const roads = [
+    "M.G. Road",
+    "Brigade Road",
+    "100 Feet Road",
+    "CMH Road",
+    "Outer Ring Road",
+    "ITPL Main Road",
+    "Whitefield Main Road",
+    "Hosur Road",
+    "Electronic City Flyover",
+    "Silk Board Flyover",
+    "Koramangala 80 Feet Road",
+    "Sony World Junction",
+    "Bannerghatta Road",
+    "Bellary Road",
+    "Hebbal Flyover",
+    "Tumkur Road",
+    "Yeshwanthpur Circle",
+    "Sarjapur Road",
+  ];
 
-    setPredictionResult
+  const [loading, setLoading] = useState(false);
 
-}) {
+  const [formData, setFormData] = useState({
+    Area_Name: "Whitefield",
+    Road_Intersection_Name: "Outer Ring Road",
+    Traffic_Volume: 18500,
+    Average_Speed: 36,
+    Travel_Time_Index: 1.6,
+    Road_Capacity_Utilization: 82,
+    Incident_Reports: 1,
+    Environmental_Impact: 68,
+    Public_Transport_Usage: 45,
+    Traffic_Signal_Compliance: 88,
+    Parking_Usage: 65,
+    Pedestrian_and_Cyclist_Count: 180,
+    Weather: "Clear",
+    Roadwork: false,
+  });
 
-    const areas = [
-        "Indiranagar",
-        "Whitefield",
-        "Koramangala",
-        "Electronic City",
-        "M.G. Road",
-        "Jayanagar",
-        "Yeshwanthpur",
-        "Hebbal"
-    ];
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    let parsed = value;
+    if (type === "number" || type === "range") {
+      parsed = value === "" ? "" : Number(value);
+    } else if (type === "checkbox") {
+      parsed = checked;
+    }
 
-    const roads = [
-        "100 Feet Road",
-        "CMH Road",
-        "Marathahalli Bridge",
-        "Sony World Junction",
-        "Sarjapur Road",
-        "Hosur Road",
-        "Trinity Circle",
-        "Anil Kumble Circle",
-        "South End Circle",
-        "Yeshwanthpur Circle"
-    ];
+    setFormData((prev) => ({
+      ...prev,
+      [name]: parsed,
+    }));
+  };
 
-    const weatherOptions = [
-
-        "Clear",
-        "Overcast",
-        "Fog",
-        "Rain",
-        "Windy"
-    ];
-
-    const [loading, setLoading] = useState(false);
-
-    const [formData, setFormData] = useState({
-
-        Area_Name: "Whitefield",
-
-        Road_Intersection_Name: "Marathahalli Bridge",
-
-        Traffic_Category: "High",
-
-        Traffic_Volume: 20000,
-
-        Average_Speed: 42,
-
-        Travel_Time_Index: 1.6,
-
-        Road_Capacity_Utilization: 85,
-
-        Incident_Reports: 2,
-
-        Environmental_Impact: 72,
-
-        Public_Transport_Usage: 40,
-
-        Traffic_Signal_Compliance: 90,
-
-        Parking_Usage: 68,
-
-        Pedestrian_and_Cyclist_Count: 220,
-
-        Year: 2023,
-
-        Month: 9,
-
-        Day: 15,
-
-        DayOfWeek: 5,
-
+  const applyPreset = (preset) => {
+    if (preset === "peak") {
+      setFormData((prev) => ({
+        ...prev,
+        Area_Name: "Koramangala",
+        Road_Intersection_Name: "Silk Board Flyover",
+        Traffic_Volume: 28000,
+        Average_Speed: 14,
         Weather: "Clear",
+        Roadwork: false,
+      }));
+    } else if (preset === "rain") {
+      setFormData((prev) => ({
+        ...prev,
+        Area_Name: "Indiranagar",
+        Road_Intersection_Name: "100 Feet Road",
+        Traffic_Volume: 19500,
+        Average_Speed: 22,
+        Weather: "Rain",
+        Roadwork: true,
+      }));
+    } else if (preset === "normal") {
+      setFormData((prev) => ({
+        ...prev,
+        Area_Name: "M.G. Road",
+        Road_Intersection_Name: "M.G. Road",
+        Traffic_Volume: 11000,
+        Average_Speed: 52,
+        Weather: "Clear",
+        Roadwork: false,
+      }));
+    }
+  };
 
-        Roadwork: false
+  const handlePredict = async () => {
+    try {
+      setLoading(true);
+      const result = await predictCongestion(formData);
 
-    });
-    
-    const handleChange = (e) => {
-
-        const { name, value } = e.target;
-
-        setFormData({
-            ...formData,
-            [name]: value
+      if (setPredictionResult) {
+        setPredictionResult({
+          ...result,
+          area: formData.Area_Name,
+          road: formData.Road_Intersection_Name,
+          trafficVolume: formData.Traffic_Volume,
+          averageSpeed: formData.Average_Speed,
+          weather: formData.Weather,
         });
-
-    };
-
-    const handlePredict = async () => {
-
-        try {
-
-            setLoading(true);
-
-            const result = await predictCongestion(formData);
-
-            setPredictionResult({
-
-                ...result,
-
-                area: formData.Area_Name,
-
-                road: formData.Road_Intersection_Name,
-
-                trafficVolume: formData.Traffic_Volume,
-
-                averageSpeed: formData.Average_Speed,
-
-                weather: formData.Weather
-
-            });
-
-        }
-        catch (err) {
-
-            console.error(err);
-            alert("Prediction Failed");
-
-        }
-        finally {
-
-            setLoading(false);
-
-        }
-
-    };
-
-    return (
-
-        <div className="prediction-panel">
-
-            <h2>🤖 AI Congestion Prediction</h2>
-
-            <br />
-
-            <label>Area</label>
-
-            <select
-                name="Area_Name"
-                value={formData.Area_Name}
-                onChange={handleChange}
-            >
-                {areas.map(area => (
-                    <option key={area} value={area}>
-                        {area}
-                    </option>
-                ))}
-            </select>
-
-            <br /><br />
-
-            <label>Road</label>
-
-            <select
-                name="Road_Intersection_Name"
-                value={formData.Road_Intersection_Name}
-                onChange={handleChange}
-            >
-                {roads.map(road => (
-                    <option key={road} value={road}>
-                        {road}
-                    </option>
-                ))}
-            </select>
-
-            <br /><br />
-
-            <label>Traffic Volume</label>
-
-            <input
-                name="Traffic_Volume"
-                type="number"
-                value={formData.Traffic_Volume}
-                onChange={handleChange}
-            />
-
-            <br /><br />
-
-            <label>Average Speed (km/h)</label>
-
-            <input
-                name="Average_Speed"
-                type="number"
-                value={formData.Average_Speed}
-                onChange={handleChange}
-            />
-
-            <br /><br />
-
-            <label>Weather</label>
-
-            <select
-                name="Weather"
-                value={formData.Weather}
-                onChange={handleChange}
-            >
-                {weatherOptions.map(weather => (
-                    <option key={weather} value={weather}>
-                        {weather}
-                    </option>
-                ))}
-            </select>
-
-            <br /><br />
-
-            <label>Roadwork</label>
-
-            <select
-                name="Roadwork"
-                value={formData.Roadwork}
-                onChange={(e) =>
-                    setFormData({
-                        ...formData,
-                        Roadwork: e.target.value === "true"
-                    })
-                }
-            >
-                <option value="false">No</option>
-                <option value="true">Yes</option>
-            </select>
-
-            <br /><br />
-
-            <button
-                onClick={handlePredict}
-                style={{
-                    width: "100%",
-                    padding: "12px",
-                    border: "none",
-                    borderRadius: "8px",
-                    background: "#1976d2",
-                    color: "white",
-                    fontSize: "16px",
-                    cursor: "pointer"
-                }}
-            >
-
-                {loading ? "Predicting..." : "Predict"}
-
-            </button>
-
-            <br /><br />
-
-            {predictionResult && (
-
-            <div
-                className="prediction-result"
-                style={{
-                    marginTop: "30px",
-                    borderRadius: "12px",
-                    padding: "25px",
-                    background: "#ffffff",
-                    border: "2px solid #1976d2",
-                    boxShadow: "0 8px 20px rgba(0,0,0,.08)"
-                }}
-            >
-
-                <h2 style={{marginBottom:"20px"}}>
-                    🤖 AI Prediction Result
-                </h2>
-
-                <div
-                    style={{
-                        display:"grid",
-                        gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
-                        gap:"15px"
-                    }}
-                >
-
-                    <div>
-
-                        <strong>Congestion Score</strong>
-
-                        <h2>
-
-                            {predictionResult.congestion_prediction.toFixed(2)} %
-
-                        </h2>
-
-                    </div>
-
-                    <div>
-
-                        <strong>Risk Level</strong>
-
-                        <h2>
-
-                            {predictionResult.prediction_level}
-
-                        </h2>
-
-                    </div>
-
-                    <div>
-
-                        <strong>AI Confidence</strong>
-
-                        <h2>
-
-                            {predictionResult.confidence} %
-
-                        </h2>
-
-                    </div>
-
-                </div>
-
-                <hr style={{margin:"25px 0"}}/>
-
-                <h3>
-
-                    🚦 AI Recommendation
-
-                </h3>
-
-                <p>
-
-                    {predictionResult.recommended_action}
-
-                </p>
-
-                <br/>
-
-                <h3>
-
-                    🗺 Suggested Alternate Route
-
-                </h3>
-
-                <p>
-
-                    {predictionResult.alternate_route}
-
-                </p>
-
-            </div>
-
-            )}
-
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Prediction calculation failed. Please check backend connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getWeatherIcon = (w) => {
+    switch (w) {
+      case "Clear":
+        return "☀️";
+      case "Rain":
+        return "🌧️";
+      case "Overcast":
+        return "⛅";
+      case "Fog":
+        return "🌫️";
+      case "Windy":
+        return "💨";
+      default:
+        return "🌤️";
+    }
+  };
+
+  return (
+    <div className="prediction-panel-overhaul">
+      {/* Header with AI Badge and Presets */}
+      <div className="prediction-header">
+        <div className="header-left">
+          <div className="ai-status-pill">
+            <span className="pulse-dot"></span>
+            <span>Random Forest ML Model</span>
+          </div>
+          <h2>AI Traffic Congestion Forecaster</h2>
+          <p className="subtitle">
+            Simulate dynamic intersection variables and forecast bottleneck risk levels.
+          </p>
         </div>
 
-    );
+        <div className="preset-scenarios">
+          <span className="preset-label">Quick Scenarios:</span>
+          <div className="preset-chips">
+            <button type="button" onClick={() => applyPreset("peak")} className="preset-chip">
+              🔥 Peak Rush Hour
+            </button>
+            <button type="button" onClick={() => applyPreset("rain")} className="preset-chip">
+              🌧️ Rain Advisory
+            </button>
+            <button type="button" onClick={() => applyPreset("normal")} className="preset-chip">
+              ⚡ Optimal Flow
+            </button>
+          </div>
+        </div>
+      </div>
 
+      {/* Form Controls Grid */}
+      <div className="prediction-form-grid">
+        {/* Left Column: Corridor & Geography */}
+        <div className="form-card-column">
+          <h4 className="column-title">
+            <span>📍</span> Geography & Corridor
+          </h4>
+
+          <div className="field-group">
+            <label>Municipal Area / Sector</label>
+            <select name="Area_Name" value={formData.Area_Name} onChange={handleChange} className="form-select">
+              {areas.map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field-group">
+            <label>Target Road / Intersection</label>
+            <select
+              name="Road_Intersection_Name"
+              value={formData.Road_Intersection_Name}
+              onChange={handleChange}
+              className="form-select"
+            >
+              {roads.map((road) => (
+                <option key={road} value={road}>
+                  {road}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field-group">
+            <label>Active Roadwork / Construction</label>
+            <div className="toggle-switch-wrapper">
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  name="Roadwork"
+                  checked={formData.Roadwork}
+                  onChange={handleChange}
+                />
+                <span className="slider round"></span>
+              </label>
+              <span className="switch-status-text">
+                {formData.Roadwork ? "🚧 Roadwork Hazard Present" : "Clear Roadway"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Dynamics & Weather */}
+        <div className="form-card-column">
+          <h4 className="column-title">
+            <span>📊</span> Flow Telemetry & Atmosphere
+          </h4>
+
+          <div className="field-group">
+            <div className="label-row">
+              <label>Hourly Traffic Volume</label>
+              <span className="value-badge">{formData.Traffic_Volume.toLocaleString()} veh/hr</span>
+            </div>
+            <input
+              type="range"
+              name="Traffic_Volume"
+              min="2000"
+              max="40000"
+              step="500"
+              value={formData.Traffic_Volume}
+              onChange={handleChange}
+              className="slider-range"
+            />
+          </div>
+
+          <div className="field-group">
+            <div className="label-row">
+              <label>Average Vehicle Speed</label>
+              <span className="value-badge">{formData.Average_Speed} km/h</span>
+            </div>
+            <input
+              type="range"
+              name="Average_Speed"
+              min="5"
+              max="80"
+              step="1"
+              value={formData.Average_Speed}
+              onChange={handleChange}
+              className="slider-range"
+            />
+          </div>
+
+          <div className="field-group">
+            <label>Weather Condition</label>
+            <div className="weather-chips-container">
+              {WEATHER_OPTIONS.map((w) => (
+                <button
+                  type="button"
+                  key={w}
+                  onClick={() => setFormData((prev) => ({ ...prev, Weather: w }))}
+                  className={`weather-chip-btn ${formData.Weather === w ? "active" : ""}`}
+                >
+                  <span>{getWeatherIcon(w)}</span>
+                  <span>{w}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Compute Prediction Action Button */}
+      <div className="prediction-submit-row">
+        <button type="button" onClick={handlePredict} disabled={loading} className="predict-execute-btn">
+          {loading ? (
+            <>
+              <span className="spinner-dot"></span>
+              <span>Evaluating Neural Regressor...</span>
+            </>
+          ) : (
+            <>
+              <span>⚡ Execute ML Congestion Forecast</span>
+              <span>→</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Prediction Result Display */}
+      {predictionResult && (
+        <div className="prediction-result-card animate-fadeIn">
+          <div className="result-header">
+            <div className="result-title-group">
+              <span className="result-badge-icon">🧠</span>
+              <div>
+                <h3>AI Prediction Forecast</h3>
+                <p>
+                  Evaluated for <strong>{predictionResult.road || formData.Road_Intersection_Name}</strong> ({predictionResult.area || formData.Area_Name})
+                </p>
+              </div>
+            </div>
+
+            <div
+              className={`risk-level-tag ${
+                predictionResult.prediction_level === "High"
+                  ? "danger"
+                  : predictionResult.prediction_level === "Moderate"
+                  ? "warning"
+                  : "success"
+              }`}
+            >
+              ● {predictionResult.prediction_level} Risk Level
+            </div>
+          </div>
+
+          {/* Metric Highlights Strip */}
+          <div className="result-metrics-grid">
+            <div className="result-metric-box">
+              <span className="metric-title">Congestion Index</span>
+              <div className="metric-score-row">
+                <h2>
+                  {typeof predictionResult.congestion_prediction === "number"
+                    ? predictionResult.congestion_prediction.toFixed(1)
+                    : predictionResult.congestion_prediction}
+                  %
+                </h2>
+              </div>
+              <div className="metric-progress-bar">
+                <div
+                  className="metric-progress-fill"
+                  style={{
+                    width: `${Math.min(predictionResult.congestion_prediction, 100)}%`,
+                    backgroundColor:
+                      predictionResult.congestion_prediction >= 70
+                        ? "var(--danger)"
+                        : predictionResult.congestion_prediction >= 40
+                        ? "var(--warning)"
+                        : "var(--success)",
+                  }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="result-metric-box">
+              <span className="metric-title">Simulated Volume</span>
+              <h2>{(predictionResult.trafficVolume || formData.Traffic_Volume).toLocaleString()}</h2>
+              <span className="metric-note">Vehicles / Hour</span>
+            </div>
+
+            <div className="result-metric-box">
+              <span className="metric-title">Predicted Velocity</span>
+              <h2>{predictionResult.averageSpeed || formData.Average_Speed} km/h</h2>
+              <span className="metric-note">Corridor Flow</span>
+            </div>
+          </div>
+
+          {/* Recommendations & Alternate Route */}
+          <div className="result-actions-grid">
+            <div className="recommendation-box">
+              <div className="rec-header">
+                <span>🚦</span>
+                <h4>AI Signal & Dispatch Recommendation</h4>
+              </div>
+              <p>{predictionResult.recommended_action || "Maintain adaptive signal cycle times."}</p>
+            </div>
+
+            <div className="alternate-route-box">
+              <div className="rec-header">
+                <span>🗺️</span>
+                <h4>Suggested Bypass Corridor</h4>
+              </div>
+              <p>{predictionResult.alternate_route || "Outer Ring Road via Inner Arterial Bypass"}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default PredictionPanel;

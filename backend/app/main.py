@@ -1,6 +1,12 @@
+import os
+import time
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.database.connection import engine
 from app.database.base import Base
@@ -23,12 +29,42 @@ from app.routers import routes
 from app.routers import history
 from app.routers import prediction_history
 
-app = FastAPI()
 
+def get_cors_origins():
+    raw_origins = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000",
+    )
+    return [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+
+
+def wait_for_database(max_attempts=30, delay_seconds=2):
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return
+        except SQLAlchemyError:
+            if attempt == max_attempts:
+                raise
+            time.sleep(delay_seconds)
+
+
+@asynccontextmanager
+async def lifespan(app):
+    wait_for_database()
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(
+    title="TrafficVision AI API",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,7 +83,6 @@ app.include_router(zones.router)
 app.include_router(notifications.router)
 app.include_router(routes.router)
 app.include_router(history.router)
-Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def home():
@@ -67,7 +102,20 @@ def home():
 
 @app.get("/health")
 def health():
-    return {
-        "status": "Backend Running",
-        "message": "TrafficVision AI API is working"
-    }
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return {
+            "status": "Backend Running",
+            "database": "Connected successfully",
+            "message": "TrafficVision AI API is working"
+        }
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "Backend Unhealthy",
+                "database": "Connection failed",
+                "error": str(exc),
+            },
+        )

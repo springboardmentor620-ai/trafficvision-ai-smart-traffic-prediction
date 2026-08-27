@@ -1,112 +1,101 @@
 import { useEffect, useState } from "react";
-
 import { getBusiestRoads } from "../../services/analytics";
 
 function RoadRankingTable() {
+  const [roads, setRoads] = useState([]);
 
-    const [roads, setRoads] = useState([]);
+  useEffect(() => {
+    let mounted = true;
 
-    useEffect(() => {
+    const loadRoads = async () => {
+      try {
+        const data = await getBusiestRoads();
+        if (!mounted) return;
+        setRoads(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-        let mounted = true;
+    loadRoads();
 
-        const loadRoads = async () => {
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-            try {
+  return (
+    <div
+      style={{
+        background: "var(--bg-surface)",
+        color: "var(--text-primary)",
+        borderRadius: "14px",
+        padding: "24px",
+        border: "1px solid var(--border-color)",
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      <h2 style={{ fontSize: "18px", marginBottom: "16px", color: "var(--text-primary)" }}>Road Congestion Ranking</h2>
 
-                const data = await getBusiestRoads();
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          marginTop: "12px",
+        }}
+      >
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Road</th>
+            <th>Status</th>
+            <th>Vehicles</th>
+            <th>Average Speed</th>
+          </tr>
+        </thead>
 
-                if (!mounted) return;
+        <tbody>
+          {roads.map((road, index) => (
+            <tr key={road.id || index}>
+              <td>{index + 1}</td>
+              <td style={{ fontWeight: "600" }}>
+                {typeof road.road === "object"
+                  ? road.road?.name
+                  : road.road || road.name || road.road_name || `Road #${index + 1}`}
+              </td>
+              <td>
 
-                setRoads(data);
-
-            }
-
-            catch (err) {
-
-                console.error(err);
-
-            }
-
-        };
-
-        loadRoads();
-
-        return () => {
-
-            mounted = false;
-
-        };
-
-    }, []);
-
-    return (
-
-        <div
-            style={{
-                background: "#fff",
-                borderRadius: "12px",
-                padding: "20px",
-                boxShadow: "0 3px 12px rgba(0,0,0,.08)"
-            }}
-        >
-
-            <h2>Road Ranking</h2>
-
-            <table
-                style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    marginTop: "20px"
-                }}
-            >
-
-                <thead>
-
-                    <tr>
-
-                        <th>#</th>
-
-                        <th>Road</th>
-
-                        <th>Status</th>
-
-                        <th>Vehicles</th>
-
-                        <th>Average Speed</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {roads.map((road, index) => (
-
-                        <tr key={road.id}>
-
-                            <td>{index + 1}</td>
-
-                            <td>{road.road}</td>
-
-                            <td>{road.status}</td>
-
-                            <td>{road.vehicles}</td>
-
-                            <td>{road.average_speed} km/h</td>
-
-                        </tr>
-
-                    ))}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    );
-
+                <span
+                  style={{
+                    padding: "3px 10px",
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    backgroundColor:
+                      road.status === "Heavy"
+                        ? "var(--danger-light)"
+                        : road.status === "Moderate"
+                        ? "var(--warning-light)"
+                        : "var(--success-light)",
+                    color:
+                      road.status === "Heavy"
+                        ? "var(--danger)"
+                        : road.status === "Moderate"
+                        ? "var(--warning)"
+                        : "var(--success)",
+                  }}
+                >
+                  {road.status}
+                </span>
+              </td>
+              <td>{road.vehicles}</td>
+              <td>{road.average_speed} km/h</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default RoadRankingTable;

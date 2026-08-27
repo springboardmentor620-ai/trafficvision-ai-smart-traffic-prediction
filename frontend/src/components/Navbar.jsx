@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../services/auth";
+import { useTheme } from "../context/ThemeContext";
+import { useSidebar } from "../context/SidebarContext";
 
 import NotificationPanel from "./common/NotificationPanel";
+import Logo from "./common/Logo";
+
 
 import {
     getNotifications,
@@ -13,8 +17,11 @@ import "./../styles/navbar.css";
 function Navbar() {
 
     const navigate = useNavigate();
+    const { resolvedTheme, toggleTheme } = useTheme();
+    const { toggleSidebar } = useSidebar();
 
     const [menuOpen, setMenuOpen] = useState(false);
+
 
     const menuRef = useRef(null);
 
@@ -124,7 +131,7 @@ function Navbar() {
                 return "Traffic Operator";
 
             case "commuter":
-                return "Commuter";
+                return "Public User";
 
             default:
                 return role;
@@ -139,11 +146,23 @@ function Navbar() {
 
             <div className="navbar-left">
 
-                <button className="menu-button">
+                <button
+                    className="menu-button"
+                    onClick={toggleSidebar}
+                    title="Toggle Sidebar"
+                    aria-label="Toggle navigation"
+                >
                     ☰
                 </button>
 
+                <Logo
+                    size="sm"
+                    to={user?.role === "traffic_operator" ? "/operator" : user?.role === "commuter" ? "/commuter" : "/admin"}
+                    style={{ marginRight: "12px" }}
+                />
+
                 <input
+
                     className="search-box"
                     placeholder="Search traffic, reports, zones..."
                 />
@@ -163,6 +182,8 @@ function Navbar() {
                         onClick={() =>
                             setShowNotifications(!showNotifications)
                         }
+                        title="Notifications"
+                        aria-label="View notifications"
                     >
 
                         🔔
@@ -178,17 +199,17 @@ function Navbar() {
                                 <span
                                     style={{
                                         position: "absolute",
-                                        top: "-6px",
-                                        right: "-6px",
-                                        background: "#ef4444",
+                                        top: "-4px",
+                                        right: "-4px",
+                                        background: "var(--danger)",
                                         color: "#fff",
                                         borderRadius: "50%",
-                                        minWidth: "20px",
-                                        height: "20px",
+                                        minWidth: "18px",
+                                        height: "18px",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        fontSize: "12px",
+                                        fontSize: "11px",
                                         fontWeight: "bold",
                                     }}
                                 >
@@ -211,8 +232,13 @@ function Navbar() {
 
                 </div>    
 
-                <button className="icon-button">
-                    🌙
+                <button 
+                    className="icon-button theme-toggle-btn"
+                    onClick={toggleTheme}
+                    title={`Switch to ${resolvedTheme === "dark" ? "Light" : "Dark"} Mode`}
+                    aria-label="Toggle dark mode"
+                >
+                    {resolvedTheme === "dark" ? "☀️" : "🌙"}
                 </button>
 
                 <div
@@ -242,11 +268,12 @@ function Navbar() {
 
                             <div className="username">
 
-                                {user?.name || "Loading..."}
+                                {user?.name ? user.name.replace(/^Senior\s+/i, "") : "User"}
 
                             </div>
 
                             <div className="role">
+
 
                                 {user
                                     ? getRoleName(user.role)
@@ -260,57 +287,28 @@ function Navbar() {
 
                     {menuOpen && (
 
-                        <div
-                            style={{
-                                position: "absolute",
-                                right: 20,
-                                top: 70,
-                                background: "#fff",
-                                borderRadius: "10px",
-                                boxShadow: "0 5px 20px rgba(0,0,0,.15)",
-                                minWidth: "180px",
-                                overflow: "hidden",
-                                zIndex: 999,
-                            }}
-                        >
+                        <div className="profile-dropdown">
 
                             <button
-                                style={{
-                                    width: "100%",
-                                    border: "none",
-                                    background: "white",
-                                    padding: "14px",
-                                    cursor: "pointer",
-                                    textAlign: "left",
+                                onClick={() => {
+                                    setMenuOpen(false);
+                                    navigate("/admin/settings");
                                 }}
                             >
-                                👤 Profile
+                                ⚙️ Settings
                             </button>
 
                             <button
-                                style={{
-                                    width: "100%",
-                                    border: "none",
-                                    background: "white",
-                                    padding: "14px",
-                                    cursor: "pointer",
-                                    textAlign: "left",
+                                onClick={() => {
+                                    toggleTheme();
                                 }}
                             >
-                                ⚙ Settings
+                                {resolvedTheme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"}
                             </button>
 
                             <button
                                 onClick={logout}
-                                style={{
-                                    width: "100%",
-                                    border: "none",
-                                    background: "#ef4444",
-                                    color: "white",
-                                    padding: "14px",
-                                    cursor: "pointer",
-                                    textAlign: "left",
-                                }}
+                                className="logout-btn"
                             >
                                 🚪 Logout
                             </button>
@@ -324,21 +322,14 @@ function Navbar() {
             </div>
 
             {
-
                 showNotifications && (
-
                     <NotificationPanel
-
                         notifications={notifications}
-
                         refresh={loadNotifications}
-
+                        onClose={() => setShowNotifications(false)}
                     />
-
                 )
-
             }
-
 
         </header>
 

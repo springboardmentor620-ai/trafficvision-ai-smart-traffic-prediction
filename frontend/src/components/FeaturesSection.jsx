@@ -1,41 +1,58 @@
 function FeaturesSection() {
+  const features = [
+    {
+      icon: "🧠",
+      title: "Predictive Neural Congestion Engine",
+      description: "Multi-variable machine learning forecasting corridor bottlenecks and speed drops 15 to 60 minutes in advance.",
+    },
+    {
+      icon: "🚦",
+      title: "Autonomous Corridor Rerouting",
+      description: "Dynamic graph optimization computing optimal bypass paths to balance urban flow and relieve choke points.",
+    },
+    {
+      icon: "🗺️",
+      title: "Geospatial GIS Live Mapping",
+      description: "Interactive OpenStreetMap visualization detailing real-time vehicle densities, road statuses, and active city zones.",
+    },
+    {
+      icon: "⚡",
+      title: "Instant Incident Dispatch & Alerts",
+      description: "Real-time alert notifications distributed automatically across municipal operators and public citizens.",
+    },
+    {
+      icon: "📊",
+      title: "Deep Historical Telemetry Analytics",
+      description: "Comprehensive volume trends, busiest road rankings, speed distribution models, and downloadable PDF reports.",
+    },
+    {
+      icon: "🛡️",
+      title: "Zero-Trust Role-Based Governance",
+      description: "Strict RBAC security providing specialized portals for System Administrators, Traffic Operators, and Public Users.",
+    },
+  ];
+
   return (
-    <section className="features">
-
-      <h2>Key Features</h2>
-
-      <div className="feature-grid">
-
-        <div className="feature-card">
-          <h3>📡 Live Traffic Monitoring</h3>
-          <p>
-            Monitor real-time traffic conditions and congestion across different zones.
-          </p>
-        </div>
-
-        <div className="feature-card">
-          <h3>🔒 Secure Authentication</h3>
-          <p>
-            JWT-based authentication with Role-Based Access Control for secure access.
-          </p>
-        </div>
-
-        <div className="feature-card">
-          <h3>📊 Interactive Dashboard</h3>
-          <p>
-            Visualize traffic data using charts, summary cards, and live updates.
-          </p>
-        </div>
-
-        <div className="feature-card">
-          <h3>🤖 AI Prediction</h3>
-          <p>
-            Future enhancement for predicting congestion using machine learning.
-          </p>
-        </div>
-
+    <section id="features" className="features">
+      <div className="section-header">
+        <span className="section-tag">Core Capabilities</span>
+        <h2>Built for Smart Cities & High-Velocity Transit</h2>
+        <p>
+          End-to-end intelligent infrastructure combining sensory telemetry, neural forecasting, and automated traffic dispatch.
+        </p>
       </div>
 
+      <div className="feature-grid">
+        {features.map((feat, idx) => (
+          <div key={idx} className="feature-card">
+            <div>
+              <div className="feature-card-icon">{feat.icon}</div>
+              <h3>{feat.title}</h3>
+              <p>{feat.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

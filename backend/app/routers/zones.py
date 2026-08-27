@@ -17,7 +17,70 @@ router = APIRouter(
 
 @router.get("/", response_model=list[ZoneResponse])
 def get_zones(db: Session = Depends(get_db)):
-    return ZoneService.get_all(db)
+    zones = ZoneService.get_all(db)
+    if len(zones) == 0:
+        sample_zones = [
+            ZoneCreate(
+                name="Central Business District (CBD)",
+                city="Bengaluru",
+                state="Karnataka",
+                status="Heavy",
+                roads=14,
+            ),
+            ZoneCreate(
+                name="East IT Corridor (Whitefield & Bellandur)",
+                city="Bengaluru",
+                state="Karnataka",
+                status="Heavy",
+                roads=22,
+            ),
+            ZoneCreate(
+                name="South Tech Corridor (Electronic City & Silk Board)",
+                city="Bengaluru",
+                state="Karnataka",
+                status="Moderate",
+                roads=18,
+            ),
+            ZoneCreate(
+                name="North Airport Transit Zone (Hebbal & Yelahanka)",
+                city="Bengaluru",
+                state="Karnataka",
+                status="Normal",
+                roads=12,
+            ),
+            ZoneCreate(
+                name="West Industrial Sector (Peenya & Yeshwanthpur)",
+                city="Bengaluru",
+                state="Karnataka",
+                status="Normal",
+                roads=10,
+            ),
+            ZoneCreate(
+                name="Southeast Hub (HSR Layout & Sarjapur)",
+                city="Bengaluru",
+                state="Karnataka",
+                status="Moderate",
+                roads=16,
+            ),
+            ZoneCreate(
+                name="Southwest Residential Belt (Jayanagar & JP Nagar)",
+                city="Bengaluru",
+                state="Karnataka",
+                status="Normal",
+                roads=11,
+            ),
+            ZoneCreate(
+                name="Metro Arterial Belt (Indiranagar & MG Road)",
+                city="Bengaluru",
+                state="Karnataka",
+                status="Heavy",
+                roads=15,
+            ),
+        ]
+        for z in sample_zones:
+            ZoneService.create(db, z)
+        zones = ZoneService.get_all(db)
+    return zones
 
 
 @router.post("/", response_model=ZoneResponse)

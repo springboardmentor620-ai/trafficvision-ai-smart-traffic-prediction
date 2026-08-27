@@ -25,7 +25,13 @@ class Road(Base):
     longitude = Column(Float, nullable=False)
 
     traffic = relationship(
-    "Traffic",
-    back_populates="road",
-    cascade="all, delete"
-)
+        "Traffic",
+        back_populates="road",
+        cascade="all, delete"
+    )
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name

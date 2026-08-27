@@ -16,10 +16,15 @@ function TrafficTable({ traffic }) {
         </thead>
 
         <tbody>
-          {traffic.map((road) => (
-            <tr key={road.id}>
-              <td>{road.road}</td>
+          {traffic.map((road, index) => (
+            <tr key={road.id || index}>
+              <td>
+                {typeof road.road === "object"
+                  ? road.road?.name
+                  : road.road || road.name || road.road_name || "Corridor"}
+              </td>
               <td>{road.status}</td>
+
               <td>{road.vehicles}</td>
               <td>{road.average_speed} km/h</td>
             </tr>
