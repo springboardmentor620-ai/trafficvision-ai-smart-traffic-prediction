@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
-from services.location_service import locations
+from services.location_service import locations as area_centres
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -64,7 +64,7 @@ def get_heatmap_data() -> dict:
     )
     grouped = grouped.sort_values(["density_rank", "average_traffic_volume"], ascending=[False, False])
 
-    locations = []
+    heatmap_locations = []
     for _, row in grouped.iterrows():
         location = {
             "area": str(row["Area Name"]),
@@ -77,19 +77,20 @@ def get_heatmap_data() -> dict:
         if has_geospatial_data:
             location["latitude"] = round(float(row["latitude"]), 6)
             location["longitude"] = round(float(row["longitude"]), 6)
-        elif str(row["Area Name"]) in locations:
-            location["latitude"] = locations[str(row["Area Name"])]["lat"]
-            location["longitude"] = locations[str(row["Area Name"])]["lng"]
-        locations.append(location)
+        elif str(row["Area Name"]) in area_centres:
+            centre = area_centres[str(row["Area Name"])]
+            location["latitude"] = centre["lat"]
+            location["longitude"] = centre["lng"]
+        heatmap_locations.append(location)
 
     counts = grouped["density"].value_counts()
     return {
-        "has_geospatial_data": has_geospatial_data or any("latitude" in item for item in locations),
+        "has_geospatial_data": has_geospatial_data or any("latitude" in item for item in heatmap_locations),
         "message": (
             "Marker coordinates are available from the dataset."
             if has_geospatial_data else "Markers use known area-centre coordinates because the supplied dataset has no latitude/longitude columns."
         ),
         "required_geospatial_fields": [] if has_geospatial_data else ["Latitude", "Longitude"],
         "density_summary": {level: int(counts.get(level, 0)) for level in DENSITY_LEVELS},
-        "locations": locations,
+        "locations": heatmap_locations,
     }

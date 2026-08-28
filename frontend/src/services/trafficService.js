@@ -72,6 +72,11 @@ export async function getPredictionOptions() {
   return requestJson("/traffic/prediction-options");
 }
 
+export async function getDatasetCountries() { return requestJson("/locations/countries"); }
+export async function getDatasetStates(country) { return requestJson(`/locations/states/${encodeURIComponent(country)}`); }
+export async function getDatasetCities(state) { return requestJson(`/locations/cities/${encodeURIComponent(state)}`); }
+export async function getDatasetRoads(city) { return requestJson(`/locations/roads/${encodeURIComponent(city)}`); }
+
 export async function authenticate(payload, signup = false) {
   return requestJson(`/auth/${signup ? "signup" : "login"}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
 }

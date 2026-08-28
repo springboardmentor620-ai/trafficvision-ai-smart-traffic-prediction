@@ -1,11 +1,16 @@
+import os
+
 import psycopg2
 
 
 def get_connection():
-    return psycopg2.connect(
-        host="localhost",
-        database="trafficvision_db",
-        user="postgres",
-        password="veni123",
-        port="5432"
-    )
+    settings = {
+        "host": os.getenv("DATABASE_HOST", "localhost"),
+        "database": os.getenv("DATABASE_NAME", "trafficvision_db"),
+        "user": os.getenv("DATABASE_USER", "postgres"),
+        "port": os.getenv("DATABASE_PORT", "5432"),
+    }
+    password = os.getenv("DATABASE_PASSWORD")
+    if password:
+        settings["password"] = password
+    return psycopg2.connect(**settings)

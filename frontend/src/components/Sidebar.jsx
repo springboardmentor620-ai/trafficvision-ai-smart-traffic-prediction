@@ -38,7 +38,7 @@ const navigationItems = [
 
 function Sidebar() {
   const navigate = useNavigate();
-  const logout = () => { localStorage.removeItem("role"); navigate("/"); };
+  const logout = () => { localStorage.removeItem("role"); localStorage.removeItem("user"); localStorage.removeItem("trafficvision-read-alerts"); navigate("/"); };
   return (
     <div className="sidebar">
 

@@ -6,7 +6,7 @@ import {
   TileLayer,
   useMap,
 } from "react-leaflet";
-import { MdLocationOff, MdMap, MdSpeed } from "react-icons/md";
+import { MdMap, MdSpeed } from "react-icons/md";
 
 import { getHeatmap } from "../services/trafficService";
 import "leaflet/dist/leaflet.css";
@@ -32,6 +32,7 @@ function MapAutoFit({ locations }) {
 
 function HeatMap() {
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -43,7 +44,7 @@ function HeatMap() {
       } catch (requestError) {
         console.error("Unable to load heatmap:", requestError);
         if (active) setError("Traffic density data is temporarily unavailable.");
-      }
+      } finally { if (active) setLoading(false); }
     }
 
     loadHeatmap();
@@ -52,12 +53,12 @@ function HeatMap() {
 
   const locations = useMemo(() => data?.locations ?? [], [data]);
   const markerLocations = useMemo(
-    () => locations.filter((location) => Number.isFinite(location.latitude) && Number.isFinite(location.longitude)),
+    () => locations.filter((location) => Number.isFinite(Number(location.latitude)) && Number.isFinite(Number(location.longitude))),
     [locations],
   );
 
-  if (error) return <div className="heatmap-state heatmap-state--error">{error}</div>;
-  if (!data) return <div className="heatmap-state">Loading traffic density data...</div>;
+  if (loading) return <div className="heatmap-state">Loading traffic density data...</div>;
+  if (error || !data || !locations.length) return <div className="heatmap-state heatmap-state--error">No heatmap data available.</div>;
 
   return (
     <main className="heatmap-page" aria-labelledby="heatmap-title">
@@ -80,14 +81,14 @@ function HeatMap() {
         ))}
       </section>
 
-      {data.has_geospatial_data && markerLocations.length > 0 ? (
+      {markerLocations.length > 0 ? (
         <section className="heatmap-map-shell" aria-label="OpenStreetMap traffic density markers">
-          <MapContainer center={[markerLocations[0].latitude, markerLocations[0].longitude]} zoom={12} className="heatmap-leaflet-map" zoomControl>
+          <MapContainer center={[Number(markerLocations[0].latitude), Number(markerLocations[0].longitude)]} zoom={12} className="heatmap-leaflet-map" zoomControl>
             <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {markerLocations.map((location) => (
               <CircleMarker
                 key={`${location.area}-${location.road}`}
-                center={[location.latitude, location.longitude]}
+                center={[Number(location.latitude), Number(location.longitude)]}
                 radius={13}
                 pathOptions={{ color: densityColors[location.density], fillColor: densityColors[location.density], fillOpacity: .78, weight: 2 }}
               >
@@ -97,12 +98,7 @@ function HeatMap() {
             <MapAutoFit locations={markerLocations} />
           </MapContainer>
         </section>
-      ) : (
-        <section className="heatmap-unavailable" aria-labelledby="coordinates-title">
-          <div className="heatmap-unavailable__icon"><MdLocationOff /></div>
-          <div><h2 id="coordinates-title">Map markers need geographic coordinates</h2><p>{data.message}</p><small>Required fields: {data.required_geospatial_fields.join(" and ")}</small></div>
-        </section>
-      )}
+      ) : <section className="heatmap-unavailable">No heatmap data available.</section>}
 
       <section className="heatmap-density-list" aria-labelledby="density-list-title">
         <header><div><p className="heatmap-page__eyebrow">Available dataset view</p><h2 id="density-list-title">Road density ranking</h2></div><span><MdMap /> {locations.length} mapped dataset locations</span></header>

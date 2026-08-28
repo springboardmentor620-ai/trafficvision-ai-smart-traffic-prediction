@@ -12,6 +12,7 @@ from routers.heatmap import router as heatmap_router
 from routers.ai import router as ai_router
 from routers.predict import router as predict_router
 from routers.reports import router as reports_router
+from routers.locations import router as locations_router
 
 app = FastAPI(
     title="TrafficVision AI API",
@@ -49,6 +50,7 @@ app.include_router(heatmap_router)
 app.include_router(ai_router)
 app.include_router(predict_router)
 app.include_router(reports_router)
+app.include_router(locations_router)
 
 # ===========================
 # Home API
