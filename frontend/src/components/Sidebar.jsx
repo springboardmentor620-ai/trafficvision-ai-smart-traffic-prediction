@@ -3,13 +3,9 @@ import { NavLink } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
 import Logo from "./common/Logo";
 import "./../styles/sidebar.css";
+
 function Sidebar() {
-  let user;
-  try {
-    user = JSON.parse(localStorage.getItem("user") || "{}");
-  } catch {
-    user = {};
-  }
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const role = user?.role || "admin";
   const { isOpen, isMobile, closeSidebar, toggleSidebar } = useSidebar();
 

@@ -1,15 +1,12 @@
 function RouteRecommendation({
-    locations = [],
+    locations,
     origin,
     destination
 }) {
     if (
-        !locations ||
         !locations.length ||
         !origin ||
-        !destination ||
-        !origin.input ||
-        !destination.input
+        !destination
     ) {
         return (
             <div
@@ -34,12 +31,12 @@ function RouteRecommendation({
 
     const estimatedTime = Math.round(
         (
-            (origin.input?.Traffic_Volume || 15000) +
-            (destination.input?.Traffic_Volume || 15000)
+            origin.input.Traffic_Volume +
+            destination.input.Traffic_Volume
         ) / 2000 +
         (
-            (origin.prediction || 35) +
-            (destination.prediction || 35)
+            origin.prediction +
+            destination.prediction
         ) / 15
     );
 

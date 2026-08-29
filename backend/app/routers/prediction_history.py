@@ -11,7 +11,6 @@ router = APIRouter(
 )
 
 
-@router.get("")
-@router.get("/", include_in_schema=False)
+@router.get("/")
 def latest_predictions(db: Session = Depends(get_db)):
     return get_latest(db)

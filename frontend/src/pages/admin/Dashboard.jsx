@@ -112,11 +112,11 @@ function Dashboard() {
   const normalCount = summary?.normal_traffic ?? trafficData.filter((r) => r.status === "Normal").length;
   const activeAlertsCount = alerts.filter((a) => a.status === "Active" || !a.is_resolved).length || 3;
 
+  // Filtered live corridor table
   const filteredCorridors = useMemo(() => {
     const term = searchCorridor.toLowerCase();
     return trafficData.filter((t) => {
-      const rawName = (t && typeof t.road === "object" && t.road !== null) ? t.road.name : (t?.road || t?.name || "");
-      const name = typeof rawName === "string" ? rawName.toLowerCase() : "";
+      const name = (typeof t.road === "object" ? t.road?.name : t.road || t.name || "").toLowerCase();
       return name.includes(term);
     });
   }, [trafficData, searchCorridor]);
@@ -773,9 +773,7 @@ function Dashboard() {
               {filteredCorridors.slice(0, 8).map((road, idx) => {
                 const isHeavy = road.status === "Heavy";
                 const isMod = road.status === "Moderate";
-                const name = (road && typeof road.road === "object" && road.road !== null)
-                  ? road.road.name
-                  : (road?.road || road?.name || `Corridor #${idx + 1}`);
+                const name = typeof road.road === "object" ? road.road?.name : road.road || road.name || `Corridor #${idx + 1}`;
 
                 return (
                   <tr

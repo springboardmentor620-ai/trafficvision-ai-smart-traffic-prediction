@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel
 
 
@@ -21,19 +20,19 @@ class RoadCreate(BaseModel):
 
 class RoadUpdate(BaseModel):
 
-    name: Optional[str] = None
+    name: str
 
-    city: Optional[str] = None
+    city: str
 
-    state: Optional[str] = None
+    state: str
 
-    status: Optional[str] = None
+    status: str
 
-    speed_limit: Optional[int] = None
+    speed_limit: int
 
-    latitude: Optional[float] = None
+    latitude: float
 
-    longitude: Optional[float] = None
+    longitude: float
 
 
 class RoadResponse(BaseModel):

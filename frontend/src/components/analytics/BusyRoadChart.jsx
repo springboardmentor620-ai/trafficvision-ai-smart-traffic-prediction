@@ -23,9 +23,9 @@ function BusyRoadChart() {
         const formatted = (data || []).map((item, idx) => ({
           ...item,
           road:
-            (item && typeof item.road === "object" && item.road !== null)
-              ? item.road.name
-              : item?.road || item?.name || item?.road_name || `Road #${idx + 1}`,
+            typeof item.road === "object"
+              ? item.road?.name
+              : item.road || item.name || item.road_name || `Road #${idx + 1}`,
         }));
         setRoads(formatted);
       } catch (err) {

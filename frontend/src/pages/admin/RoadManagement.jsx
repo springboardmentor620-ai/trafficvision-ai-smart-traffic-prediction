@@ -23,7 +23,7 @@ function RoadManagement() {
     try {
       setLoading(true);
       const data = await getRoads();
-      setRoads(Array.isArray(data) ? data : []);
+      setRoads(data);
     } catch (err) {
       console.error("Failed to load roads", err);
     } finally {
@@ -66,15 +66,14 @@ function RoadManagement() {
     }
   };
 
+  // Filtered roads based on search and status
   const filteredRoads = useMemo(() => {
-    return (Array.isArray(roads) ? roads : []).filter((r) => {
-      const name = (r?.name || "").toLowerCase();
-      const city = (r?.city || "").toLowerCase();
-      const status = (r?.status || "").toLowerCase();
-      const term = (searchTerm || "").toLowerCase();
-      const matchesSearch = name.includes(term) || city.includes(term);
+    return roads.filter((r) => {
+      const matchesSearch =
+        r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.city.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus =
-        statusFilter === "All" || status === statusFilter.toLowerCase();
+        statusFilter === "All" || r.status.toLowerCase() === statusFilter.toLowerCase();
       return matchesSearch && matchesStatus;
     });
   }, [roads, searchTerm, statusFilter]);

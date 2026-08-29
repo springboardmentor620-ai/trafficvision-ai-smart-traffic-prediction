@@ -62,8 +62,8 @@ class NotificationService:
 
     @staticmethod
     def create(db: Session, notification):
-        data = notification.model_dump() if hasattr(notification, "model_dump") else notification.dict()
-        new_notification = Notification(**data)
+
+        new_notification = Notification(**notification.dict())
 
         db.add(new_notification)
 

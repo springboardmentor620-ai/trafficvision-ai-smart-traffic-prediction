@@ -26,9 +26,11 @@ function Navbar() {
     const menuRef = useRef(null);
 
     const logout = () => {
+
         localStorage.removeItem("token");
-        localStorage.removeItem("user");
+
         navigate("/login");
+
     };
 
     useEffect(() => {

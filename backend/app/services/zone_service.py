@@ -11,8 +11,8 @@ class ZoneService:
 
     @staticmethod
     def create(db: Session, zone):
-        data = zone.model_dump() if hasattr(zone, "model_dump") else zone.dict()
-        new_zone = Zone(**data)
+
+        new_zone = Zone(**zone.dict())
 
         db.add(new_zone)
 
@@ -32,15 +32,8 @@ class ZoneService:
         if not existing:
             return None
 
-        update_data = (
-            zone.model_dump(exclude_unset=True)
-            if hasattr(zone, "model_dump")
-            else {k: v for k, v in zone.dict().items() if v is not None}
-        )
-
-        for key, value in update_data.items():
-            if value is not None:
-                setattr(existing, key, value)
+        for key, value in zone.dict().items():
+            setattr(existing, key, value)
 
         db.commit()
 

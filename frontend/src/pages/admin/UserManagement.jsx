@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import AdminLayout from "../../components/dashboard/AdminLayout";
 import {
   getUsers,
@@ -39,14 +39,7 @@ function UserManagement() {
   const [formLoading, setFormLoading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState({ text: "", type: "" });
 
-  const showFeedback = useCallback((text, type = "success") => {
-    setFeedbackMsg({ text, type });
-    setTimeout(() => {
-      setFeedbackMsg({ text: "", type: "" });
-    }, 4500);
-  }, []);
-
-  const loadData = useCallback(async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       const [usersData, statsData, meData] = await Promise.all([
@@ -74,11 +67,18 @@ function UserManagement() {
     } finally {
       setLoading(false);
     }
-  }, [showFeedback]);
+  };
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
+
+  const showFeedback = (text, type = "success") => {
+    setFeedbackMsg({ text, type });
+    setTimeout(() => {
+      setFeedbackMsg({ text: "", type: "" });
+    }, 4500);
+  };
 
   const handleOpenCreate = () => {
     setFormData({

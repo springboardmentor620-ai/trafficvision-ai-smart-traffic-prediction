@@ -59,9 +59,9 @@ function RoadRankingTable() {
             <tr key={road.id || index}>
               <td>{index + 1}</td>
               <td style={{ fontWeight: "600" }}>
-                {(road && typeof road.road === "object" && road.road !== null)
-                  ? road.road.name
-                  : (road?.road || road?.name || road?.road_name || `Road #${index + 1}`)}
+                {typeof road.road === "object"
+                  ? road.road?.name
+                  : road.road || road.name || road.road_name || `Road #${index + 1}`}
               </td>
               <td>
 

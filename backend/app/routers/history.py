@@ -14,11 +14,14 @@ router = APIRouter(
 )
 
 
-@router.get("")
-@router.get("/", include_in_schema=False)
+@router.get("/")
+
 def history(
+
     db: Session = Depends(get_db),
+
 ):
+
     return HistoryService.traffic_history(db)
 
 

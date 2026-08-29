@@ -2,15 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import PublicNavbar from "../components/PublicNavbar";
 import GoogleAuthButton from "../components/common/GoogleAuthButton";
-import { login, loginStep1, loginVerifyOtp, googleAuth, getCurrentUser } from "../services/auth";
+import { loginStep1, loginVerifyOtp, googleAuth, getCurrentUser } from "../services/auth";
 import "../styles/Login.css";
 
 function Login() {
   const navigate = useNavigate();
 
-  // Mode: "direct" (Instant Password Login) or "2fa" (2-Step Email OTP Login)
-  const [authMode, setAuthMode] = useState("direct");
-  const [step, setStep] = useState(1); // 1: email/password, 2: OTP code (only for 2fa mode)
+  // Step 1: Credentials, Step 2: 2-Step OTP Verification
+  const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -43,68 +42,8 @@ function Login() {
     });
   }
 
-  function redirectByRole(role) {
-    if (role === "admin") {
-      navigate("/admin");
-    } else if (role === "traffic_operator") {
-      navigate("/operator");
-    } else if (role === "commuter") {
-      navigate("/commuter");
-    } else {
-      navigate("/commuter");
-    }
-  }
-
-  // Handle Quick Demo One-Click Login
-  const handleQuickLogin = async (email, password) => {
-    setFormData({ email, password });
-    setErrorMessage("");
-    setInfoMessage("");
-    setLoading(true);
-
-    try {
-      const data = await login(email, password);
-      localStorage.setItem("token", data.access_token);
-
-      const user = data.user || (await getCurrentUser());
-      localStorage.setItem("user", JSON.stringify(user));
-
-      redirectByRole(user.role);
-    } catch (err) {
-      setErrorMessage(
-        err.response?.data?.detail || "Could not sign in with demo credentials."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Direct Standard Password Login (Default)
-  async function handleDirectSubmit(e) {
-    e.preventDefault();
-    setErrorMessage("");
-    setInfoMessage("");
-    setLoading(true);
-
-    try {
-      const data = await login(formData.email, formData.password);
-      localStorage.setItem("token", data.access_token);
-
-      const user = data.user || (await getCurrentUser());
-      localStorage.setItem("user", JSON.stringify(user));
-
-      redirectByRole(user.role);
-    } catch (err) {
-      setErrorMessage(
-        err.response?.data?.detail || "Invalid email address or password. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // 2-Step OTP Step 1
-  async function handle2FAStep1(e) {
+  // Handle Step 1: Credentials Check & Send OTP
+  async function handleCredentialsSubmit(e) {
     e.preventDefault();
     setErrorMessage("");
     setInfoMessage("");
@@ -137,6 +76,7 @@ function Login() {
     newOtp[index] = value.slice(-1);
     setOtp(newOtp);
 
+    // Auto-advance focus to next input
     if (value && index < 5) {
       otpInputsRef.current[index + 1]?.focus();
     }
@@ -157,7 +97,7 @@ function Login() {
     }
   };
 
-  // 2-Step OTP Step 2
+  // Handle Step 2: Verify OTP
   async function handleOtpSubmit(e) {
     if (e) e.preventDefault();
     const fullOtp = otp.join("");
@@ -186,6 +126,24 @@ function Login() {
     }
   }
 
+  // Handle Resend OTP
+  async function handleResendOtp() {
+    if (resendTimer > 0) return;
+    setErrorMessage("");
+    setLoading(true);
+
+    try {
+      const res = await loginStep1(formData.email, formData.password);
+      setResendTimer(60);
+      setInfoMessage(`A fresh verification code was dispatched to ${formData.email}`);
+      if (res.demo_code) setDemoCode(res.demo_code);
+    } catch (err) {
+      setErrorMessage(err.response?.data?.detail || "Failed to resend verification code.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Handle Google OAuth
   async function handleGoogleSuccess(googlePayload) {
     setErrorMessage("");
@@ -203,6 +161,18 @@ function Login() {
       setErrorMessage(err.response?.data?.detail || "Google authentication failed.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  function redirectByRole(role) {
+    if (role === "admin") {
+      navigate("/admin");
+    } else if (role === "traffic_operator") {
+      navigate("/operator");
+    } else if (role === "commuter") {
+      navigate("/commuter");
+    } else {
+      setErrorMessage("Unknown user role received from server.");
     }
   }
 
@@ -235,10 +205,10 @@ function Login() {
                 </div>
 
                 <div className="hero-feature-item">
-                  <div className="feature-icon-box">⚡</div>
+                  <div className="feature-icon-box">🔒</div>
                   <div className="feature-text">
-                    <h4>Instant 1-Click Access</h4>
-                    <p>Direct login with password, Google Identity, or optional 2FA verification.</p>
+                    <h4>2-Step Security Verification</h4>
+                    <p>Multi-factor OTP protection with automated SMTP alert dispatching.</p>
                   </div>
                 </div>
 
@@ -258,8 +228,8 @@ function Login() {
                 <span className="label">Predictive Engine</span>
               </div>
               <div className="metric-stat">
-                <span className="num">Google OAuth</span>
-                <span className="label">Identity Provider</span>
+                <span className="num">2FA / OTP</span>
+                <span className="label">Access Security</span>
               </div>
               <div className="metric-stat">
                 <span className="num">18+</span>
@@ -299,76 +269,6 @@ function Login() {
                   <div style={{ flex: 1, height: "1px", background: "var(--border-color)" }}></div>
                 </div>
 
-                {/* Quick Demo Role Logins */}
-                <div style={{ marginBottom: "18px" }}>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: "700",
-                      color: "var(--text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                      marginBottom: "8px",
-                      textAlign: "center",
-                    }}
-                  >
-                    🚀 Instant 1-Click Demo Logins
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("admin@trafficvision.ai", "password123")}
-                      disabled={loading}
-                      style={{
-                        padding: "8px 4px",
-                        fontSize: "12px",
-                        fontWeight: "700",
-                        borderRadius: "8px",
-                        border: "1px solid #3b82f6",
-                        backgroundColor: "rgba(59, 130, 246, 0.08)",
-                        color: "#3b82f6",
-                        cursor: loading ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      👑 Admin
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("operator@trafficvision.ai", "password123")}
-                      disabled={loading}
-                      style={{
-                        padding: "8px 4px",
-                        fontSize: "12px",
-                        fontWeight: "700",
-                        borderRadius: "8px",
-                        border: "1px solid #10b981",
-                        backgroundColor: "rgba(16, 185, 129, 0.08)",
-                        color: "#10b981",
-                        cursor: loading ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      🚦 Operator
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin("user@trafficvision.ai", "password123")}
-                      disabled={loading}
-                      style={{
-                        padding: "8px 4px",
-                        fontSize: "12px",
-                        fontWeight: "700",
-                        borderRadius: "8px",
-                        border: "1px solid #8b5cf6",
-                        backgroundColor: "rgba(139, 92, 246, 0.08)",
-                        color: "#8b5cf6",
-                        cursor: loading ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      🚗 Commuter
-                    </button>
-                  </div>
-                </div>
-
                 {errorMessage && (
                   <div className="auth-alert-banner error">
                     <span>⚠️</span>
@@ -376,7 +276,7 @@ function Login() {
                   </div>
                 )}
 
-                <form onSubmit={authMode === "2fa" ? handle2FAStep1 : handleDirectSubmit} className="auth-form">
+                <form onSubmit={handleCredentialsSubmit} className="auth-form">
                   <div className="input-field-group">
                     <label htmlFor="email">Email Address</label>
                     <div className="input-box-wrapper">
@@ -401,135 +301,68 @@ function Login() {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         name="password"
-                        placeholder="Enter your password"
+                        placeholder="••••••••••••"
                         value={formData.password}
                         onChange={handleChange}
                         required
                       />
                       <button
                         type="button"
-                        className="password-toggle-btn"
+                        className="toggle-visibility-btn"
                         onClick={() => setShowPassword(!showPassword)}
+                        title={showPassword ? "Hide password" : "Show password"}
                       >
-                        {showPassword ? "👁️" : "👁️‍🗨️"}
+                        {showPassword ? "👁️‍🗨️" : "👁️"}
                       </button>
                     </div>
                   </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      margin: "6px 0 16px",
-                      fontSize: "13px",
-                    }}
-                  >
-                    <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", color: "var(--text-secondary)" }}>
-                      <input
-                        type="checkbox"
-                        checked={authMode === "2fa"}
-                        onChange={(e) => setAuthMode(e.target.checked ? "2fa" : "direct")}
-                        style={{ cursor: "pointer" }}
-                      />
-                      <span>Require 2-Step OTP Code</span>
+                  <div className="auth-options-row">
+                    <label className="remember-checkbox-label">
+                      <input type="checkbox" defaultChecked />
+                      <span>Remember this device</span>
                     </label>
-
-                    <Link
-                      to="/forgot-password"
-                      style={{
-                        color: "var(--accent-color)",
-                        textDecoration: "none",
-                        fontWeight: "500",
-                      }}
-                    >
+                    <Link to="/forgot-password" className="forgot-link">
                       Forgot password?
                     </Link>
                   </div>
 
                   <button type="submit" className="auth-submit-btn" disabled={loading}>
-                    {loading ? "Signing in..." : authMode === "2fa" ? "Send Security OTP →" : "Sign In to Dashboard →"}
+                    {loading ? (
+                      <>
+                        <span className="btn-spinner"></span>
+                        <span>Verifying Credentials...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Continue to 2-Step Verification</span>
+                        <span>→</span>
+                      </>
+                    )}
                   </button>
                 </form>
 
-                <div className="auth-footer-prompt">
-                  <span>Don't have an account? </span>
-                  <Link to="/register">Create an account</Link>
+                <div className="auth-switch-footer">
+                  <span>Don't have an account?</span>
+                  <Link to="/register">Create a Public User Account</Link>
                 </div>
               </>
             ) : (
-              /* Step 2: Enter 6-Digit OTP */
+              /* Step 2: 2-Step OTP Verification Form */
               <>
                 <div className="auth-header">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStep(1);
-                      setErrorMessage("");
-                    }}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "var(--accent-color)",
-                      fontWeight: "600",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      padding: "0 0 12px 0",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    ← Back to credentials
-                  </button>
-                  <h1>Two-Step Verification</h1>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "var(--primary-light)", padding: "4px 12px", borderRadius: "14px", color: "var(--primary)", fontSize: "12px", fontWeight: "700", marginBottom: "8px" }}>
+                    🔒 2-Step Verification
+                  </div>
+                  <h1>Enter 6-Digit Code</h1>
                   <p>
-                    Enter the 6-digit security code dispatched to <strong>{formData.email}</strong>.
+                    We sent a security code to <strong>{formData.email}</strong>. Enter it below to complete sign-in.
                   </p>
                 </div>
 
                 {infoMessage && (
-                  <div className="auth-alert-banner info">
-                    <span>📩</span>
-                    <span>{infoMessage}</span>
-                  </div>
-                )}
-
-                {demoCode && (
-                  <div
-                    style={{
-                      margin: "12px 0 16px",
-                      padding: "10px 14px",
-                      backgroundColor: "rgba(59, 130, 246, 0.1)",
-                      border: "1px solid rgba(59, 130, 246, 0.3)",
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <span style={{ fontSize: "13px", color: "var(--text-primary)" }}>
-                      Demo Code: <strong style={{ color: "var(--accent-color)", letterSpacing: "2px" }}>{demoCode}</strong>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOtp(demoCode.split(""));
-                        otpInputsRef.current[5]?.focus();
-                      }}
-                      style={{
-                        background: "var(--accent-color)",
-                        color: "#fff",
-                        border: "none",
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        fontSize: "12px",
-                        cursor: "pointer",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Auto-Fill
-                    </button>
+                  <div style={{ padding: "10px 14px", backgroundColor: "rgba(34, 197, 94, 0.12)", border: "1px solid rgba(34, 197, 94, 0.3)", borderRadius: "8px", color: "var(--success)", fontSize: "13px", fontWeight: "600", marginBottom: "16px" }}>
+                    {infoMessage}
                   </div>
                 )}
 
@@ -541,71 +374,80 @@ function Login() {
                 )}
 
                 <form onSubmit={handleOtpSubmit} className="auth-form">
-                  <div style={{ margin: "16px 0 24px" }}>
-                    <label style={{ display: "block", marginBottom: "10px", fontSize: "13px", fontWeight: "600" }}>
-                      Security Verification Code
-                    </label>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: "8px",
-                      }}
-                      onPaste={handleOtpPaste}
-                    >
-                      {otp.map((digit, index) => (
-                        <input
-                          key={index}
-                          ref={(el) => (otpInputsRef.current[index] = el)}
-                          type="text"
-                          maxLength="1"
-                          value={digit}
-                          onChange={(e) => handleOtpChange(index, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                          style={{
-                            width: "48px",
-                            height: "54px",
-                            textAlign: "center",
-                            fontSize: "20px",
-                            fontWeight: "700",
-                            borderRadius: "10px",
-                            border: "2px solid var(--border-color)",
-                            backgroundColor: "var(--bg-surface)",
-                            color: "var(--text-primary)",
-                            outline: "none",
-                            transition: "all 0.2s ease",
-                          }}
-                          onFocus={(e) => (e.target.style.borderColor = "var(--accent-color)")}
-                          onBlur={(e) => (e.target.style.borderColor = "var(--border-color)")}
-                        />
-                      ))}
-                    </div>
+                  {/* 6-Digit OTP Box Grid */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      justifyContent: "space-between",
+                      margin: "12px 0 24px 0",
+                    }}
+                    onPaste={handleOtpPaste}
+                  >
+                    {otp.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={(el) => (otpInputsRef.current[idx] = el)}
+                        type="text"
+                        maxLength="1"
+                        value={digit}
+                        onChange={(e) => handleOtpChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                        style={{
+                          width: "48px",
+                          height: "56px",
+                          textAlign: "center",
+                          fontSize: "22px",
+                          fontWeight: "800",
+                          borderRadius: "10px",
+                          border: digit ? "2px solid var(--primary)" : "1px solid var(--border-color)",
+                          backgroundColor: "var(--bg-input)",
+                          color: "var(--text-primary)",
+                          outline: "none",
+                          boxShadow: digit ? "0 0 0 3px var(--primary-light)" : "none",
+                          transition: "all 0.15s ease",
+                        }}
+                      />
+                    ))}
                   </div>
 
-                  <button type="submit" className="auth-submit-btn" disabled={loading}>
-                    {loading ? "Verifying..." : "Verify & Sign In →"}
+                  <button type="submit" className="auth-submit-btn" disabled={loading || otp.join("").length < 6}>
+                    {loading ? (
+                      <>
+                        <span className="btn-spinner"></span>
+                        <span>Verifying Code...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Confirm & Access Dashboard</span>
+                        <span>✓</span>
+                      </>
+                    )}
                   </button>
 
-                  <div style={{ textAlign: "center", marginTop: "18px", fontSize: "13px" }}>
-                    {resendTimer > 0 ? (
-                      <span style={{ color: "var(--text-muted)" }}>
-                        Resend code in <strong>{resendTimer}s</strong>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handle2FAStep1}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          color: "var(--accent-color)",
-                          cursor: "pointer",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Resend Verification Code
-                      </button>
-                    )}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px", fontSize: "13px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      ← Back to credentials
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={resendTimer > 0 || loading}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: resendTimer > 0 ? "var(--text-muted)" : "var(--primary)",
+                        cursor: resendTimer > 0 ? "not-allowed" : "pointer",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend Code ✉️"}
+                    </button>
                   </div>
                 </form>
               </>

@@ -27,15 +27,15 @@ class TrafficService:
 
                 "id": item.id,
 
-                "road": item.road.name if item.road else f"Road #{item.road_id}",
+                "road": item.road.name,
 
-                "city": item.road.city if item.road else "Bengaluru",
+                "city": item.road.city,
 
-                "state": item.road.state if item.road else "Karnataka",
+                "state": item.road.state,
 
-                "latitude": item.road.latitude if (item.road and item.road.latitude is not None) else 12.9716,
+                "latitude": item.road.latitude,
 
-                "longitude": item.road.longitude if (item.road and item.road.longitude is not None) else 77.5946,
+                "longitude": item.road.longitude,
 
                 "status": item.status,
 
@@ -43,7 +43,7 @@ class TrafficService:
 
                 "average_speed": item.average_speed,
 
-                "speed_limit": (item.road.speed_limit if item.road else None) or 60,
+                "speed_limit": item.road.speed_limit or 60,
 
             })
 

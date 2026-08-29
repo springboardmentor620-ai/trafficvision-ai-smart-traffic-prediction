@@ -17,15 +17,7 @@ from app.schemas.user import (
     AdminUserCreate,
     AdminUserUpdate,
     UserStatsResponse,
-    GoogleAuthPayload,
-    LoginStep1Payload,
-    LoginVerifyOtpPayload,
-    SendOtpPayload,
-    VerifyRegisterOtpPayload,
-    ForgotPasswordPayload,
-    ResetPasswordPayload,
 )
-from app.services.otp_service import OTPService
 from app.utils.security import (
     hash_password,
     verify_password,
@@ -36,60 +28,88 @@ from app.utils.email_validator import validate_email_authenticity
 router = APIRouter()
 
 
-@router.post("/register")
-@router.post("/auth/register")
+@router.post("/register", response_model=UserResponse)
 def register(user: UserRegister, db: Session = Depends(get_db)):
     """
     Public registration endpoint.
-    Creates a 'commuter' account and returns JWT token + user profile.
+
+    Security: Always creates a 'commuter' account regardless of any role value
+    submitted by the client. The role is assigned server-side and cannot be
+    overridden by the request payload.
+
+    To create admin or traffic_operator accounts, use POST /admin/users
+    with a valid admin JWT token.
     """
-    cleaned_email = str(user.email).strip().lower()
-    if not cleaned_email or "@" not in cleaned_email:
+    is_valid, error_msg = validate_email_authenticity(user.email)
+    if not is_valid:
         raise HTTPException(
             status_code=400,
-            detail="Please provide a valid email address.",
+            detail=error_msg,
         )
 
-    existing_user = db.query(User).filter(User.email == cleaned_email).first()
+    existing_user = db.query(User).filter(User.email == user.email).first()
 
     if existing_user:
         raise HTTPException(
             status_code=400,
-            detail="An account with this email address already exists. Please sign in.",
+            detail="Email already registered"
         )
 
     new_user = User(
-        name=user.name.strip(),
-        email=cleaned_email,
+        name=user.name,
+        email=user.email,
         password=hash_password(user.password),
-        role=COMMUTER,  # Always commuter
+        role=COMMUTER,  # Always commuter — never trust client-submitted role
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
-    access_token = create_access_token(
-        {
-            "sub": new_user.email,
-            "role": new_user.role,
-        }
-    )
+    return new_user
 
-    return {
-        "id": new_user.id,
-        "name": new_user.name,
-        "email": new_user.email,
-        "role": new_user.role,
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "id": new_user.id,
-            "name": new_user.name,
-            "email": new_user.email,
-            "role": new_user.role,
-        },
-    }
+
+from pydantic import BaseModel
+from app.services.otp_service import OTPService
+
+
+class SendOtpPayload(BaseModel):
+    email: str
+    purpose: Optional[str] = "Registration"
+
+
+class VerifyRegisterOtpPayload(BaseModel):
+    name: str
+    email: str
+    password: str
+    code: str
+
+
+class LoginStep1Payload(BaseModel):
+    email: str
+    password: str
+
+
+class LoginVerifyOtpPayload(BaseModel):
+    email: str
+    code: str
+
+
+class GoogleAuthPayload(BaseModel):
+    email: str
+    name: Optional[str] = "Google User"
+    google_id: Optional[str] = None
+    credential: Optional[str] = None
+
+
+class ForgotPasswordPayload(BaseModel):
+    email: str
+
+
+class ResetPasswordPayload(BaseModel):
+    email: str
+    code: str
+    new_password: str
 
 
 @router.post("/auth/forgot-password")
@@ -275,19 +295,19 @@ def google_auth(payload: GoogleAuthPayload, db: Session = Depends(get_db)):
     Google OAuth Authentication:
     Logs in existing user or automatically registers a new user via Google Identity.
     """
-    cleaned_email = (payload.email or "").strip().lower()
-    if not cleaned_email or "@" not in cleaned_email:
-        raise HTTPException(status_code=400, detail="Valid Google email address is required.")
+    cleaned_email = payload.email.strip().lower()
+    is_valid, error_msg = validate_email_authenticity(cleaned_email)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
 
     db_user = db.query(User).filter(User.email == cleaned_email).first()
 
     if not db_user:
         # Auto-create user from Google OAuth
-        name = (payload.name or cleaned_email.split("@")[0].replace(".", " ").title()).strip()
         db_user = User(
-            name=name,
+            name=payload.name or "Google User",
             email=cleaned_email,
-            password=hash_password(str(uuid.uuid4())),
+            password=hash_password(str(uuid.uuid4())),  # Random secure password for OAuth accounts
             role=COMMUTER,
         )
         db.add(db_user)
@@ -312,48 +332,13 @@ def google_auth(payload: GoogleAuthPayload, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/auth/login")
-def auth_login(payload: UserLogin, db: Session = Depends(get_db)):
-    """
-    Standard Direct JSON Login:
-    Authenticates email and password, returning JWT access token and user profile.
-    """
-    cleaned_email = payload.email.strip().lower()
-    db_user = db.query(User).filter(User.email == cleaned_email).first()
-
-    if not db_user or not verify_password(payload.password, db_user.password):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid email address or password. Please try again.",
-        )
-
-    access_token = create_access_token(
-        {
-            "sub": db_user.email,
-            "role": db_user.role,
-        }
-    )
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": {
-            "id": db_user.id,
-            "name": db_user.name,
-            "email": db_user.email,
-            "role": db_user.role,
-        },
-    }
-
-
 @router.post("/login", response_model=Token)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
-    cleaned_username = form_data.username.strip().lower()
     db_user = db.query(User).filter(
-        User.email == cleaned_username
+        User.email == form_data.username
     ).first()
 
     if not db_user:

@@ -15,8 +15,7 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=list[ZoneResponse])
-@router.get("/", response_model=list[ZoneResponse], include_in_schema=False)
+@router.get("/", response_model=list[ZoneResponse])
 def get_zones(db: Session = Depends(get_db)):
     zones = ZoneService.get_all(db)
     if len(zones) == 0:

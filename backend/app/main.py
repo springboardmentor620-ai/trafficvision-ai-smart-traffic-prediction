@@ -50,62 +50,10 @@ def wait_for_database(max_attempts=30, delay_seconds=2):
             time.sleep(delay_seconds)
 
 
-def auto_seed_default_users():
-    """
-    Ensures default accounts exist in the database on initial startup
-    (essential for cloud deployments like Render).
-    """
-    try:
-        from app.database.connection import SessionLocal
-        from app.models.user import User
-        from app.utils.security import hash_password
-        from app.constants.roles import ADMIN, TRAFFIC_OPERATOR, COMMUTER
-
-        default_accounts = [
-            {
-                "name": "System Administrator",
-                "email": "admin@trafficvision.ai",
-                "password": "password123",
-                "role": ADMIN,
-            },
-            {
-                "name": "Traffic Operator",
-                "email": "operator@trafficvision.ai",
-                "password": "password123",
-                "role": TRAFFIC_OPERATOR,
-            },
-            {
-                "name": "Public Citizen User",
-                "email": "user@trafficvision.ai",
-                "password": "password123",
-                "role": COMMUTER,
-            },
-        ]
-
-        db = SessionLocal()
-        try:
-            for acc in default_accounts:
-                existing = db.query(User).filter(User.email == acc["email"]).first()
-                if not existing:
-                    user = User(
-                        name=acc["name"],
-                        email=acc["email"],
-                        password=hash_password(acc["password"]),
-                        role=acc["role"],
-                    )
-                    db.add(user)
-            db.commit()
-        finally:
-            db.close()
-    except Exception as e:
-        print(f"[STARTUP SEED NOTICE] {e}")
-
-
 @asynccontextmanager
 async def lifespan(app):
     wait_for_database()
     Base.metadata.create_all(bind=engine)
-    auto_seed_default_users()
     yield
 
 
@@ -117,7 +65,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_cors_origins(),
-    allow_origin_regex=r"https?://.*",
+    allow_origin_regex=r"https://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

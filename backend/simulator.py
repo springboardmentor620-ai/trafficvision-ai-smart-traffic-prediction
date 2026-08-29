@@ -149,44 +149,6 @@ def initialize(db):
     db.commit()
 
 
-ROAD_TO_AREA_MAP = {
-    "100 Feet Road": "Indiranagar",
-    "CMH Road": "Indiranagar",
-    "Indiranagar": "Indiranagar",
-    "Marathahalli": "Whitefield",
-    "Whitefield": "Whitefield",
-    "ITPL": "Whitefield",
-    "Outer Ring Road": "Koramangala",
-    "Silk Board": "Koramangala",
-    "Sony World": "Koramangala",
-    "Koramangala": "Koramangala",
-    "Sarjapur": "Koramangala",
-    "Hosur Road": "Electronic City",
-    "Electronic City": "Electronic City",
-    "M.G. Road": "M.G. Road",
-    "Brigade Road": "M.G. Road",
-    "Trinity Circle": "M.G. Road",
-    "Anil Kumble": "M.G. Road",
-    "Hebbal": "Hebbal",
-    "Airport Road": "Hebbal",
-    "Ballari Road": "Hebbal",
-    "Bellary Road": "Hebbal",
-    "Yeshwanthpur": "Yeshwanthpur",
-    "Tumkur Road": "Yeshwanthpur",
-    "Jayanagar": "Jayanagar",
-    "South End Circle": "Jayanagar",
-    "Bannerghatta": "Jayanagar",
-}
-
-
-def infer_area_name(road_name: str, fallback: str = "Whitefield") -> str:
-    r_lower = (road_name or "").lower()
-    for key, area in ROAD_TO_AREA_MAP.items():
-        if key.lower() in r_lower:
-            return area
-    return fallback
-
-
 def update_traffic(db):
     initialize(db)
     rows = db.query(Traffic).all()
@@ -194,14 +156,14 @@ def update_traffic(db):
 
     for row in rows:
         road_name = row.road.name if row.road else f"Road #{row.road_id}"
-        area_name = infer_area_name(road_name)
+        city_name = row.road.city if row.road else "Bengaluru"
 
         params = generate_corridor_params(road_name)
         traffic_category = get_traffic_category(params["traffic_volume"])
 
         df = pd.DataFrame([
             {
-                "Area Name": area_name,
+                "Area Name": city_name,
                 "Road/Intersection Name": road_name,
                 "Traffic Category": traffic_category,
                 "Traffic Volume": params["traffic_volume"],
@@ -247,7 +209,7 @@ def update_traffic(db):
 
         save_prediction(
             db,
-            area_name=area_name,
+            area_name=city_name,
             road_name=road_name,
             traffic_volume=params["traffic_volume"],
             average_speed=params["speed"],
