@@ -19,9 +19,9 @@ function TrafficTable({ traffic }) {
           {traffic.map((road, index) => (
             <tr key={road.id || index}>
               <td>
-                {typeof road.road === "object"
-                  ? road.road?.name
-                  : road.road || road.name || road.road_name || "Corridor"}
+                {(road && typeof road.road === "object" && road.road !== null)
+                  ? road.road.name
+                  : (road?.road || road?.name || road?.road_name || "Corridor")}
               </td>
               <td>{road.status}</td>
 

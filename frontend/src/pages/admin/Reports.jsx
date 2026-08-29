@@ -480,7 +480,9 @@ function Reports() {
             </thead>
             <tbody>
               {filteredCorridors.map((c, i) => {
-                const name = typeof c.road === "object" ? c.road?.name : c.road || c.name || "Corridor";
+                const name = (c && typeof c.road === "object" && c.road !== null)
+                  ? c.road.name
+                  : (c?.road || c?.name || "Corridor");
                 const isHeavy = c.status === "Heavy";
                 const isMod = c.status === "Moderate";
                 const loadPercent = isHeavy ? 88 : isMod ? 60 : 32;

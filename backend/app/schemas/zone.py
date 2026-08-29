@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -16,15 +17,15 @@ class ZoneCreate(BaseModel):
 
 class ZoneUpdate(BaseModel):
 
-    name: str
+    name: Optional[str] = None
 
-    city: str
+    city: Optional[str] = None
 
-    state: str
+    state: Optional[str] = None
 
-    status: str
+    status: Optional[str] = None
 
-    roads: int
+    roads: Optional[int] = None
 
 
 class ZoneResponse(BaseModel):

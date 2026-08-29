@@ -240,7 +240,7 @@ def generate_report(report):
             table_style.append(("BACKGROUND", (0, row_idx), (-1, row_idx), colors.white))
 
     table.setStyle(TableStyle(table_style))
-    story.append(KeepTogether(table))
+    story.append(table)
 
     doc.build(story)
     buffer.seek(0)

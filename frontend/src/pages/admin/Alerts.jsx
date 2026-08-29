@@ -47,7 +47,7 @@ function Alerts() {
     try {
       setLoading(true);
       const data = await getAlerts();
-      setAlerts(data);
+      setAlerts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load alerts", err);
     } finally {

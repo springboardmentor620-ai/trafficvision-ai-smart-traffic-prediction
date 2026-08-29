@@ -5,37 +5,22 @@ from pydantic import BaseModel, EmailStr
 class UserRegister(BaseModel):
     """
     Schema for the public POST /register endpoint.
-
-    The `role` field has been intentionally removed.
-    Public registration always creates a 'commuter' account — the server
-    assigns this role unconditionally regardless of any client-submitted value.
-    Privileged accounts (admin, traffic_operator) must be created by an
-    administrator via POST /admin/users.
     """
     name: str
-    email: EmailStr
+    email: str
     password: str
 
 
 class AdminUserCreate(BaseModel):
-    """
-    Schema for the admin-only POST /admin/users endpoint.
-    Requires a valid admin JWT token.
-    Allows creating accounts with any role: admin, traffic_operator, commuter.
-    """
     name: str
-    email: EmailStr
+    email: str
     password: str
     role: str
 
 
 class AdminUserUpdate(BaseModel):
-    """
-    Schema for the admin-only PUT /admin/users/{user_id} endpoint.
-    Allows updating name, email, role, and optionally resetting password.
-    """
     name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     role: Optional[str] = None
     password: Optional[str] = None
 
@@ -43,7 +28,7 @@ class AdminUserUpdate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     name: str
-    email: EmailStr
+    email: str
     role: str
 
     class Config:
@@ -58,10 +43,49 @@ class UserStatsResponse(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class GoogleAuthPayload(BaseModel):
+    email: str
+    name: Optional[str] = "Google User"
+    google_id: Optional[str] = None
+    credential: Optional[str] = None
+
+
+class LoginStep1Payload(BaseModel):
+    email: str
+    password: str
+
+
+class LoginVerifyOtpPayload(BaseModel):
+    email: str
+    code: str
+
+
+class SendOtpPayload(BaseModel):
+    email: str
+    purpose: Optional[str] = "Registration"
+
+
+class VerifyRegisterOtpPayload(BaseModel):
+    name: str
+    email: str
+    password: str
+    code: str
+
+
+class ForgotPasswordPayload(BaseModel):
+    email: str
+
+
+class ResetPasswordPayload(BaseModel):
+    email: str
+    code: str
+    new_password: str

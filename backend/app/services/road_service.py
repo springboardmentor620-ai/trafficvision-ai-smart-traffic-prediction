@@ -12,8 +12,8 @@ class RoadService:
 
     @staticmethod
     def create(db: Session, road):
-
-        new_road = Road(**road.dict())
+        data = road.model_dump() if hasattr(road, "model_dump") else road.dict()
+        new_road = Road(**data)
 
         db.add(new_road)
 
@@ -33,9 +33,15 @@ class RoadService:
         if not existing:
             return None
 
-        for key, value in road.dict().items():
+        update_data = (
+            road.model_dump(exclude_unset=True)
+            if hasattr(road, "model_dump")
+            else {k: v for k, v in road.dict().items() if v is not None}
+        )
 
-            setattr(existing, key, value)
+        for key, value in update_data.items():
+            if value is not None:
+                setattr(existing, key, value)
 
         db.commit()
 

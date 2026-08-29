@@ -62,7 +62,11 @@ function Settings() {
   const handleClearCache = () => {
     if (window.confirm("Are you sure you want to reset preferences and clear cached data?")) {
       const currentTheme = theme;
+      const currentToken = localStorage.getItem("token");
+      const currentUser = localStorage.getItem("user");
       localStorage.clear();
+      if (currentToken) localStorage.setItem("token", currentToken);
+      if (currentUser) localStorage.setItem("user", currentUser);
       localStorage.setItem("trafficvision_theme", currentTheme);
       setSaveToast(true);
       setTimeout(() => setSaveToast(false), 2500);

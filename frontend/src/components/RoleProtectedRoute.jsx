@@ -2,7 +2,14 @@ import { Navigate } from "react-router-dom";
 
 function RoleProtectedRoute({ children, allowedRole, allowedRoles }) {
   const userStr = localStorage.getItem("user");
-  const user = userStr ? JSON.parse(userStr) : null;
+  let user = null;
+  if (userStr) {
+    try {
+      user = JSON.parse(userStr);
+    } catch {
+      user = null;
+    }
+  }
 
   if (!user) {
     return <Navigate to="/login" replace />;

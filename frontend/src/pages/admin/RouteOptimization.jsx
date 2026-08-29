@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -25,21 +25,19 @@ L.Icon.Default.mergeOptions({
 const BANGALORE_JUNCTIONS = [
   "M.G. Road",
   "Indiranagar (100 Feet Road)",
-  "Whitefield",
+  "Whitefield Main Road",
   "Marathahalli Bridge",
-  "Koramangala (Sony World)",
-  "Electronic City",
+  "Koramangala (Sony World Junction)",
+  "Electronic City Phase 1",
   "Hebbal Flyover",
   "Airport Road (KIA)",
+  "Outer Ring Road (Silk Board)",
+  "Sarjapur Main Road",
+  "Bannerghatta Road",
+  "HSR Layout (27th Main)",
+  "Old Airport Road",
   "Yeshwanthpur Circle",
   "Jayanagar 4th Block",
-  "Outer Ring Road (Bellandur)",
-  "Hosur Road (Silk Board)",
-  "HSR Layout",
-  "Old Airport Road",
-  "Sarjapur Road",
-  "Majestic (City Center)",
-  "Banashankari",
 ];
 
 // Helper to auto-fit map view bounds
@@ -64,7 +62,7 @@ function RouteOptimization() {
   const [routeResult, setRouteResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleOptimize = async () => {
+  const handleOptimize = useCallback(async () => {
     if (!source || !destination) return;
 
     try {
@@ -77,12 +75,12 @@ function RouteOptimization() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [source, destination]);
 
   // Run initial calculation on load
   useEffect(() => {
     handleOptimize();
-  }, []);
+  }, [handleOptimize]);
 
   const handleSwap = () => {
     const temp = source;

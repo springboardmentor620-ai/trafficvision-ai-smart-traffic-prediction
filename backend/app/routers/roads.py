@@ -15,7 +15,8 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[RoadResponse])
+@router.get("", response_model=list[RoadResponse])
+@router.get("/", response_model=list[RoadResponse], include_in_schema=False)
 def get_roads(db: Session = Depends(get_db)):
     roads = RoadService.get_all(db)
 

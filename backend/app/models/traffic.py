@@ -28,7 +28,7 @@ class Traffic(Base):
 
     average_speed = Column(Integer, nullable=False)
 
-    road = relationship("Road")
+    road = relationship("Road", back_populates="traffic")
     
     def __str__(self):
         return self.road.name if self.road else f"Traffic #{self.id}"

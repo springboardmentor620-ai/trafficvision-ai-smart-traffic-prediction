@@ -330,7 +330,8 @@ function TrafficMap() {
         // Build lookup map by road name
         const trafficMap = new Map();
         (traffic || []).forEach((t) => {
-          const tName = (typeof t.road === "object" ? t.road?.name : t.road || t.name || "").toLowerCase();
+          const rawName = (t && typeof t.road === "object" && t.road !== null) ? t.road.name : (t?.road || t?.name || "");
+          const tName = typeof rawName === "string" ? rawName.toLowerCase() : "";
           if (tName) trafficMap.set(tName, t);
         });
 

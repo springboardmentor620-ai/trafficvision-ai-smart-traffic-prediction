@@ -23,7 +23,7 @@ function ZoneManagement() {
     try {
       setLoading(true);
       const data = await getZones();
-      setZones(data);
+      setZones(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load zones", err);
     } finally {
@@ -66,14 +66,15 @@ function ZoneManagement() {
     }
   };
 
-  // Filtered zones based on search and status
   const filteredZones = useMemo(() => {
-    return zones.filter((z) => {
-      const matchesSearch =
-        z.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        z.city.toLowerCase().includes(searchTerm.toLowerCase());
+    return (Array.isArray(zones) ? zones : []).filter((z) => {
+      const name = (z?.name || "").toLowerCase();
+      const city = (z?.city || "").toLowerCase();
+      const status = (z?.status || "").toLowerCase();
+      const term = (searchTerm || "").toLowerCase();
+      const matchesSearch = name.includes(term) || city.includes(term);
       const matchesStatus =
-        statusFilter === "All" || z.status.toLowerCase() === statusFilter.toLowerCase();
+        statusFilter === "All" || status === statusFilter.toLowerCase();
       return matchesSearch && matchesStatus;
     });
   }, [zones, searchTerm, statusFilter]);

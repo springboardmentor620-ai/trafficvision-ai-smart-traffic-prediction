@@ -1,17 +1,24 @@
 import api from "./api";
 
 export async function login(email, password) {
-  const formData = new URLSearchParams();
-  formData.append("username", email);
-  formData.append("password", password);
+  try {
+    const response = await api.post("/auth/login", { email, password });
+    return response.data;
+  } catch (err) {
+    if (err.response?.status === 404 || err.response?.status === 405) {
+      const formData = new URLSearchParams();
+      formData.append("username", email);
+      formData.append("password", password);
 
-  const response = await api.post("/login", formData, {
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
-
-  return response.data;
+      const response = await api.post("/login", formData, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+      return response.data;
+    }
+    throw err;
+  }
 }
 
 export async function loginStep1(email, password) {
@@ -54,8 +61,16 @@ export async function googleAuth(googlePayload) {
 }
 
 export async function register(userData) {
-  const response = await api.post("/register", userData);
-  return response.data;
+  try {
+    const response = await api.post("/auth/register", userData);
+    return response.data;
+  } catch (err) {
+    if (err.response?.status === 404 || err.response?.status === 405) {
+      const response = await api.post("/register", userData);
+      return response.data;
+    }
+    throw err;
+  }
 }
 
 export async function getCurrentUser() {
