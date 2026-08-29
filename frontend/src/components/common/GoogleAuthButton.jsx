@@ -1,32 +1,46 @@
 import { useState } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
 
-function GoogleAuthButton({ onGoogleSuccess, disabled = false, label = "Continue with Google" }) {
+function GoogleAuthButton({
+  onGoogleSuccess,
+  onError,
+  disabled = false,
+  label = "Continue with Google",
+}) {
   const [loading, setLoading] = useState(false);
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setLoading(true);
+        if (onGoogleSuccess) {
+          await onGoogleSuccess({
+            access_token: tokenResponse.access_token,
+          });
+        }
+      } catch (err) {
+        if (onError) onError(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: (errorResponse) => {
+      setLoading(false);
+      console.error("Google authentication failed:", errorResponse);
+      if (onError) onError(errorResponse);
+    },
+  });
 
   const handleGoogleClick = () => {
     if (disabled || loading) return;
-    setLoading(true);
-
-    // Prompt or simulated instant Google account profile selector
-    const simulatedGoogleEmail = `user.${Math.floor(1000 + Math.random() * 9000)}@gmail.com`;
-    const userPrompt = window.prompt(
-      "Enter your Google Account Email for OAuth sign-in:",
-      simulatedGoogleEmail
-    );
-
-    if (!userPrompt || !userPrompt.includes("@")) {
+    try {
+      setLoading(true);
+      loginWithGoogle();
+    } catch (err) {
       setLoading(false);
-      return;
+      console.error("Error triggering Google Login:", err);
+      if (onError) onError(err);
     }
-
-    const googlePayload = {
-      email: userPrompt.trim().toLowerCase(),
-      name: userPrompt.split("@")[0].replace(".", " ").toUpperCase(),
-      google_id: `g_oauth_${Date.now()}`,
-    };
-
-    onGoogleSuccess(googlePayload);
-    setLoading(false);
   };
 
   return (

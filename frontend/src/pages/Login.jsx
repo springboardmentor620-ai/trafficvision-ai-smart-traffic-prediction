@@ -249,7 +249,11 @@ function Login() {
 
                 {/* Google OAuth Quick Sign In */}
                 <div style={{ marginBottom: "18px" }}>
-                  <GoogleAuthButton onGoogleSuccess={handleGoogleSuccess} disabled={loading} />
+                  <GoogleAuthButton
+                    onGoogleSuccess={handleGoogleSuccess}
+                    onError={() => setErrorMessage("Google sign-in was cancelled or failed.")}
+                    disabled={loading}
+                  />
                 </div>
 
                 <div

@@ -42,3 +42,5 @@ tzdata==2026.3
 uvicorn==0.51.0
 watchfiles==1.2.0
 websockets==16.1
+google-auth>=2.0.0
+requests>=2.31.0

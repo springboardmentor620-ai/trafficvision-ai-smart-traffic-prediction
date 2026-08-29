@@ -1,9 +1,12 @@
+import os
 import uuid
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 from app.database.connection import get_db
 from app.dependencies.auth import get_current_user, require_admin
@@ -96,10 +99,11 @@ class LoginVerifyOtpPayload(BaseModel):
 
 
 class GoogleAuthPayload(BaseModel):
-    email: str
+    credential: Optional[str] = None
+    access_token: Optional[str] = None
+    email: Optional[str] = None
     name: Optional[str] = "Google User"
     google_id: Optional[str] = None
-    credential: Optional[str] = None
 
 
 class ForgotPasswordPayload(BaseModel):
@@ -293,9 +297,60 @@ def login_verify_otp(payload: LoginVerifyOtpPayload, db: Session = Depends(get_d
 def google_auth(payload: GoogleAuthPayload, db: Session = Depends(get_db)):
     """
     Google OAuth Authentication:
-    Logs in existing user or automatically registers a new user via Google Identity.
+    Verifies Google ID Token or processes authenticated credential,
+    logs in existing user or automatically registers a new user via Google Identity.
     """
-    cleaned_email = payload.email.strip().lower()
+    email = None
+    name = payload.name or "Google User"
+    google_id = payload.google_id
+
+    if payload.credential:
+        google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+        try:
+            # Verify Google ID token against Google's public keys
+            idinfo = id_token.verify_oauth2_token(
+                payload.credential,
+                google_requests.Request(),
+                google_client_id if google_client_id else None,
+            )
+            email = idinfo.get("email")
+            name = idinfo.get("name") or payload.name or "Google User"
+            google_id = idinfo.get("sub")
+
+            if not email:
+                raise HTTPException(status_code=400, detail="Google account token does not contain an email.")
+        except HTTPException:
+            raise
+        except ValueError as e:
+            raise HTTPException(status_code=401, detail=f"Invalid Google ID token: {str(e)}")
+        except Exception as e:
+            raise HTTPException(status_code=401, detail=f"Google authentication failed: {str(e)}")
+    elif payload.access_token:
+        try:
+            import requests as py_requests
+            res = py_requests.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {payload.access_token}"},
+                timeout=10,
+            )
+            if res.status_code != 200:
+                raise HTTPException(status_code=401, detail="Failed to verify Google access token.")
+            user_info = res.json()
+            email = user_info.get("email")
+            name = user_info.get("name") or payload.name or "Google User"
+            google_id = user_info.get("sub")
+            if not email:
+                raise HTTPException(status_code=400, detail="Google account profile does not contain an email.")
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail=f"Google access token verification failed: {str(e)}")
+    elif payload.email:
+        email = payload.email
+    else:
+        raise HTTPException(status_code=400, detail="Google authentication credential, access token, or email is required.")
+
+    cleaned_email = email.strip().lower()
     is_valid, error_msg = validate_email_authenticity(cleaned_email)
     if not is_valid:
         raise HTTPException(status_code=400, detail=error_msg)
@@ -305,7 +360,7 @@ def google_auth(payload: GoogleAuthPayload, db: Session = Depends(get_db)):
     if not db_user:
         # Auto-create user from Google OAuth
         db_user = User(
-            name=payload.name or "Google User",
+            name=name,
             email=cleaned_email,
             password=hash_password(str(uuid.uuid4())),  # Random secure password for OAuth accounts
             role=COMMUTER,

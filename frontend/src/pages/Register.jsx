@@ -284,7 +284,12 @@ function Register() {
 
                 {/* Google OAuth Quick Sign Up */}
                 <div style={{ marginBottom: "18px" }}>
-                  <GoogleAuthButton onGoogleSuccess={handleGoogleSuccess} disabled={loading} label="Sign up with Google" />
+                  <GoogleAuthButton
+                    onGoogleSuccess={handleGoogleSuccess}
+                    onError={() => setErrorMessage("Google registration was cancelled or failed.")}
+                    disabled={loading}
+                    label="Sign up with Google"
+                  />
                 </div>
 
                 <div
